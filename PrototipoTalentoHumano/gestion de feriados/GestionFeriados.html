@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feriados y Días No Laborables | Talento Humano</title>
+  <link rel="stylesheet" href="GestionFeriados.css?v=2">
+  <script type="module" src="GestionFeriados.js?v=2"></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">CALENDARIO LABORAL · TALENTO HUMANO</p>
+        <h1>Feriados y Días No Laborables</h1>
+        <p>Control de feriados de ley aplicables a la jornada de prácticas (Lunes a Viernes) y días no laborables decretados por el Gobierno.</p>
+      </div>
+      <span class="source-badge">Calendario Institucional</span>
+    </header>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- KPIs Generales -->
+    <section class="stats" aria-label="Resumen de días festivos y horas">
+      <div>
+        <span>Feriados de ley (Lun-Vie)</span>
+        <strong id="kpiFeriadosLey">13 días</strong>
+        <small id="kpiSubLey">Aplicables en prácticas</small>
+      </div>
+      <div>
+        <span>Horas de ley computadas</span>
+        <strong id="kpiHorasLey" style="color:var(--primary)">65 h</strong>
+        <small>5 horas diarias por feriado</small>
+      </div>
+      <div>
+        <span>Decretados por el Gobierno</span>
+        <strong id="kpiFeriadosGob" style="color:var(--cyan-dark)">3 días</strong>
+        <small id="kpiSubGob">Puentes y cumbres oficiales</small>
+      </div>
+      <div>
+        <span>Feriados en fin de semana</span>
+        <strong id="kpiFeriadosFinde" style="color:var(--orange)">3 días</strong>
+        <small>Excluidos (no hay jornada sáb/dom)</small>
+      </div>
+    </section>
+
+    <div class="panel">
+      <!-- Navegación por pestañas -->
+      <nav class="tabs" aria-label="Secciones de feriados">
+        <button type="button" id="tabCalendario" data-tab="calendario" aria-pressed="true">
+          <span>Feriados de calendario (Lunes a Viernes)</span>
+          <span class="tab-badge" id="badgeTabCalendario">13</span>
+        </button>
+        <button type="button" id="tabGobierno" data-tab="gobierno" aria-pressed="false">
+          <span>Feriados decretados por el Gobierno</span>
+          <span class="tab-badge" id="badgeTabGobierno">3</span>
+        </button>
+      </nav>
+
+      <!-- ========================================== -->
+      <!-- VISTA 1: FERIADOS CALENDARIO (LUNES A VIERNES) -->
+      <!-- ========================================== -->
+      <section id="viewCalendario" aria-label="Feriados de ley por calendario">
+        <div class="tab-info-banner">
+          <span class="icon" aria-hidden="true">💡</span>
+          <div>
+            <strong>Regla de prácticas profesionales:</strong> La jornada regular de prácticas en Devdatep se desarrolla estrictamente de <strong>lunes a viernes (5 horas diarias)</strong>. Por tanto, el sistema filtra y computa <em>únicamente</em> los feriados de calendario que caen en día hábil (Lunes a Viernes). Aquellos feriados que coinciden con sábado o domingo quedan excluidos automáticamente del cómputo de horas.
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <label class="filter-select">
+              Año:
+              <select id="selectYearCalendario" aria-label="Filtrar por año">
+                <option value="2025">2025</option>
+                <option value="2026" selected>2026 (Año en curso)</option>
+                <option value="2027">2027</option>
+              </select>
+            </label>
+            <label class="filter-select">
+              Mes:
+              <select id="selectMesCalendario" aria-label="Filtrar por mes">
+                <option value="TODOS">Todos los meses</option>
+                <option value="1">Enero</option>
+                <option value="2">Febrero</option>
+                <option value="3">Marzo</option>
+                <option value="4">Abril</option>
+                <option value="5">Mayo</option>
+                <option value="6">Junio</option>
+                <option value="7">Julio</option>
+                <option value="8">Agosto</option>
+                <option value="9">Septiembre</option>
+                <option value="10">Octubre</option>
+                <option value="11">Noviembre</option>
+                <option value="12">Diciembre</option>
+              </select>
+            </label>
+          </div>
+          <div class="toolbar-right">
+            <label class="checkbox-toggle">
+              <input type="checkbox" id="toggleFinde">
+              <span>Mostrar también feriados en fin de semana (excluidos)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Día</th>
+                <th>Feriado / Celebración</th>
+                <th>Base Legal</th>
+                <th>Impacto Jornada</th>
+                <th>Condición</th>
+              </tr>
+            </thead>
+            <tbody id="rowsCalendario"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyCalendario" class="empty-state" hidden>
+          <strong>No hay feriados para este filtro</strong>
+          <p>Prueba seleccionando otro mes o año.</p>
+        </div>
+
+        <div id="footerCalendario" class="table-footer">
+          <span id="footerCountCalendario">13 feriados aplicables de lunes a viernes</span>
+          <span id="footerHoursCalendario">Total: 65 horas no laborables computadas</span>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VISTA 2: FERIADOS DECRETADOS POR EL GOBIERNO -->
+      <!-- ========================================== -->
+      <section id="viewGobierno" aria-label="Feriados decretados por el Gobierno" hidden>
+        <div class="tab-info-banner">
+          <span class="icon" aria-hidden="true">🏛️</span>
+          <div>
+            <strong>Días no laborables decretados:</strong> Feriados y puentes turísticos oficiales aprobados mediante Decreto Supremo del Poder Ejecutivo (Presidencia del Consejo de Ministros - PCM). Puedes registrar nuevos feriados, editarlos o darlos de baja.
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <span aria-hidden="true">🔍</span>
+              <input id="searchGobierno" type="search" placeholder="Buscar por motivo, norma o fecha...">
+            </div>
+            <label class="filter-select">
+              Régimen:
+              <select id="filterTipoGobierno" aria-label="Filtrar por régimen">
+                <option value="TODOS">Todos los tipos</option>
+                <option value="No laborable compensable">No laborable compensable</option>
+                <option value="No laborable extraordinario">No laborable extraordinario</option>
+                <option value="Feriado cívico excepcional">Feriado cívico excepcional</option>
+              </select>
+            </label>
+          </div>
+          <div class="toolbar-right">
+            <button type="button" class="primary" id="btnNuevoFeriadoGobierno">
+              + Registrar feriado del gobierno
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Día</th>
+                <th>Motivo / Denominación</th>
+                <th>Norma Legal / Decreto</th>
+                <th>Régimen</th>
+                <th>Horas</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rowsGobierno"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyGobierno" class="empty-state" hidden>
+          <strong>No se encontraron feriados del gobierno</strong>
+          <p>Haz clic en "+ Registrar feriado del gobierno" para agregar uno nuevo.</p>
+        </div>
+
+        <div id="footerGobierno" class="table-footer">
+          <span id="footerCountGobierno">3 feriados del gobierno registrados</span>
+          <span id="footerHoursGobierno">Total: 15 horas de práctica aplicadas</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- Regla de negocio y nota al pie -->
+    <p class="footnote">
+      <strong>Marco regulatorio institucional:</strong> Las prácticas preprofesionales se rigen por la Ley de Modalidades Formativas Laborales (Ley N° 28518) y el D.Leg. 713 (Descansos Remunerados). Los feriados que coinciden con la jornada pactada (lunes a viernes de 5 horas diarias) son exonerados de recuperación salvo disposición expresa contraria.
+    </p>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REGISTRAR / EDITAR FERIADO GOBIERNO -->
+  <!-- ========================================== -->
+  <dialog id="modalFeriadoGobierno" aria-labelledby="modalFeriadoTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow" id="modalFeriadoEyebrow">GESTIÓN GUBERNAMENTAL</p>
+        <h2 id="modalFeriadoTitle">Registrar feriado decretado por el gobierno</h2>
+      </div>
+      <button type="button" class="dialog-close-btn" data-close="modalFeriadoGobierno" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <form id="formFeriadoGobierno" novalidate>
+      <input type="hidden" id="feriadoId" value="">
+
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="feriadoFecha">Fecha decretada *</label>
+          <input type="date" id="feriadoFecha" required>
+          <div id="feriadoFechaPreview" class="day-preview-badge">
+            📅 Selecciona una fecha para verificar el día de la semana
+          </div>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="feriadoMotivo">Motivo o denominación oficial *</label>
+          <input type="text" id="feriadoMotivo" placeholder="Ej. Día no laborable con fines turísticos (Puente festivo)" required maxlength="120">
+        </div>
+
+        <div class="form-group">
+          <label for="feriadoDecreto">Decreto Supremo / Base Legal *</label>
+          <input type="text" id="feriadoDecreto" placeholder="Ej. D.S. N° 011-2026-PCM" required maxlength="60">
+        </div>
+
+        <div class="form-group">
+          <label for="feriadoTipo">Régimen de descanso *</label>
+          <select id="feriadoTipo" required>
+            <option value="No laborable compensable">No laborable compensable</option>
+            <option value="No laborable extraordinario">No laborable extraordinario</option>
+            <option value="Feriado cívico excepcional">Feriado cívico excepcional</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="feriadoHoras">Horas de práctica computadas *</label>
+          <input type="number" id="feriadoHoras" min="1" max="8" value="5" required>
+        </div>
+
+        <div class="form-group">
+          <label for="feriadoAmbito">Ámbito de aplicación</label>
+          <select id="feriadoAmbito">
+            <option value="Nacional (Público y Privado)">Nacional (Público y Privado)</option>
+            <option value="Sector Público (Extensible)">Sector Público (Extensible)</option>
+            <option value="Regional / Local">Regional / Local</option>
+          </select>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="feriadoObservaciones">Observaciones o notas de compensación</label>
+          <textarea id="feriadoObservaciones" rows="2" placeholder="Detalles de compensación o alcances para practicantes..."></textarea>
+        </div>
+
+        <p id="formError" class="form-error" role="alert"></p>
+      </div>
+
+      <footer class="dialog-actions">
+        <button type="button" data-close="modalFeriadoGobierno">Cancelar</button>
+        <button type="submit" class="primary" id="btnSubmitFeriado">Guardar feriado</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ========================================== -->
+  <!-- MODAL: CONFIRMAR ELIMINACIÓN -->
+  <!-- ========================================== -->
+  <dialog id="modalConfirmDelete" aria-labelledby="confirmDeleteTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow" style="color:var(--red)">ELIMINACIÓN DE REGISTRO</p>
+        <h2 id="confirmDeleteTitle">Eliminar feriado decretado</h2>
+      </div>
+      <button type="button" class="dialog-close-btn" data-close="modalConfirmDelete" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <div style="padding: 10px 0;">
+      <p id="confirmDeleteMessage" style="margin: 0; line-height: 1.6;">
+        ¿Estás seguro de que deseas eliminar este feriado gubernamental? Esta acción retirará las horas del cómputo de prácticas.
+      </p>
+    </div>
+
+    <footer class="dialog-actions">
+      <button type="button" data-close="modalConfirmDelete">Cancelar</button>
+      <button type="button" class="btn-danger" id="btnConfirmDeleteAction">Eliminar definitivamente</button>
+    </footer>
+  </dialog>
+</body>
+</html>
