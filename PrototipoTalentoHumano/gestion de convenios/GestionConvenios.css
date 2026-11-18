@@ -1,1 +1,1358 @@
-*{box-sizing:border-box}body{margin:0;background:#f3f4f8;color:#080832;font-family:"Segoe UI",Arial,sans-serif}main{max-width:760px;margin:70px auto;padding:42px;background:white;border:1px solid #e3e5ed;border-radius:24px}.label{display:block;font-size:11px;letter-spacing:2px;font-weight:700;color:#687287}.icon{display:grid;place-items:center;width:64px;height:64px;background:#eef8fa;color:#1596ad;border-radius:18px;font-size:32px;margin-top:32px}h1{font-size:32px;margin-bottom:12px}p{color:#687287;line-height:1.7}.notice{border-left:3px solid #f7bd32;background:#fffbef;padding:20px;margin:30px 0}.notice p{margin-bottom:0}a{color:#155a81;font-weight:600;text-decoration:none}a:focus-visible{outline:3px solid #28b5cb;outline-offset:5px}@media(max-width:650px){main{margin:20px;padding:25px}h1{font-size:25px}}
+/* ==========================================================================
+   DEVDATEP CONSULTING - GESTIÓN DE CONVENIOS DE PRÁCTICAS
+   Estilos principales del módulo · Prototipo Talento Humano
+   ========================================================================== */
+
+:root {
+  --th-primary: #2867C7;
+  --th-primary-hover: #1F56AA;
+  --th-primary-light: #EDF4FF;
+  --th-navy: #080832;
+  --th-text: #17243B;
+  --th-text-secondary: #59677B;
+  --th-text-muted: #8592A4;
+  --th-background: #F4F7FB;
+  --th-surface: #FFFFFF;
+  --th-border: #DFE7F0;
+  --th-success: #278A6D;
+  --th-success-light: #E7F6EF;
+  --th-warning: #D97706;
+  --th-warning-light: #FFF5DB;
+  --th-danger: #B42318;
+  --th-danger-light: #FDECEA;
+  --th-info: #0284C7;
+  --th-info-light: #E0F2FE;
+  --th-font: "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  color: var(--th-text);
+  background: var(--th-background);
+  font-family: var(--th-font);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.page-shell {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 24px 28px 48px;
+}
+
+/* ==========================================================================
+   Encabezado de Página
+   ========================================================================== */
+.page-header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--th-primary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+}
+
+h1 {
+  font-size: 26px;
+  letter-spacing: -0.5px;
+  color: var(--th-navy);
+  margin: 0 0 8px;
+  font-weight: 750;
+}
+
+.page-description {
+  margin: 0;
+  color: var(--th-text-secondary);
+  font-size: 13.5px;
+  max-width: 820px;
+}
+
+/* ==========================================================================
+   Status Toast / Alert
+   ========================================================================== */
+#statusAlert {
+  padding: 12px 18px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  font-size: 13.5px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slideDown 0.25s ease-out;
+}
+
+#statusAlert.success {
+  background: var(--th-success-light);
+  color: #0f5132;
+  border: 1px solid #badbcc;
+}
+
+#statusAlert.danger {
+  background: var(--th-danger-light);
+  color: var(--th-danger);
+  border: 1px solid #f5c2c7;
+}
+
+#statusAlert.warning {
+  background: var(--th-warning-light);
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+#statusAlert.info {
+  background: var(--th-info-light);
+  color: #055160;
+  border: 1px solid #b6effb;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   KPIs Grid
+   ========================================================================== */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.kpi-card {
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(8, 8, 50, 0.03);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(8, 8, 50, 0.06);
+}
+
+.kpi-title {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--th-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--th-navy);
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.kpi-subtitle {
+  font-size: 11.5px;
+  color: var(--th-text-muted);
+}
+
+/* ==========================================================================
+   Panel Principal con Pestañas
+   ========================================================================== */
+.panel {
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(8, 8, 50, 0.04);
+  overflow: hidden;
+}
+
+/* Pestañas Horizontales con opción activa subrayada en azul */
+.tabs-nav {
+  display: flex;
+  gap: 32px;
+  padding: 0 24px;
+  border-bottom: 2px solid var(--th-border);
+  background: #ffffff;
+}
+
+.tab-btn {
+  padding: 16px 4px;
+  border: none;
+  background: transparent;
+  border-bottom: 3px solid transparent;
+  font-family: var(--th-font);
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--th-text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: -2px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.tab-btn:hover {
+  color: var(--th-navy);
+}
+
+/* Subrayado activo en azul corporativo */
+.tab-btn.active,
+.tab-btn[aria-pressed="true"] {
+  color: var(--th-primary);
+  border-bottom-color: var(--th-primary);
+}
+
+.tab-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: #edf4ff;
+  color: var(--th-primary);
+  font-weight: 700;
+}
+
+.tab-btn.active .tab-badge {
+  background: var(--th-primary);
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Barra de Herramientas (Buscador y Filtro por Área)
+   ========================================================================== */
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--th-border);
+  flex-wrap: wrap;
+  background: #ffffff;
+}
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.search-box {
+  position: relative;
+  min-width: 290px;
+  flex: 1;
+  max-width: 420px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--th-text-muted);
+  pointer-events: none;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 12px 8px 36px;
+  border: 1px solid var(--th-border);
+  border-radius: 8px;
+  font-family: var(--th-font);
+  font-size: 13.5px;
+  background: var(--th-surface);
+  color: var(--th-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: var(--th-primary);
+  box-shadow: 0 0 0 3px rgba(40, 103, 199, 0.12);
+}
+
+.filter-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--th-text-secondary);
+}
+
+.filter-label {
+  font-weight: 600;
+}
+
+.filter-group select {
+  padding: 8px 12px;
+  border: 1px solid var(--th-border);
+  border-radius: 8px;
+  font-family: var(--th-font);
+  font-size: 13px;
+  background: var(--th-surface);
+  color: var(--th-text);
+  cursor: pointer;
+}
+
+.filter-group select:focus {
+  outline: none;
+  border-color: var(--th-primary);
+}
+
+/* ==========================================================================
+   Tablas de Datos
+   ========================================================================== */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.th-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.th-table th {
+  padding: 14px 18px;
+  background: #f9fbfe;
+  color: var(--th-text-secondary);
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--th-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.th-table td {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--th-border);
+  vertical-align: middle;
+}
+
+.th-table tbody tr:hover {
+  background: #f8fafd;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.colab-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.colab-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #edf4ff;
+  color: var(--th-primary);
+  font-weight: 750;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+  border: 1px solid #d4e2f8;
+}
+
+.colab-name {
+  font-weight: 650;
+  color: var(--th-navy);
+}
+
+.colab-sub {
+  font-size: 11.5px;
+  color: var(--th-text-muted);
+}
+
+.code-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f1f3f7;
+  color: #334155;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.code-pill-provisional {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px dashed #fcd34d;
+  font-weight: 700;
+}
+
+.code-pill-definitive {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+/* Badges de Estado */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.status-preparacion {
+  background: #f1f5f9;
+  color: #475569;
+}
+.status-preparacion::before { background: #94a3b8; }
+
+.status-conformidad {
+  background: #fef3c7;
+  color: #92400e;
+}
+.status-conformidad::before { background: #d97706; }
+
+.status-observado {
+  background: var(--th-danger-light);
+  color: var(--th-danger);
+}
+.status-observado::before { background: var(--th-danger); }
+
+.status-firma {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+.status-firma::before { background: #0284c7; }
+
+.status-vigente,
+.status-firmado {
+  background: var(--th-success-light);
+  color: var(--th-success);
+}
+.status-vigente::before,
+.status-firmado::before { background: var(--th-success); }
+
+.status-finalizado {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.status-finalizado::before { background: #9ca3af; }
+
+/* Botón de Gestionar / Ver */
+.btn-action-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--th-border);
+  background: #ffffff;
+  border-radius: 8px;
+  color: var(--th-primary);
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-action-icon:hover {
+  background: var(--th-primary-light);
+  border-color: var(--th-primary);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--th-text-secondary);
+}
+
+.empty-icon {
+  font-size: 42px;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+/* ==========================================================================
+   PANTALLA DE DETALLE INDEPENDIENTE
+   ========================================================================== */
+.detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 20px;
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 14px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(8, 8, 50, 0.03);
+}
+
+.detail-heading-info {
+  flex: 1;
+}
+
+.detail-colab-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.detail-colab-title h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--th-navy);
+}
+
+.muted-text {
+  color: var(--th-text-secondary);
+  font-size: 12.5px;
+  margin: 3px 0 0;
+}
+
+/* Stepper de Progreso */
+.workflow-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 14px;
+  padding: 18px 32px;
+  margin-bottom: 24px;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 750;
+  font-size: 13px;
+  border: 2px solid #cbd5e1;
+}
+
+.step-item.active .step-circle {
+  background: var(--th-primary);
+  color: #ffffff;
+  border-color: var(--th-primary);
+}
+
+.step-item.completed .step-circle {
+  background: var(--th-success);
+  color: #ffffff;
+  border-color: var(--th-success);
+}
+
+.step-text strong {
+  display: block;
+  font-size: 13px;
+  color: var(--th-navy);
+}
+
+.step-text small {
+  font-size: 11px;
+  color: var(--th-text-muted);
+}
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: #e2e8f0;
+  margin: 0 16px;
+}
+
+.step-line.active {
+  background: var(--th-primary);
+}
+
+/* Callouts y Alertas */
+.callout {
+  display: flex;
+  gap: 14px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  border: 1px solid transparent;
+}
+
+.callout-icon {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.callout-body {
+  flex: 1;
+}
+
+.callout-warning {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #92400e;
+}
+
+.obs-box {
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border-left: 4px solid var(--th-warning);
+  margin: 8px 0;
+  font-style: italic;
+  color: #451a03;
+}
+
+.callout-info {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+  color: #0369a1;
+}
+
+.callout-success {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.callout-actions {
+  margin-top: 10px;
+}
+
+/* Selector de Plantilla */
+.template-selection-card {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 16px 22px;
+  margin-bottom: 22px;
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card-subtitle {
+  font-size: 12.5px;
+  color: var(--th-text-secondary);
+  margin: 2px 0 0;
+}
+
+.template-selector-control {
+  min-width: 320px;
+}
+
+/* Grupos del Formulario */
+.form-group-card {
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin: 0 0 20px;
+  box-shadow: 0 2px 6px rgba(8, 8, 50, 0.02);
+}
+
+.group-legend {
+  font-size: 16px;
+  font-weight: 750;
+  color: var(--th-navy);
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.group-desc {
+  font-size: 12.5px;
+  color: var(--th-text-secondary);
+  margin: 2px 0 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.field-hint {
+  font-size: 11.5px;
+  color: var(--th-primary);
+  margin-top: 4px;
+}
+
+/* Barra inferior fija de acciones del detalle */
+.detail-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: #ffffff;
+  border: 1px solid var(--th-border);
+  border-radius: 14px;
+  margin-top: 24px;
+  box-shadow: 0 4px 16px rgba(8, 8, 50, 0.06);
+  position: sticky;
+  bottom: 16px;
+  z-index: 10;
+  flex-wrap: wrap;
+}
+
+.actions-left,
+.actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   MODALES
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(8, 8, 50, 0.55);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+.modal-dialog {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 16px 40px rgba(8, 8, 50, 0.2);
+  width: 100%;
+  max-width: 680px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: popIn 0.2s ease-out;
+}
+
+.modal-dialog.modal-lg {
+  max-width: 860px;
+}
+
+.modal-dialog.modal-xl {
+  max-width: 1040px;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--th-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--th-navy);
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--th-text-muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.btn-close-modal:hover {
+  background: #f1f5f9;
+  color: var(--th-navy);
+}
+
+/* Soporte para formularios dentro del modal-dialog manteniendo la estructura flex */
+.modal-dialog > form,
+#formRegistrarFirma {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.modal-body {
+  padding: 22px 24px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: calc(90vh - 140px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f8fafc;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.modal-footer {
+  padding: 14px 24px;
+  border-top: 1px solid var(--th-border);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #f8fafc;
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+/* Ajustes específicos para el modal de entrega de convenio firmado y credenciales */
+#modalRegistrarFirma .modal-dialog {
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#modalRegistrarFirma #formRegistrarFirma {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+#modalRegistrarFirma .modal-body {
+  overflow-y: auto;
+  max-height: calc(90vh - 140px);
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+#modalRegistrarFirma .modal-footer {
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  background: #f8fafc;
+}
+
+/* Estilos de la Demostración del Practicante */
+.demo-header {
+  background: linear-gradient(135deg, #1e3a8a, #2867c7);
+  color: #ffffff;
+}
+
+.demo-header h2 {
+  color: #ffffff;
+}
+
+.demo-header .btn-close-modal {
+  color: #e2e8f0;
+}
+
+.demo-badge-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.demo-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.colab-intro-banner {
+  background: #edf4ff;
+  border-left: 4px solid var(--th-primary);
+  padding: 14px 18px;
+  border-radius: 8px;
+  margin-bottom: 18px;
+}
+
+.colab-data-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.summary-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.summary-card h4 {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  color: var(--th-navy);
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 6px;
+}
+
+.summary-card p {
+  margin: 4px 0;
+  font-size: 12.5px;
+  color: var(--th-text-secondary);
+}
+
+.summary-card p strong {
+  color: var(--th-text);
+}
+
+.obs-input-container {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.obs-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* ==========================================================================
+   DOCUMENTO OFICIAL TIPO HOJA A4 IMPRIMIBLE
+   ========================================================================== */
+.preview-sheet-body {
+  background: #525659;
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.doc-sheet {
+  background: #ffffff;
+  width: 100%;
+  max-width: 820px;
+  min-height: 1050px;
+  padding: 50px 60px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+  font-family: "Times New Roman", Times, serif;
+  color: #111827;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+.doc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid #111827;
+  padding-bottom: 14px;
+  margin-bottom: 24px;
+  font-family: var(--th-font);
+}
+
+.doc-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-symbol {
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--th-navy);
+}
+
+.brand-symbol span {
+  color: #06b6d4;
+}
+
+.doc-badge {
+  padding: 4px 10px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.doc-title {
+  text-align: center;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin: 18px 0 24px;
+  font-family: var(--th-font);
+}
+
+.doc-intro {
+  text-align: justify;
+  margin-bottom: 16px;
+}
+
+.doc-parties {
+  margin-bottom: 20px;
+}
+
+.party-box {
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.party-box h4 {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  font-family: var(--th-font);
+  color: #1e293b;
+}
+
+.doc-subtitle {
+  text-align: center;
+  font-size: 15px;
+  font-weight: 750;
+  margin: 24px 0 16px;
+  border-top: 1px solid #cbd5e1;
+  border-bottom: 1px solid #cbd5e1;
+  padding: 6px 0;
+  font-family: var(--th-font);
+}
+
+.clause-item {
+  margin-bottom: 16px;
+  text-align: justify;
+}
+
+.clause-item h5 {
+  margin: 0 0 4px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--th-font);
+}
+
+.doc-signing-place {
+  margin-top: 32px;
+  text-align: justify;
+}
+
+.doc-signatures {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-top: 60px;
+  text-align: center;
+  font-family: var(--th-font);
+  font-size: 12px;
+}
+
+.sig-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.sig-line {
+  width: 140px;
+  height: 1px;
+  background: #334155;
+  margin-bottom: 8px;
+}
+
+.sig-col strong {
+  font-size: 11px;
+  color: var(--th-navy);
+}
+
+.sig-col p {
+  margin: 4px 0 0;
+  color: var(--th-text-secondary);
+}
+
+/* ==========================================================================
+   VISOR Y DETALLE DE CONVENIO FIRMADO
+   ========================================================================== */
+.firmado-summary-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--th-border);
+  margin-bottom: 18px;
+}
+
+.firmado-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--th-primary);
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 750;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.doc-attachment-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.doc-attachment-card h4 {
+  margin: 0 0 10px;
+  font-size: 13.5px;
+  color: var(--th-navy);
+}
+
+.doc-attachment-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pdf-icon {
+  width: 40px;
+  height: 40px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 800;
+  font-size: 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.file-demo-option {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  color: var(--th-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
+.file-chosen-text {
+  font-size: 12px;
+  color: var(--th-success);
+  font-weight: 600;
+  margin-top: 4px;
+  display: block;
+}
+
+.history-timeline h4 {
+  margin: 0 0 12px;
+  font-size: 13.5px;
+  color: var(--th-navy);
+}
+
+.timeline-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  position: relative;
+}
+
+.timeline-list::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: #e2e8f0;
+}
+
+.timeline-item {
+  position: relative;
+  padding-left: 24px;
+  margin-bottom: 12px;
+  font-size: 12.5px;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: 3px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--th-primary);
+  border: 2px solid #ffffff;
+}
+
+.timeline-dot.green { background: var(--th-success); }
+.timeline-dot.orange { background: var(--th-warning); }
+
+/* ==========================================================================
+   ESTILOS DE IMPRESIÓN (@media print)
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableConvenio, #printableConvenio * {
+    visibility: visible;
+  }
+  #printableConvenio {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    margin: 0;
+    padding: 20mm;
+    box-shadow: none;
+  }
+  .preview-sheet-body {
+    background: transparent;
+    padding: 0;
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 900px) {
+  .page-shell {
+    padding: 16px;
+  }
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    max-width: 100%;
+  }
+  .workflow-stepper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .step-line {
+    display: none;
+  }
+  .doc-sheet {
+    padding: 25px 20px;
+  }
+  .doc-signatures {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (max-width: 640px), (max-height: 700px) {
+  .modal-dialog {
+    max-height: 94vh;
+  }
+  .modal-body {
+    max-height: calc(94vh - 120px);
+    padding: 16px;
+  }
+  .modal-header {
+    padding: 14px 18px;
+  }
+  .modal-footer {
+    padding: 12px 18px;
+  }
+}

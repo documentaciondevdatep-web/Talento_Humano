@@ -4,4 +4,11 @@
 
 .form-section h3{margin-top:22px;margin-bottom:10px}.form-section dl{margin-top:0}.preview-toolbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:0 0 16px;color:#6e7d91;font-size:12px}.preview-toolbar a{color:#2867c7;font-weight:650;text-decoration:none;white-space:nowrap}@media(max-width:650px){.preview-toolbar{align-items:flex-start;flex-direction:column}}
 
+.heading-actions{display:flex;align-items:center;gap:14px}
+.home-link{display:inline-flex;align-items:center;gap:6px;color:var(--primary);text-decoration:none;font-weight:650;font-size:12.5px}
+.home-link:hover{text-decoration:underline}
+.agreement-consult-box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin:18px 0}
+.agreement-consult-box h4{margin:0 0 10px;font-size:14px;color:var(--navy)}
+.agreement-consult-box p{margin:6px 0;font-size:12.5px;color:var(--muted)}
+.agreement-consult-box p strong{color:var(--navy)}
 .panel table{min-width:1050px}.practice-value{white-space:nowrap}.practice-value small{white-space:normal;max-width:150px}
