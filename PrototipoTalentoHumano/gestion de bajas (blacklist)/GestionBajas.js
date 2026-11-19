@@ -1,14 +1,24 @@
 import { obtenerColaboradores, obtenerNombreArea, obtenerNombreDepartamento } from '../shared/js/colaboradoresStorage.js';
-"use strict";
 
 const STORAGE_KEY = "talentoHumanoBajasDemo";
 const STORAGE_VERSION_KEY = STORAGE_KEY + "Version";
-const STORAGE_VERSION = "4";
-const MOTIVES = [
+const STORAGE_VERSION = "5";
+
+const BAJA_MOTIVES = [
+  "CULMINACIÓN DE PRÁCTICAS",
+  "RENUNCIA VOLUNTARIA",
+  "FIN DE CONVENIO",
+  "MUTUO ACUERDO",
+  "MOTIVOS ACADÉMICOS",
+  "MOTIVOS DE SALUD / PERSONALES"
+];
+
+const BLACKLIST_MOTIVES = [
   "ASISTENCIA",
   "COMPORTAMIENTO",
   "DESEMPEÑO"
 ];
+
 const INFRACTIONS = [
   "AUSENCIA DINAMICAS",
   "FALTA INJUSTIFICADA",
@@ -33,7 +43,9 @@ const INFRACTIONS = [
   "REALIZAR ACTIVIDADES EXTRALABORALES SIN PERMISO",
   "BAJO DESEMPEÑO (EVALUACIÓN DE LÍDERES)"
 ];
+
 const LEVELS = ["GRAVE", "MUY GRAVE"];
+
 const collaborators = {
   "1004": { name: "Rosmery Estefany Tenorio Nunja", area: "Marketing y Ventas" },
   "982": { name: "Alexis Javier Blas Mendoza", area: "DESARROLLO WEB" },
@@ -43,31 +55,97 @@ const collaborators = {
   "963": { name: "Leonardo Gabriel Perez La Rosa", area: "Desarrollo Rápido de Aplicaciones" },
   "1040": { name: "Rodrigo Franceso Corilla Cornejo", area: "Backend" },
   "1013": { name: "Lenning Andree Zacarias Lopez", area: "Backend" },
-  "1021": { name: "Jhoel Anderson Gavidia Calderon", area: "Backend" }
+  "1021": { name: "Jhoel Anderson Gavidia Calderon", area: "Backend" },
+  "1015": { name: "Camila Fernanda Huamán Ríos", area: "Diseño UX/UI" },
+  "1028": { name: "Juan Carlos Quispe Silva", area: "Desarrollo Web" },
+  "1035": { name: "Valeria Sofía Morales Castro", area: "Marketing y Ventas" },
+  "1042": { name: "Christian Daniel Vega Reyes", area: "Backend" },
+  "1050": { name: "Andrea Nicole Mendoza Peña", area: "Talento Humano" }
 };
 
-
+// Carga opcional de colaboradores del sistema compartido
 try {
   const systemColabs = obtenerColaboradores();
   if (Array.isArray(systemColabs)) {
-    systemColabs.forEach(c => {
+    systemColabs.forEach(function (c) {
       const code = String(c.codigoColaborador || c.idColaborador);
-      const fullName = [c.nombres, c.apellidoPaterno, c.apellidoMaterno].filter(Boolean).join(' ');
-      const area = (typeof obtenerNombreArea === 'function' ? obtenerNombreArea(c.idArea) : null) || 
-                   (typeof obtenerNombreDepartamento === 'function' ? obtenerNombreDepartamento(c.idDepartamento) : null) || 
-                   'General';
+      const fullName = [c.nombres, c.apellidoPaterno, c.apellidoMaterno].filter(Boolean).join(" ");
+      const area = (typeof obtenerNombreArea === "function" ? obtenerNombreArea(c.idArea) : null) ||
+                   (typeof obtenerNombreDepartamento === "function" ? obtenerNombreDepartamento(c.idDepartamento) : null) ||
+                   "General";
       if (!collaborators[code]) {
         collaborators[code] = { name: fullName, area: area };
       }
     });
   }
 } catch (e) {
-  console.warn('Colaboradores de sistema cargados en modo local:', e);
+  console.warn("Colaboradores de sistema cargados en modo local:", e);
 }
 
-const sampleRecords = [
+// Registros de demostración para Bajas (practicantes que culminan o se retiran)
+const sampleBajasRecords = [
+  {
+    key: "demo-baja-1015",
+    category: "baja",
+    id: "1015",
+    collaborator: collaborators["1015"].name,
+    area: collaborators["1015"].area,
+    bajaReason: "CULMINACIÓN DE PRÁCTICAS",
+    exitDate: "2026-11-15",
+    documentName: "Constancia_Practicas_1015.pdf",
+    observation: "Culminó exitosamente las 480 horas reglamentarias del convenio de prácticas."
+  },
+  {
+    key: "demo-baja-1028",
+    category: "baja",
+    id: "1028",
+    collaborator: collaborators["1028"].name,
+    area: collaborators["1028"].area,
+    bajaReason: "CULMINACIÓN DE PRÁCTICAS",
+    exitDate: "2026-11-10",
+    documentName: "Acta_Entrega_1028.pdf",
+    observation: "Periodo cumplido a satisfacción. Evaluaciones de desempeño aprobadas con felicitación."
+  },
+  {
+    key: "demo-baja-1035",
+    category: "baja",
+    id: "1035",
+    collaborator: collaborators["1035"].name,
+    area: collaborators["1035"].area,
+    bajaReason: "RENUNCIA VOLUNTARIA",
+    exitDate: "2026-11-02",
+    documentName: "Carta_Renuncia_1035.pdf",
+    observation: "Retiro voluntario formalizado por cruce de horarios con clases presenciales universitarias."
+  },
+  {
+    key: "demo-baja-1042",
+    category: "baja",
+    id: "1042",
+    collaborator: collaborators["1042"].name,
+    area: collaborators["1042"].area,
+    bajaReason: "FIN DE CONVENIO",
+    exitDate: "2026-10-28",
+    documentName: "Informe_Final_1042.pdf",
+    observation: "Culminación de plazo pactado en el convenio formativo interinstitucional."
+  },
+  {
+    key: "demo-baja-1050",
+    category: "baja",
+    id: "1050",
+    collaborator: collaborators["1050"].name,
+    area: collaborators["1050"].area,
+    bajaReason: "CULMINACIÓN DE PRÁCTICAS",
+    exitDate: "2026-10-20",
+    documentName: "Constancia_Practicas_1050.pdf",
+    observation: "Periodo de prácticas preprofesionales completado con entrega satisfactoria de cargo."
+  }
+];
+
+// Registros de demostración para Blacklist (infracciones o lista negra)
+const sampleBlacklistRecords = [
   {
     key: "demo-1004",
+    category: "blacklist",
     id: "1004",
     collaborator: collaborators["1004"].name,
     area: collaborators["1004"].area,
@@ -80,6 +158,7 @@ const sampleRecords = [
   },
   {
     key: "demo-982",
+    category: "blacklist",
     id: "982",
     collaborator: collaborators["982"].name,
     area: collaborators["982"].area,
@@ -92,6 +171,7 @@ const sampleRecords = [
   },
   {
     key: "demo-983",
+    category: "blacklist",
     id: "983",
     collaborator: collaborators["983"].name,
     area: collaborators["983"].area,
@@ -104,6 +184,7 @@ const sampleRecords = [
   },
   {
     key: "demo-1006",
+    category: "blacklist",
     id: "1006",
     collaborator: collaborators["1006"].name,
     area: collaborators["1006"].area,
@@ -116,6 +197,7 @@ const sampleRecords = [
   },
   {
     key: "demo-1020",
+    category: "blacklist",
     id: "1020",
     collaborator: collaborators["1020"].name,
     area: collaborators["1020"].area,
@@ -128,6 +210,7 @@ const sampleRecords = [
   },
   {
     key: "demo-963",
+    category: "blacklist",
     id: "963",
     collaborator: collaborators["963"].name,
     area: collaborators["963"].area,
@@ -140,6 +223,7 @@ const sampleRecords = [
   },
   {
     key: "demo-1040",
+    category: "blacklist",
     id: "1040",
     collaborator: collaborators["1040"].name,
     area: collaborators["1040"].area,
@@ -152,6 +236,7 @@ const sampleRecords = [
   },
   {
     key: "demo-1013",
+    category: "blacklist",
     id: "1013",
     collaborator: collaborators["1013"].name,
     area: collaborators["1013"].area,
@@ -164,6 +249,7 @@ const sampleRecords = [
   },
   {
     key: "demo-1021",
+    category: "blacklist",
     id: "1021",
     collaborator: collaborators["1021"].name,
     area: collaborators["1021"].area,
@@ -176,28 +262,65 @@ const sampleRecords = [
   }
 ];
 
+const sampleRecords = sampleBajasRecords.concat(sampleBlacklistRecords);
+
+// Elementos de la interfaz
+const tabButtonBajas = document.getElementById("tabButtonBajas");
+const tabButtonBlacklist = document.getElementById("tabButtonBlacklist");
+const viewBajas = document.getElementById("viewBajas");
+const viewBlacklist = document.getElementById("viewBlacklist");
+const badgeBajas = document.getElementById("badgeBajas");
+const badgeBlacklist = document.getElementById("badgeBlacklist");
+const newRecordButton = document.getElementById("newRecordButton");
+const newRecordButtonText = document.getElementById("newRecordButtonText");
+
+// Tabla Bajas
+const searchInputBajas = document.getElementById("searchInputBajas");
+const reasonFilterBajas = document.getElementById("reasonFilterBajas");
+const recordsCountBajas = document.getElementById("recordsCountBajas");
+const recordsTableBodyBajas = document.getElementById("recordsTableBodyBajas");
+
+// Tabla Blacklist
+const searchInputBlacklist = document.getElementById("searchInputBlacklist");
+const reasonFilterBlacklist = document.getElementById("reasonFilterBlacklist");
+const recordsCountBlacklist = document.getElementById("recordsCountBlacklist");
+const recordsTableBodyBlacklist = document.getElementById("recordsTableBodyBlacklist");
+
+// Formulario Modal
 const formDialog = document.getElementById("recordDialog");
 const detailsDialog = document.getElementById("detailsDialog");
 const recordForm = document.getElementById("recordForm");
-const tableBody = document.getElementById("recordsTableBody");
-const searchInput = document.getElementById("searchInput");
-const reasonFilter = document.getElementById("reasonFilter");
+const recordCategorySelect = document.getElementById("recordCategory");
+const formDialogTitle = document.getElementById("formDialogTitle");
 const collaboratorSearchInput = document.getElementById("collaboratorSearch");
 const collaboratorSuggestions = document.getElementById("collaboratorSuggestions");
 const collaboratorSearchMessage = document.getElementById("collaboratorSearchMessage");
 const employeeIdInput = document.getElementById("employeeId");
 const employeeNameInput = document.getElementById("employeeName");
 const employeeAreaInput = document.getElementById("employeeArea");
+
+// Campos específicos de Baja
+const bajaFieldsGroup = document.getElementById("bajaFieldsGroup");
+const bajaReasonSelect = document.getElementById("bajaReason");
+const exitDateInput = document.getElementById("exitDate");
+
+// Campos específicos de Blacklist
+const blacklistFieldsGroup = document.getElementById("blacklistFieldsGroup");
 const reasonSelect = document.getElementById("reason");
+const infringementSelect = document.getElementById("infringement");
+const levelSelect = document.getElementById("level");
+
+// Campos comunes
 const signedDocumentInput = document.getElementById("signedDocument");
 const currentDocument = document.getElementById("currentDocument");
 const currentDocumentName = document.getElementById("currentDocumentName");
-const infringementSelect = document.getElementById("infringement");
 const observationInput = document.getElementById("observation");
 const legacyRecordNotice = document.getElementById("legacyRecordNotice");
 const toast = document.getElementById("toast");
 
+// Estado de la aplicación
 let records = [];
+let currentTab = "bajas";
 let editingKey = null;
 let selectedDetailsKey = null;
 let selectedCollaboratorId = null;
@@ -224,6 +347,15 @@ function escapeHtml(value) {
   });
 }
 
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return "—";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const parts = dateStr.split("-");
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  }
+  return dateStr;
+}
+
 function showMessage(message, isError) {
   window.clearTimeout(toastTimeout);
   toast.textContent = message;
@@ -239,35 +371,39 @@ function isValidRecord(record) {
     && typeof record.key === "string"
     && typeof record.id === "string"
     && typeof record.collaborator === "string"
-    && typeof record.area === "string"
-    && typeof record.reason === "string"
-    && (record.customReason === undefined || typeof record.customReason === "string")
-    && typeof record.infringement === "string"
-    && typeof record.level === "string"
-    && typeof record.documentName === "string";
+    && typeof record.area === "string";
 }
 
 function normalizeStoredRecord(record) {
-  const normalizedRecord = Object.assign({}, record);
-  normalizedRecord.customReason = normalizedRecord.customReason || "";
-  normalizedRecord.legacyReason = normalizedRecord.legacyReason || "";
-  normalizedRecord.legacyInfringement = normalizedRecord.legacyInfringement || "";
-  normalizedRecord.legacyLevel = normalizedRecord.legacyLevel || "";
-  normalizedRecord.observation = normalizedRecord.observation || "";
+  const normalized = Object.assign({}, record);
+  normalized.category = normalized.category || (normalized.infringement || normalized.level ? "blacklist" : "baja");
+  normalized.observation = normalized.observation || "";
+  normalized.documentName = normalized.documentName || "";
 
-  if (normalizedRecord.reason && !MOTIVES.includes(normalizedRecord.reason)) {
-    normalizedRecord.legacyReason = normalizedRecord.legacyReason || normalizedRecord.reason;
-    normalizedRecord.reason = "";
+  if (normalized.category === "baja") {
+    normalized.bajaReason = normalized.bajaReason || normalized.reason || "CULMINACIÓN DE PRÁCTICAS";
+    normalized.exitDate = normalized.exitDate || "";
+  } else {
+    normalized.customReason = normalized.customReason || "";
+    normalized.legacyReason = normalized.legacyReason || "";
+    normalized.legacyInfringement = normalized.legacyInfringement || "";
+    normalized.legacyLevel = normalized.legacyLevel || "";
+
+    if (normalized.reason && !BLACKLIST_MOTIVES.includes(normalized.reason)) {
+      normalized.legacyReason = normalized.legacyReason || normalized.reason;
+      normalized.reason = "";
+    }
+    if (normalized.infringement && !INFRACTIONS.includes(normalized.infringement)) {
+      normalized.legacyInfringement = normalized.legacyInfringement || normalized.infringement;
+      normalized.infringement = "";
+    }
+    if (normalized.level && !LEVELS.includes(normalized.level)) {
+      normalized.legacyLevel = normalized.legacyLevel || normalized.level;
+      normalized.level = "";
+    }
   }
-  if (normalizedRecord.infringement && !INFRACTIONS.includes(normalizedRecord.infringement)) {
-    normalizedRecord.legacyInfringement = normalizedRecord.legacyInfringement || normalizedRecord.infringement;
-    normalizedRecord.infringement = "";
-  }
-  if (normalizedRecord.level && !LEVELS.includes(normalizedRecord.level)) {
-    normalizedRecord.legacyLevel = normalizedRecord.legacyLevel || normalizedRecord.level;
-    normalizedRecord.level = "";
-  }
-  return normalizedRecord;
+
+  return normalized;
 }
 
 function persistRecords(nextRecords) {
@@ -304,6 +440,8 @@ function loadRecords() {
     const storedKeys = new Set(records.map(function (record) {
       return record.key;
     }));
+
+    // Asegura que las muestras de ambas categorías estén presentes si no existen
     sampleRecords.forEach(function (sample) {
       if (!storedKeys.has(sample.key)) {
         records.push(Object.assign({}, sample));
@@ -316,28 +454,123 @@ function loadRecords() {
       window.localStorage.setItem(STORAGE_VERSION_KEY, STORAGE_VERSION);
     }
   } catch (error) {
-    records = [];
-    showMessage("No se pudieron leer o actualizar los registros guardados. Se muestra una lista vacía; los datos almacenados no se han borrado.", true);
+    records = sampleRecords.map(function (record) {
+      return Object.assign({}, record);
+    });
+    showMessage("Se cargaron los registros de demostración predeterminados.", false);
   }
 }
 
-function renderReasonFilter() {
-  const selectedValue = reasonFilter.value;
-  reasonFilter.innerHTML = '<option value="">Todos los motivos</option>' + MOTIVES.map(function (reason) {
-    return '<option value="' + escapeHtml(reason) + '">' + escapeHtml(reason) + "</option>";
+// Gestión de Pestañas
+function setActiveTab(tab) {
+  currentTab = tab;
+  const isBajas = tab === "bajas";
+
+  tabButtonBajas.classList.toggle("active", isBajas);
+  tabButtonBajas.setAttribute("aria-selected", isBajas ? "true" : "false");
+  viewBajas.hidden = !isBajas;
+
+  tabButtonBlacklist.classList.toggle("active", !isBajas);
+  tabButtonBlacklist.setAttribute("aria-selected", !isBajas ? "true" : "false");
+  viewBlacklist.hidden = isBajas;
+
+  newRecordButtonText.textContent = isBajas ? "Registrar nueva baja" : "Registrar en Blacklist";
+}
+
+tabButtonBajas.addEventListener("click", function () {
+  setActiveTab("bajas");
+});
+
+tabButtonBlacklist.addEventListener("click", function () {
+  setActiveTab("blacklist");
+});
+
+// Renderizado de Filtros de Selección
+function renderFiltersOptions() {
+  // Filtro de Bajas
+  const currentBajaValue = reasonFilterBajas.value;
+  reasonFilterBajas.innerHTML = '<option value="">Todos los motivos de baja</option>' +
+    BAJA_MOTIVES.map(function (m) {
+      return '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + "</option>";
+    }).join("");
+  if (BAJA_MOTIVES.includes(currentBajaValue)) {
+    reasonFilterBajas.value = currentBajaValue;
+  }
+
+  // Filtro de Blacklist
+  const currentBlacklistValue = reasonFilterBlacklist.value;
+  reasonFilterBlacklist.innerHTML = '<option value="">Todos los motivos</option>' +
+    BLACKLIST_MOTIVES.map(function (m) {
+      return '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + "</option>";
+    }).join("");
+  if (BLACKLIST_MOTIVES.includes(currentBlacklistValue)) {
+    reasonFilterBlacklist.value = currentBlacklistValue;
+  }
+}
+
+// Renderizado de Tabla: Bajas
+function renderBajasTable() {
+  const allBajas = records.filter(function (r) {
+    return r.category === "baja";
+  });
+  badgeBajas.textContent = String(allBajas.length);
+
+  const query = searchInputBajas.value.trim().toLocaleLowerCase("es");
+  const selectedReason = reasonFilterBajas.value;
+
+  const filtered = allBajas.filter(function (record) {
+    const matchesQuery = !query
+      || record.id.toLocaleLowerCase("es").includes(query)
+      || record.collaborator.toLocaleLowerCase("es").includes(query);
+    const matchesReason = !selectedReason || record.bajaReason === selectedReason;
+    return matchesQuery && matchesReason;
+  });
+
+  recordsCountBajas.textContent = filtered.length + (filtered.length === 1 ? " registro" : " registros");
+
+  if (filtered.length === 0) {
+    const hasFilters = Boolean(query || selectedReason);
+    recordsTableBodyBajas.innerHTML = '<tr><td class="empty-row" colspan="7">' +
+      (hasFilters ? "No hay registros de bajas que coincidan con los filtros aplicados." : "Aún no hay practicantes registrados con baja. Haz clic en 'Registrar nueva baja' para agregar uno.") +
+      "</td></tr>";
+    return;
+  }
+
+  recordsTableBodyBajas.innerHTML = filtered.map(function (record) {
+    let badgeClass = "baja-badge";
+    if (record.bajaReason === "RENUNCIA VOLUNTARIA") {
+      badgeClass += " renuncia";
+    } else if (record.bajaReason === "FIN DE CONVENIO") {
+      badgeClass += " fin-convenio";
+    }
+
+    return "<tr>"
+      + '<td class="id-cell">' + escapeHtml(record.id) + "</td>"
+      + '<td class="employee-cell">' + escapeHtml(record.collaborator) + "</td>"
+      + "<td>" + escapeHtml(record.area) + "</td>"
+      + '<td><span class="' + badgeClass + '">' + escapeHtml(record.bajaReason || "—") + "</span></td>"
+      + "<td>" + escapeHtml(formatDateDisplay(record.exitDate)) + "</td>"
+      + "<td>" + (record.documentName
+        ? '<span class="document-name" title="' + escapeHtml(record.documentName) + '">' + escapeHtml(record.documentName) + "</span>"
+        : '<span class="empty-document">—</span>') + "</td>"
+      + '<td><div class="row-actions">'
+      + '<button class="action-button" type="button" data-action="view" data-key="' + escapeHtml(record.key) + '">Consultar</button>'
+      + "</div></td>"
+      + "</tr>";
   }).join("");
-
-  if (MOTIVES.indexOf(selectedValue) !== -1) {
-    reasonFilter.value = selectedValue;
-  }
 }
 
-function renderRecords() {
-  renderReasonFilter();
+// Renderizado de Tabla: Blacklist
+function renderBlacklistTable() {
+  const allBlacklist = records.filter(function (r) {
+    return r.category === "blacklist";
+  });
+  badgeBlacklist.textContent = String(allBlacklist.length);
 
-  const query = searchInput.value.trim().toLocaleLowerCase("es");
-  const selectedReason = reasonFilter.value;
-  const filteredRecords = records.filter(function (record) {
+  const query = searchInputBlacklist.value.trim().toLocaleLowerCase("es");
+  const selectedReason = reasonFilterBlacklist.value;
+
+  const filtered = allBlacklist.filter(function (record) {
     const matchesQuery = !query
       || record.id.toLocaleLowerCase("es").includes(query)
       || record.collaborator.toLocaleLowerCase("es").includes(query);
@@ -345,26 +578,28 @@ function renderRecords() {
     return matchesQuery && matchesReason;
   });
 
-  document.getElementById("recordsCount").textContent =
-    filteredRecords.length + (filteredRecords.length === 1 ? " registro" : " registros");
+  recordsCountBlacklist.textContent = filtered.length + (filtered.length === 1 ? " registro" : " registros");
 
-  if (filteredRecords.length === 0) {
+  if (filtered.length === 0) {
     const hasFilters = Boolean(query || selectedReason);
-    tableBody.innerHTML = '<tr><td class="empty-row" colspan="8">' +
-      (hasFilters ? "No hay registros que coincidan con la búsqueda." : "Aún no hay registros. Puedes registrar una nueva baja.") +
+    recordsTableBodyBlacklist.innerHTML = '<tr><td class="empty-row" colspan="8">' +
+      (hasFilters ? "No hay registros en Blacklist que coincidan con la búsqueda." : "Aún no hay colaboradores en lista negra. Puedes registrar uno con el botón superior.") +
       "</td></tr>";
     return;
   }
 
-  tableBody.innerHTML = filteredRecords.map(function (record) {
+  recordsTableBodyBlacklist.innerHTML = filtered.map(function (record) {
+    const levelDisplay = record.level || record.legacyLevel || "";
+    const isMuyGrave = levelDisplay === "MUY GRAVE";
+
     return "<tr>"
       + '<td class="id-cell">' + escapeHtml(record.id) + "</td>"
       + '<td class="employee-cell">' + escapeHtml(record.collaborator) + "</td>"
       + "<td>" + escapeHtml(record.area) + "</td>"
       + '<td><span class="reason-badge">' + escapeHtml(record.reason || record.legacyReason || "—") + "</span></td>"
       + "<td>" + escapeHtml(record.infringement || record.legacyInfringement || "—") + "</td>"
-      + '<td>' + (record.level || record.legacyLevel
-        ? '<span class="level-badge">' + escapeHtml(record.level || record.legacyLevel) + "</span>"
+      + "<td>" + (levelDisplay
+        ? '<span class="level-badge' + (isMuyGrave ? ' muy-grave' : '') + '">' + escapeHtml(levelDisplay) + "</span>"
         : "—") + "</td>"
       + "<td>" + (record.documentName
         ? '<span class="document-name" title="' + escapeHtml(record.documentName) + '">' + escapeHtml(record.documentName) + "</span>"
@@ -376,6 +611,13 @@ function renderRecords() {
   }).join("");
 }
 
+function renderRecords() {
+  renderFiltersOptions();
+  renderBajasTable();
+  renderBlacklistTable();
+}
+
+// Búsqueda y Selección de Colaboradores
 function setCollaboratorSearchMessage(message, status) {
   collaboratorSearchMessage.textContent = message;
   collaboratorSearchMessage.classList.remove("success", "error");
@@ -416,7 +658,7 @@ function searchCollaborators(query) {
       + " · " + escapeHtml(collaborator.area) + "</small></button>";
   }).join("");
   setSuggestionsVisible(true);
-  setCollaboratorSearchMessage("Selecciona un colaborador para completar automáticamente el ID y el área.", "");
+  setCollaboratorSearchMessage("Selecciona un colaborador para autocompletar su ID y área.", "");
 }
 
 function selectCollaborator(id) {
@@ -424,7 +666,7 @@ function selectCollaborator(id) {
     ? collaborators[id]
     : null;
   const numericId = Number(id);
-  if (!collaborator || !/^\d+$/.test(id) || !Number.isInteger(numericId) || numericId < 0 || numericId > 2000) {
+  if (!collaborator || !/^\d+$/.test(id) || !Number.isInteger(numericId) || numericId < 0 || numericId > 9999) {
     selectedCollaboratorId = null;
     setCollaboratorSearchMessage("Selecciona un colaborador válido de la lista.", "error");
     return false;
@@ -448,23 +690,40 @@ function updateCurrentDocumentDisplay() {
   currentDocumentName.textContent = name;
 }
 
+// Adaptación dinámica de campos del modal según categoría
+function updateFormCategoryUI(category) {
+  const isBaja = category === "baja";
+  bajaFieldsGroup.hidden = !isBaja;
+  blacklistFieldsGroup.hidden = isBaja;
+
+  if (editingKey) {
+    formDialogTitle.textContent = isBaja ? "Editar baja de practicante" : "Editar colaborador en Blacklist";
+  } else {
+    formDialogTitle.textContent = isBaja ? "Registrar nueva baja" : "Registrar en Blacklist";
+  }
+}
+
 function resetForm() {
   recordForm.reset();
   editingKey = null;
   selectedCollaboratorId = null;
   retainedDocumentName = "";
-  document.getElementById("formDialogTitle").textContent = "Registrar nueva baja";
-  reasonSelect.value = "";
   collaboratorSuggestions.innerHTML = "";
   setSuggestionsVisible(false);
   currentDocument.hidden = true;
   legacyRecordNotice.hidden = true;
   legacyRecordNotice.textContent = "";
   setCollaboratorSearchMessage("", "");
+
+  // Por defecto ajusta a la pestaña activa
+  recordCategorySelect.value = currentTab;
+  updateFormCategoryUI(currentTab);
 }
 
 function openCreateDialog() {
   resetForm();
+  recordCategorySelect.value = currentTab;
+  updateFormCategoryUI(currentTab);
   formDialog.showModal();
   collaboratorSearchInput.focus();
 }
@@ -480,8 +739,10 @@ function openEditDialog(key) {
 
   resetForm();
   editingKey = record.key;
-  retainedDocumentName = record.documentName;
-  document.getElementById("formDialogTitle").textContent = "Editar registro";
+  retainedDocumentName = record.documentName || "";
+  recordCategorySelect.value = record.category || "blacklist";
+  updateFormCategoryUI(recordCategorySelect.value);
+
   if (!selectCollaborator(record.id)) {
     collaboratorSearchInput.value = record.collaborator;
     employeeNameInput.value = record.collaborator;
@@ -490,22 +751,28 @@ function openEditDialog(key) {
     selectedCollaboratorId = record.id;
   }
 
-  if (MOTIVES.includes(record.reason)) {
-    reasonSelect.value = record.reason;
+  if (record.category === "baja") {
+    bajaReasonSelect.value = BAJA_MOTIVES.includes(record.bajaReason) ? record.bajaReason : "";
+    exitDateInput.value = record.exitDate || "";
+  } else {
+    reasonSelect.value = BLACKLIST_MOTIVES.includes(record.reason) ? record.reason : "";
+    infringementSelect.value = INFRACTIONS.includes(record.infringement) ? record.infringement : "";
+    levelSelect.value = LEVELS.includes(record.level) ? record.level : "";
+
+    const legacyValues = [
+      record.legacyReason && "Motivo anterior: " + record.legacyReason,
+      record.legacyInfringement && "Infracción anterior: " + record.legacyInfringement,
+      record.legacyLevel && "Nivel anterior: " + record.legacyLevel,
+      record.customReason && "Detalle anterior: " + record.customReason
+    ].filter(Boolean);
+
+    legacyRecordNotice.textContent = legacyValues.length
+      ? "Este registro conserva valores de referencia anteriores: " + legacyValues.join(" · ")
+      : "";
+    legacyRecordNotice.hidden = !legacyValues.length;
   }
-  infringementSelect.value = INFRACTIONS.includes(record.infringement) ? record.infringement : "";
-  document.getElementById("level").value = LEVELS.includes(record.level) ? record.level : "";
+
   observationInput.value = record.observation || "";
-  const legacyValues = [
-    record.legacyReason && "Motivo anterior: " + record.legacyReason,
-    record.legacyInfringement && "Infracción anterior: " + record.legacyInfringement,
-    record.legacyLevel && "Nivel anterior: " + record.legacyLevel,
-    record.customReason && "Detalle de motivo anterior: " + record.customReason
-  ].filter(Boolean);
-  legacyRecordNotice.textContent = legacyValues.length
-    ? "Este registro conserva valores de catálogos anteriores. Si seleccionas nuevas opciones, los valores originales se mantendrán como referencia: " + legacyValues.join(" · ")
-    : "";
-  legacyRecordNotice.hidden = !legacyValues.length;
   signedDocumentInput.value = "";
   updateCurrentDocumentDisplay();
   formDialog.showModal();
@@ -522,33 +789,47 @@ function openDetailsDialog(key) {
   }
 
   selectedDetailsKey = key;
+  const isBaja = record.category === "baja";
+
+  document.getElementById("detailsEyebrow").textContent = isBaja ? "Detalle de baja de practicante" : "Detalle de registro en Blacklist";
+  document.getElementById("detailsDialogTitle").textContent = record.collaborator;
+
   const fields = [
+    ["Categoría", isBaja ? "Baja de practicante" : "Blacklist (Lista Negra)"],
     ["ID", record.id],
-    ["Colaborador", record.collaborator],
-    ["Área", record.area],
-    ["Motivo", record.reason || "—"],
-    ["Infracción", record.infringement || "—"],
-    ["Nivel", record.level || "—"],
-    ["Documento firmado", record.documentName || "—"],
-    ["Observación", record.observation || "—"]
+    ["Colaborador / Practicante", record.collaborator],
+    ["Área", record.area]
   ];
-  if (record.legacyReason) {
-    fields.push(["Motivo anterior", record.legacyReason]);
+
+  if (isBaja) {
+    fields.push(["Motivo de baja", record.bajaReason || "—"]);
+    fields.push(["Fecha efectiva de cese", formatDateDisplay(record.exitDate)]);
+  } else {
+    fields.push(["Motivo", record.reason || record.legacyReason || "—"]);
+    fields.push(["Infracción", record.infringement || record.legacyInfringement || "—"]);
+    fields.push(["Nivel", record.level || record.legacyLevel || "—"]);
+    if (record.legacyReason) {
+      fields.push(["Motivo anterior", record.legacyReason]);
+    }
+    if (record.customReason) {
+      fields.push(["Detalle anterior", record.customReason]);
+    }
+    if (record.legacyInfringement) {
+      fields.push(["Infracción anterior", record.legacyInfringement]);
+    }
+    if (record.legacyLevel) {
+      fields.push(["Nivel anterior", record.legacyLevel]);
+    }
   }
-  if (record.customReason) {
-    fields.push(["Detalle de motivo anterior", record.customReason]);
-  }
-  if (record.legacyInfringement) {
-    fields.push(["Infracción anterior", record.legacyInfringement]);
-  }
-  if (record.legacyLevel) {
-    fields.push(["Nivel anterior", record.legacyLevel]);
-  }
+
+  fields.push(["Documento firmado / sustento", record.documentName || "—"]);
+  fields.push(["Observación", record.observation || "—"]);
 
   document.getElementById("recordDetails").innerHTML = fields.map(function (field) {
     return '<div class="detail-item"><dt>' + escapeHtml(field[0]) + "</dt><dd>"
       + escapeHtml(field[1] || "—") + "</dd></div>";
   }).join("");
+
   detailsDialog.showModal();
 }
 
@@ -557,7 +838,8 @@ function closeDetailsDialog() {
   selectedDetailsKey = null;
 }
 
-document.getElementById("newRecordButton").addEventListener("click", openCreateDialog);
+// Event Listeners
+newRecordButton.addEventListener("click", openCreateDialog);
 document.getElementById("closeFormButton").addEventListener("click", function () {
   formDialog.close();
 });
@@ -566,12 +848,17 @@ document.getElementById("cancelFormButton").addEventListener("click", function (
 });
 document.getElementById("closeDetailsButton").addEventListener("click", closeDetailsDialog);
 document.getElementById("closeDetailsAction").addEventListener("click", closeDetailsDialog);
+
 document.getElementById("editFromDetailsButton").addEventListener("click", function () {
   const key = selectedDetailsKey;
   closeDetailsDialog();
   if (key) {
     openEditDialog(key);
   }
+});
+
+recordCategorySelect.addEventListener("change", function () {
+  updateFormCategoryUI(recordCategorySelect.value);
 });
 
 collaboratorSearchInput.addEventListener("input", function () {
@@ -581,6 +868,7 @@ collaboratorSearchInput.addEventListener("input", function () {
   employeeAreaInput.value = "";
   searchCollaborators(collaboratorSearchInput.value);
 });
+
 collaboratorSearchInput.addEventListener("keydown", function (event) {
   if (event.key === "ArrowDown" && !collaboratorSuggestions.hidden) {
     const firstSuggestion = collaboratorSuggestions.querySelector(".suggestion-option");
@@ -598,77 +886,120 @@ collaboratorSearchInput.addEventListener("keydown", function (event) {
     setSuggestionsVisible(false);
   }
 });
+
 collaboratorSuggestions.addEventListener("click", function (event) {
   const option = event.target.closest("button[data-collaborator-id]");
   if (option && selectCollaborator(option.dataset.collaboratorId)) {
     collaboratorSearchInput.focus();
   }
 });
+
 signedDocumentInput.addEventListener("change", updateCurrentDocumentDisplay);
 document.getElementById("removeDocumentButton").addEventListener("click", function () {
   retainedDocumentName = "";
   signedDocumentInput.value = "";
   updateCurrentDocumentDisplay();
 });
-searchInput.addEventListener("input", renderRecords);
-reasonFilter.addEventListener("change", renderRecords);
 
-tableBody.addEventListener("click", function (event) {
+// Filtros y búsquedas por pestaña
+searchInputBajas.addEventListener("input", renderBajasTable);
+reasonFilterBajas.addEventListener("change", renderBajasTable);
+
+searchInputBlacklist.addEventListener("input", renderBlacklistTable);
+reasonFilterBlacklist.addEventListener("change", renderBlacklistTable);
+
+// Acciones en las tablas
+recordsTableBodyBajas.addEventListener("click", function (event) {
   const button = event.target.closest("button[data-action]");
-  if (!button) {
-    return;
-  }
-
+  if (!button) return;
   const action = button.dataset.action;
   const key = button.dataset.key;
-  if (action === "view") {
-    openDetailsDialog(key);
-  } else if (action === "edit") {
-    openEditDialog(key);
-  }
+  if (action === "view") openDetailsDialog(key);
+  else if (action === "edit") openEditDialog(key);
 });
 
+recordsTableBodyBlacklist.addEventListener("click", function (event) {
+  const button = event.target.closest("button[data-action]");
+  if (!button) return;
+  const action = button.dataset.action;
+  const key = button.dataset.key;
+  if (action === "view") openDetailsDialog(key);
+  else if (action === "edit") openEditDialog(key);
+});
+
+// Envío del Formulario
 recordForm.addEventListener("submit", function (event) {
   event.preventDefault();
+
   const existingRecord = editingKey
     ? records.find(function (record) { return record.key === editingKey; })
     : null;
+
   const collaborator = selectedCollaboratorId
     ? collaborators[selectedCollaboratorId] || (existingRecord
       ? { name: existingRecord.collaborator, area: existingRecord.area }
       : null)
     : null;
+
   if (!collaborator) {
-    setCollaboratorSearchMessage("Busca y selecciona un colaborador antes de guardar.", "error");
+    setCollaboratorSearchMessage("Busca y selecciona un practicante o colaborador antes de guardar.", "error");
     collaboratorSearchInput.focus();
     return;
   }
 
+  const category = recordCategorySelect.value;
   const selectedFile = signedDocumentInput.files.length
     ? signedDocumentInput.files[0].name
     : retainedDocumentName;
-  const record = {
-    key: editingKey || createKey(),
-    id: selectedCollaboratorId,
-    collaborator: collaborator.name,
-    area: collaborator.area,
-    reason: reasonSelect.value,
-    customReason: existingRecord ? existingRecord.customReason || "" : "",
-    legacyReason: existingRecord ? existingRecord.legacyReason || "" : "",
-    infringement: infringementSelect.value,
-    legacyInfringement: existingRecord ? existingRecord.legacyInfringement || "" : "",
-    level: document.getElementById("level").value,
-    legacyLevel: existingRecord ? existingRecord.legacyLevel || "" : "",
-    documentName: selectedFile || "",
-    observation: observationInput.value.trim()
-  };
+
+  let newOrUpdatedRecord = null;
+
+  if (category === "baja") {
+    const bajaReason = bajaReasonSelect.value;
+    if (!bajaReason) {
+      showMessage("Por favor, selecciona un motivo de baja.", true);
+      bajaReasonSelect.focus();
+      return;
+    }
+
+    newOrUpdatedRecord = {
+      key: editingKey || createKey(),
+      category: "baja",
+      id: selectedCollaboratorId,
+      collaborator: collaborator.name,
+      area: collaborator.area,
+      bajaReason: bajaReason,
+      exitDate: exitDateInput.value || (existingRecord ? existingRecord.exitDate : ""),
+      documentName: selectedFile || "",
+      observation: observationInput.value.trim()
+    };
+  } else {
+    newOrUpdatedRecord = {
+      key: editingKey || createKey(),
+      category: "blacklist",
+      id: selectedCollaboratorId,
+      collaborator: collaborator.name,
+      area: collaborator.area,
+      reason: reasonSelect.value,
+      customReason: existingRecord ? existingRecord.customReason || "" : "",
+      legacyReason: existingRecord ? existingRecord.legacyReason || "" : "",
+      infringement: infringementSelect.value,
+      legacyInfringement: existingRecord ? existingRecord.legacyInfringement || "" : "",
+      level: levelSelect.value,
+      legacyLevel: existingRecord ? existingRecord.legacyLevel || "" : "",
+      documentName: selectedFile || "",
+      observation: observationInput.value.trim()
+    };
+  }
+
   const nextRecords = existingRecord
-    ? records.map(function (item) { return item.key === editingKey ? record : item; })
-    : records.concat(record);
+    ? records.map(function (item) { return item.key === editingKey ? newOrUpdatedRecord : item; })
+    : records.concat(newOrUpdatedRecord);
 
   if (persistRecords(nextRecords)) {
     formDialog.close();
-    showMessage(existingRecord ? "Registro actualizado." : "Registro guardado.");
+    setActiveTab(category);
+    showMessage(existingRecord ? "Registro actualizado correctamente." : (category === "baja" ? "Baja registrada con éxito." : "Registro en Blacklist guardado."));
   }
 });
 
@@ -677,5 +1008,7 @@ detailsDialog.addEventListener("close", function () {
   selectedDetailsKey = null;
 });
 
+// Inicialización
 loadRecords();
 renderRecords();
+setActiveTab("bajas");
