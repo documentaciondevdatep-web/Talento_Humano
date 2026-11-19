@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiempo de conexión | Talento Humano</title>
+  <link rel="stylesheet" href="GestionConexion.css?v=2">
+  <script type="module" src="GestionConexion.js?v=2"></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">CONEXIÓN Y PERMANENCIA · TALENTO HUMANO</p>
+        <h1>Tiempo de conexión</h1>
+        <p>Control de tiempo conectado a la plataforma, cumplimiento de jornada diaria y seguimiento de racha de puntualidad.</p>
+      </div>
+      <span class="source-badge">Monitoreo de conexión</span>
+    </header>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- KPIs generales de Talento Humano -->
+    <section class="stats" aria-label="Resumen de tiempo de conexión">
+      <div>
+        <span>Practicantes monitoreados</span>
+        <strong id="kpiTotalColabs">0</strong>
+      </div>
+      <div>
+        <span>Promedio conexión diaria</span>
+        <strong id="kpiPromedioDiario" style="color:var(--primary)">5.2h / día</strong>
+      </div>
+      <div>
+        <span>Cumplimiento en rango (100%)</span>
+        <strong id="kpiCumplimientoOptimo" style="color:var(--green)">0</strong>
+      </div>
+      <div>
+        <span>Racha promedio</span>
+        <strong id="kpiRachaPromedio" style="color:var(--orange)">12 días</strong>
+      </div>
+    </section>
+
+    <div class="panel">
+      <!-- Filtros de la tabla general -->
+      <div class="filters">
+        <label class="search">
+          Buscar
+          <input id="search" type="search" placeholder="Nombre, código, área o departamento">
+        </label>
+        <label>
+          Departamento
+          <select id="department">
+            <option value="">Todos los departamentos</option>
+          </select>
+        </label>
+        <label>
+          Estado de conexión
+          <select id="estadoConexionFilter">
+            <option value="">Todos los estados</option>
+            <option value="EXCELENTE">Excelente (≥ 5h)</option>
+            <option value="NORMAL">Normal (4.5h - 5h)</option>
+            <option value="BAJO">Bajo (&lt; 4.5h)</option>
+          </select>
+        </label>
+      </div>
+
+      <p id="listHint" class="hint">Seguimiento institucional de tiempo conectado: horas efectivas en plataforma, racha de puntualidad y cumplimiento del convenio.</p>
+
+      <!-- Tabla general de colaboradores -->
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Ubicación</th>
+              <th>Racha de puntualidad</th>
+              <th>Tiempo conectado</th>
+              <th>Dentro del rango</th>
+              <th>Promedio diario</th>
+              <th>Estado</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <p id="empty" class="empty" hidden>No hay registros para estos filtros.</p>
+      <div id="count" class="table-footer"></div>
+    </div>
+
+    <!-- Regla de negocio al pie -->
+    <p class="footnote">
+      <strong>Métricas de conexión:</strong> La jornada base diaria es de 5 horas de lunes a viernes (meta de período: 85 horas mensuales). Se considera un desempeño <em>Excelente</em> a partir de 5 horas diarias registradas con marcación puntual dentro del rango horario acordado.
+    </p>
+  </main>
+
+  <!-- Modal Detalle: Dashboard de Tiempo de Conexión Individual -->
+  <dialog id="modalDetalleConexion" class="dashboard-dialog" aria-labelledby="modalConexionTitle">
+    <div class="dash-modal-topbar">
+      <div class="dash-modal-left">
+        <button type="button" data-close="modalDetalleConexion" class="dash-back-btn">
+          ← Volver a la lista general
+        </button>
+        <span class="dash-modal-badge">Vista individual del colaborador</span>
+      </div>
+      <div class="dash-modal-center">
+        <label class="dash-colab-picker-label">
+          <span>Consultar otro colaborador:</span>
+          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
+        </label>
+      </div>
+      <div class="dash-modal-right">
+        <button type="button" data-close="modalDetalleConexion" class="dash-close-x" aria-label="Cerrar modal">×</button>
+      </div>
+    </div>
+
+    <div id="modalConexionBody" class="dash-modal-scrollable"></div>
+
+    <footer class="dialog-actions dash-modal-footer">
+      <button type="button" data-close="modalDetalleConexion" class="primary">Volver al control general</button>
+    </footer>
+  </dialog>
+</body>
+</html>

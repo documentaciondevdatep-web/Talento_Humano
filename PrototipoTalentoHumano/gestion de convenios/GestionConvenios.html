@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7fb">
+  <title>Gestión de Convenios | Talento Humano</title>
+  <link rel="stylesheet" href="../shared/css/theme.css">
+  <link rel="stylesheet" href="../shared/css/components.css">
+  <link rel="stylesheet" href="GestionConvenios.css?v=20261118-scroll">
+  <script src="GestionConvenios.js?v=20261118-scroll" defer></script>
+</head>
+<body>
+  <main class="page-shell">
+    
+    <!-- Toast / Alertas del sistema -->
+    <div id="statusAlert" role="status" aria-live="polite" hidden></div>
+
+    <!-- ================================================================= -->
+    <!-- PANTALLA PRINCIPAL: LISTADO Y GESTIÓN CON PESTAÑAS              -->
+    <!-- ================================================================= -->
+    <div id="screenListado">
+      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;">
+        <div>
+          <p class="eyebrow">FORMALIZACIÓN Y MODALIDADES FORMATIVAS · TALENTO HUMANO</p>
+          <h1>Gestión de Convenios</h1>
+          <p class="page-description">
+            Control de solicitudes de convenio tras culminar el periodo de prueba, preparación y corrección de datos, generación del documento oficial y registro de entrega de convenio firmado con credenciales.
+          </p>
+        </div>
+        <div>
+          <a href="../Dashboard/Dashboard.html#inicio" target="_top" class="home-link">← Volver al inicio</a>
+        </div>
+      </header>
+
+      <!-- KPIs dinámicos calculados según la pestaña activa -->
+      <section id="kpiContainer" class="kpi-grid" aria-label="Indicadores del módulo"></section>
+
+      <!-- Panel con Pestañas Horizontales -->
+      <div class="panel">
+        <nav class="tabs-nav" aria-label="Secciones de convenios">
+          <button type="button" id="tabSolicitudes" class="tab-btn active" data-tab="solicitudes" aria-pressed="true">
+            <span>Solicitudes de convenio</span>
+            <span class="tab-badge" id="badgeSolicitudes">0</span>
+          </button>
+          <button type="button" id="tabFirmados" class="tab-btn" data-tab="firmados" aria-pressed="false">
+            <span>Convenios firmados</span>
+            <span class="tab-badge" id="badgeFirmados">0</span>
+          </button>
+        </nav>
+
+        <!-- Barra de Herramientas: Buscador y Filtro por Área y Estado -->
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <span class="search-icon" aria-hidden="true">🔍</span>
+              <input id="searchInput" type="search" placeholder="Buscar por nombre, documento o código..." aria-label="Buscar colaborador" autocomplete="off">
+            </div>
+            <label class="filter-group">
+              <span class="filter-label">Área:</span>
+              <select id="filterArea" aria-label="Filtrar por área" autocomplete="off">
+                <option value="" selected>Todas las áreas</option>
+              </select>
+            </label>
+            <label class="filter-group" id="filterEstadoGroup">
+              <span class="filter-label">Estado:</span>
+              <select id="filterEstado" aria-label="Filtrar por estado" autocomplete="off">
+                <option value="" selected>Todos los estados</option>
+                <option value="Pendiente de preparación">En preparación</option>
+                <option value="Pendiente de firma">Listo para firma</option>
+              </select>
+            </label>
+          </div>
+          <div class="toolbar-right">
+            <button type="button" id="btnRecargarDatos" class="th-btn th-btn-secondary" title="Recargar datos">
+              <span aria-hidden="true">🔄</span> Actualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- VISTA 1: Solicitudes de Convenio -->
+        <section id="viewSolicitudes" aria-label="Listado de solicitudes de convenio">
+          <div class="table-wrap">
+            <table class="th-table">
+              <thead>
+                <tr>
+                  <th>Colaborador</th>
+                  <th>Código provisional</th>
+                  <th>Documento</th>
+                  <th>Área</th>
+                  <th>Fecha de solicitud</th>
+                  <th>Estado</th>
+                  <th class="text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodySolicitudes">
+                <!-- Se llena dinámicamente con JS -->
+              </tbody>
+            </table>
+          </div>
+          <div id="emptySolicitudes" class="empty-state" hidden>
+            <span class="empty-icon" aria-hidden="true">📋</span>
+            <h3>No se encontraron solicitudes</h3>
+            <p>No hay solicitudes que coincidan con los filtros seleccionados.</p>
+          </div>
+        </section>
+
+        <!-- VISTA 2: Convenios Firmados -->
+        <section id="viewFirmados" aria-label="Listado de convenios firmados" hidden>
+          <div class="table-wrap">
+            <table class="th-table">
+              <thead>
+                <tr>
+                  <th>Colaborador</th>
+                  <th>Código definitivo</th>
+                  <th>Documento</th>
+                  <th>Área</th>
+                  <th>Inicio</th>
+                  <th>Fin</th>
+                  <th>Horas acordadas</th>
+                  <th>Fecha de firma</th>
+                  <th>Estado</th>
+                  <th class="text-right">Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyFirmados">
+                <!-- Se llena dinámicamente con JS -->
+              </tbody>
+            </table>
+          </div>
+          <div id="emptyFirmados" class="empty-state" hidden>
+            <span class="empty-icon" aria-hidden="true">📁</span>
+            <h3>No hay convenios firmados registrados</h3>
+            <p>Los convenios aparecerán aquí una vez suscritos y registrada su firma y credenciales.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- PANTALLA INDEPENDIENTE: DETALLE Y GESTIÓN DE CONVENIO            -->
+    <!-- ================================================================= -->
+    <div id="screenDetalle" hidden>
+      <header class="detail-topbar">
+        <button type="button" id="btnVolverSolicitudes" class="th-btn th-btn-secondary">
+          <span aria-hidden="true">←</span> Volver a solicitudes
+        </button>
+        <div class="detail-heading-info">
+          <div class="detail-colab-title">
+            <h2 id="detalleNombreColaborador">Nombre del Colaborador</h2>
+            <span id="detalleCodigoBadge" class="code-pill">Código provisional: ----</span>
+          </div>
+          <p id="detalleSubinfo" class="muted-text">Área · Fecha de solicitud</p>
+        </div>
+        <div class="detail-topbar-actions">
+          <button type="button" id="btnIconoOjoPrevia" class="th-btn th-btn-secondary" title="Visualizar documento del convenio actual">
+            <span aria-hidden="true" style="font-size: 15px;">👁️</span> Ver documento
+          </button>
+          <span id="detalleEstadoBadge" class="status-badge">Estado</span>
+          <a href="../Dashboard/Dashboard.html#inicio" target="_top" class="home-link" style="margin-left: 8px;">← Volver al inicio</a>
+        </div>
+      </header>
+
+      <!-- Stepper del Flujo de Convenio (3 pasos según especificación) -->
+      <div class="workflow-stepper">
+        <div class="step-item" id="step1">
+          <div class="step-circle">1</div>
+          <div class="step-text">
+            <strong>Revisión y preparación</strong>
+            <small>Talento Humano</small>
+          </div>
+        </div>
+        <div class="step-line" id="line1"></div>
+        <div class="step-item" id="step2">
+          <div class="step-circle">2</div>
+          <div class="step-text">
+            <strong>Listo para firma</strong>
+            <small>Documento final generado</small>
+          </div>
+        </div>
+        <div class="step-line" id="line2"></div>
+        <div class="step-item" id="step3">
+          <div class="step-circle">3</div>
+          <div class="step-text">
+            <strong>Convenio firmado</strong>
+            <small>Código definitivo y credenciales</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alertas informativas según el estado -->
+      <div id="alertPreparacion" class="callout callout-info">
+        <div class="callout-icon" aria-hidden="true">ℹ️</div>
+        <div class="callout-body">
+          <strong>Revisión y preparación de la información del convenio</strong>
+          <p>
+            Revisa los datos recibidos del practicante y periodo de prueba. Si encuentras datos que requieren corrección, <strong>corrígelos directamente en el formulario</strong> y pulsa <strong>Guardar borrador</strong>. Si los datos están correctos, pulsa <strong>Generar documento final para firma</strong>. Puedes visualizar el convenio en cualquier momento con el <strong>icono de ojo (👁️)</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div id="alertListoFirma" class="callout callout-success" hidden>
+        <div class="callout-icon" aria-hidden="true">✓</div>
+        <div class="callout-body">
+          <strong>Documento final generado y validado para firma</strong>
+          <p>
+            El convenio oficial se encuentra listo con sus cláusulas completas. Visualiza el documento para entregarlo al colaborador y registra la firma y credenciales institucionales.
+          </p>
+        </div>
+      </div>
+
+      <div id="alertFirmadoFijo" class="callout callout-success" hidden>
+        <div class="callout-icon" aria-hidden="true">📁</div>
+        <div class="callout-body">
+          <strong>Convenio formalizado y archivado</strong>
+          <p>
+            La recepción del convenio firmado y la entrega de credenciales han sido registradas. El código definitivo ha sido asignado y el contenido se encuentra <strong>fijo para consulta</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Selector de Plantilla Word / Cláusulas -->
+      <section class="form-card template-selection-card">
+        <div class="card-header-flex">
+          <div>
+            <h3 class="th-card-title">Plantilla Oficial y Modalidad Formativa</h3>
+            <p class="card-subtitle">La plantilla se selecciona automáticamente según la situación académica y actualiza las cláusulas correspondientes.</p>
+          </div>
+          <div class="template-selector-control">
+            <label for="selectPlantilla" class="th-label">Plantilla contractual:</label>
+            <select id="selectPlantilla" class="th-select">
+              <option value="pre-profesional">Convenio de Prácticas Pre-Profesionales (Estudiantes)</option>
+              <option value="profesional">Convenio de Prácticas Profesionales (Egresados / Bachilleres)</option>
+            </select>
+          </div>
+        </div>
+      </section>
+
+      <!-- Formulario de Campos del Convenio por Grupos -->
+      <form id="formConvenioDetalle" novalidate>
+        
+        <!-- GRUPO 1: Empresa -->
+        <fieldset class="form-group-card" id="fieldsetEmpresa">
+          <legend class="group-legend">
+            <span class="group-icon">🏢</span> 1. Información de la Empresa
+          </legend>
+          <p class="group-desc">Datos institucionales precargados según la plantilla de Devdatep Consulting S.A.C.</p>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="empRazonSocial" class="th-label">Razón Social:</label>
+              <input type="text" id="empRazonSocial" name="empRazonSocial" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="empRuc" class="th-label">RUC:</label>
+              <input type="text" id="empRuc" name="empRuc" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="empActividad" class="th-label">Actividad Económica:</label>
+              <input type="text" id="empActividad" name="empActividad" class="th-input" required>
+            </div>
+            <div class="form-field full-width">
+              <label for="empDomicilio" class="th-label">Domicilio Legal:</label>
+              <input type="text" id="empDomicilio" name="empDomicilio" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="empRepresentante" class="th-label">Representante Legal:</label>
+              <input type="text" id="empRepresentante" name="empRepresentante" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="empCargoRep" class="th-label">Cargo del Representante:</label>
+              <input type="text" id="empCargoRep" name="empCargoRep" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="empDocRep" class="th-label">Documento del Representante:</label>
+              <input type="text" id="empDocRep" name="empDocRep" class="th-input" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- GRUPO 2: Centro de Formación -->
+        <fieldset class="form-group-card" id="fieldsetCentro">
+          <legend class="group-legend">
+            <span class="group-icon">🎓</span> 2. Centro de Formación Profesional
+          </legend>
+          <p class="group-desc">Información recuperada del formulario del practicante; editable por Talento Humano si requiere correcciones.</p>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="instRazonSocial" class="th-label">Razón Social (Universidad / Instituto):</label>
+              <input type="text" id="instRazonSocial" name="instRazonSocial" class="th-input" placeholder="Ej. Universidad Nacional Mayor de San Marcos" required>
+            </div>
+            <div class="form-field">
+              <label for="instRuc" class="th-label">RUC de la Institución:</label>
+              <input type="text" id="instRuc" name="instRuc" class="th-input" placeholder="Ej. 20148092282" required>
+            </div>
+            <div class="form-field">
+              <label for="instRepresentante" class="th-label">Representante / Director(a):</label>
+              <input type="text" id="instRepresentante" name="instRepresentante" class="th-input" placeholder="Ej. Dr. Carlos Sánchez Ramos" required>
+            </div>
+            <div class="form-field full-width">
+              <label for="instDomicilio" class="th-label">Domicilio de la Institución:</label>
+              <input type="text" id="instDomicilio" name="instDomicilio" class="th-input" placeholder="Ej. Av. Carlos Germán Amezaga 375, Lima" required>
+            </div>
+            <div class="form-field">
+              <label for="instCargoRep" class="th-label">Cargo del Representante:</label>
+              <input type="text" id="instCargoRep" name="instCargoRep" class="th-input" placeholder="Ej. Director de Escuela Profesional" required>
+            </div>
+            <div class="form-field">
+              <label for="instDocRep" class="th-label">Documento del Representante:</label>
+              <input type="text" id="instDocRep" name="instDocRep" class="th-input" placeholder="Ej. DNI 08234567" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- GRUPO 3: Practicante -->
+        <fieldset class="form-group-card" id="fieldsetPracticante">
+          <legend class="group-legend">
+            <span class="group-icon">👤</span> 3. Información del Practicante
+          </legend>
+          <p class="group-desc">Datos personales y académicos del colaborador recibidos en su expediente.</p>
+          <div class="form-grid">
+            <div class="form-field full-width">
+              <label for="pracNombreCompleto" class="th-label">Nombre Completo:</label>
+              <input type="text" id="pracNombreCompleto" name="pracNombreCompleto" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="pracDocumento" class="th-label">Documento de Identidad:</label>
+              <input type="text" id="pracDocumento" name="pracDocumento" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="pracNacionalidad" class="th-label">Nacionalidad:</label>
+              <input type="text" id="pracNacionalidad" name="pracNacionalidad" class="th-input" value="Peruana" required>
+            </div>
+            <div class="form-field">
+              <label for="pracFechaNacimiento" class="th-label">Fecha de Nacimiento:</label>
+              <input type="date" id="pracFechaNacimiento" name="pracFechaNacimiento" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="pracSexo" class="th-label">Sexo:</label>
+              <select id="pracSexo" name="pracSexo" class="th-select" required>
+                <option value="Femenino">Femenino</option>
+                <option value="Masculino">Masculino</option>
+                <option value="No especificado">No especificado</option>
+              </select>
+            </div>
+            <div class="form-field full-width">
+              <label for="pracDomicilio" class="th-label">Domicilio del Practicante:</label>
+              <input type="text" id="pracDomicilio" name="pracDomicilio" class="th-input" placeholder="Ej. Jr. Los Jazmines 340, Lima" required>
+            </div>
+            <div class="form-field">
+              <label for="pracSituacionAcademica" class="th-label">Situación Académica:</label>
+              <select id="pracSituacionAcademica" name="pracSituacionAcademica" class="th-select" required>
+                <option value="Estudiante universitario">Estudiante universitario</option>
+                <option value="Egresado">Egresado</option>
+                <option value="Bachiller">Bachiller</option>
+                <option value="Estudiante técnico">Estudiante técnico</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="pracEspecialidad" class="th-label">Especialidad / Carrera:</label>
+              <input type="text" id="pracEspecialidad" name="pracEspecialidad" class="th-input" placeholder="Ej. Ingeniería de Software" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- GRUPO 4: Condiciones del Convenio -->
+        <fieldset class="form-group-card" id="fieldsetCondiciones">
+          <legend class="group-legend">
+            <span class="group-icon">📑</span> 4. Condiciones de las Prácticas
+          </legend>
+          <p class="group-desc">
+            Horarios, horas acordadas y asignación formativa. La <strong>Cláusula Segunda</strong> adapta automáticamente el puesto y área indicados aquí.
+          </p>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="condFechaInicio" class="th-label">Fecha de Inicio:</label>
+              <input type="date" id="condFechaInicio" name="condFechaInicio" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="condFechaFin" class="th-label">Fecha de Fin Prevista:</label>
+              <input type="date" id="condFechaFin" name="condFechaFin" class="th-input" required>
+            </div>
+            <div class="form-field">
+              <label for="condDuracion" class="th-label">Duración Estimada:</label>
+              <input type="text" id="condDuracion" name="condDuracion" class="th-input" placeholder="Ej. 3 meses (66 días hábiles)" required>
+            </div>
+            <div class="form-field">
+              <label for="condHorasAcordadas" class="th-label">Horas Acordadas (mínimo 330h):</label>
+              <input type="number" id="condHorasAcordadas" name="condHorasAcordadas" class="th-input" min="330" max="2000" step="5" required>
+            </div>
+            <div class="form-field full-width">
+              <label for="condDiasHorario" class="th-label">Días y Horario de Prácticas:</label>
+              <input type="text" id="condDiasHorario" name="condDiasHorario" class="th-input" value="Lunes a Viernes de 09:00 a 14:00 (5 horas diarias)" required>
+            </div>
+            <div class="form-field">
+              <label for="condModalidad" class="th-label">Modalidad:</label>
+              <select id="condModalidad" name="condModalidad" class="th-select" required>
+                <option value="Remota">Remota (Trabajo formativo a distancia)</option>
+                <option value="Híbrida">Híbrida</option>
+                <option value="Presencial">Presencial</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label for="condArea" class="th-label">Área Formativa Asignada:</label>
+              <input type="text" id="condArea" name="condArea" class="th-input" required>
+            </div>
+            <div class="form-field full-width">
+              <label for="condPuesto" class="th-label">Puesto o Actividad Formativa (Cláusula Segunda):</label>
+              <input type="text" id="condPuesto" name="condPuesto" class="th-input" placeholder="Ej. Practicante Pre-Profesional de Desarrollo Frontend" required>
+              <small class="field-hint">Este valor se inserta automáticamente en la Cláusula Segunda del documento oficial.</small>
+            </div>
+            <div class="form-field">
+              <label for="condSubvencion" class="th-label">Subvención / Apoyo Formativo:</label>
+              <input type="text" id="condSubvencion" name="condSubvencion" class="th-input" value="Formativa / Asignación acordada" required>
+            </div>
+            <div class="form-field">
+              <label for="condSeguroFola" class="th-label">Póliza de Seguro FOLA:</label>
+              <input type="text" id="condSeguroFola" name="condSeguroFola" class="th-input" value="Póliza RIMAC Seguros N° 4580-2026 / Cobertura FOLA" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- GRUPO 5: Suscripción -->
+        <fieldset class="form-group-card" id="fieldsetSuscripcion">
+          <legend class="group-legend">
+            <span class="group-icon">📍</span> 5. Suscripción del Convenio
+          </legend>
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="suscCiudad" class="th-label">Ciudad de Suscripción:</label>
+              <input type="text" id="suscCiudad" name="suscCiudad" class="th-input" value="Lima" required>
+            </div>
+            <div class="form-field">
+              <label for="suscFecha" class="th-label">Fecha de Suscripción:</label>
+              <input type="date" id="suscFecha" name="suscFecha" class="th-input" required>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- Barra inferior fija de acciones del detalle -->
+        <div class="detail-actions-bar">
+          <div class="actions-left">
+            <button type="button" id="btnGuardarBorrador" class="th-btn th-btn-secondary" title="Guarda cualquier corrección realizada por Talento Humano">
+              <span aria-hidden="true">💾</span> Guardar borrador
+            </button>
+            <button type="button" id="btnGenerarDocFinal" class="th-btn th-btn-primary" title="Valida los datos y genera la versión final para firma">
+              <span aria-hidden="true">📄</span> Generar documento final para firma
+            </button>
+          </div>
+          <div class="actions-right">
+            <button type="button" id="btnVistaPreviaDoc" class="th-btn th-btn-secondary" title="Visualizar documento oficial del convenio">
+              <span aria-hidden="true">👁️</span> Ver documento
+            </button>
+            <button type="button" id="btnRegistrarFirmaDetalle" class="th-btn th-btn-success" title="Registra la entrega del convenio firmado, asigna código definitivo y credenciales">
+              <span aria-hidden="true">✍️</span> Registrar entrega de convenio firmado
+            </button>
+          </div>
+        </div>
+
+        <!-- Historial de trazabilidad y auditoría -->
+        <section class="form-card" style="margin-top: 24px;">
+          <h3 class="th-card-title">Historial y Trazabilidad del Convenio</h3>
+          <ul id="detalleHistorialList" class="timeline-list" style="margin-top: 14px;">
+            <!-- Inyectado dinámicamente -->
+          </ul>
+        </section>
+
+      </form>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: VISTA PREVIA DEL DOCUMENTO FORMAL (CON CLÁUSULAS WORD)     -->
+    <!-- ================================================================= -->
+    <div id="modalDocPreview" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-xl" role="dialog" aria-modal="true" aria-labelledby="previewDocTitle">
+        <header class="modal-header">
+          <h2 id="previewDocTitle">Vista Previa del Convenio Oficial</h2>
+          <div class="header-tools">
+            <button type="button" id="btnPrintConvenio" class="th-btn th-btn-primary">
+              <span aria-hidden="true">🖨️</span> Imprimir / Guardar como PDF
+            </button>
+            <button type="button" class="btn-close-modal" id="btnClosePreview" aria-label="Cerrar ventana">✕</button>
+          </div>
+        </header>
+
+        <div class="modal-body preview-sheet-body">
+          <!-- Documento tipo hoja A4 / membretada -->
+          <article class="doc-sheet" id="printableConvenio">
+            <header class="doc-header">
+              <div class="doc-brand">
+                <span class="brand-symbol">D<span>•</span></span>
+                <div>
+                  <strong>DEVDATEP CONSULTING S.A.C.</strong>
+                  <small>RUC 20608512345 · TECNOLOGÍA E INNOVACIÓN</small>
+                </div>
+              </div>
+              <div class="doc-meta">
+                <span id="docCodigoConvenio" class="doc-badge">CONV-2026-000</span>
+              </div>
+            </header>
+
+            <h1 class="doc-title" id="docTituloPrincipal">CONVENIO DE PRÁCTICAS PRE-PROFESIONALES</h1>
+            
+            <p class="doc-intro">
+              Conste por el presente documento, el <strong>Convenio de Prácticas</strong> que celebran de conformidad con la Ley N° 28518, Ley sobre Modalidades Formativas Laborales, y su Reglamento aprobado por D.S. N° 007-2005-TR, de una parte:
+            </p>
+
+            <section class="doc-parties">
+              <div class="party-box">
+                <h4>1. LA EMPRESA:</h4>
+                <p>
+                  <strong><span id="docEmpRazonSocial">DEVDATEP CONSULTING S.A.C.</span></strong>, con RUC N° <strong><span id="docEmpRuc">20608512345</span></strong>, domicilio legal en <span id="docEmpDomicilio">Av. Manuel Olguín 335, Santiago de Surco</span>, debidamente representada por su <span id="docEmpCargo">Gerente General</span>, don(a) <strong><span id="docEmpRep">Christian Alexis Mendoza Portocarrero</span></strong>, identificado(a) con <span id="docEmpDoc">DNI 45892134</span>.
+                </p>
+              </div>
+
+              <div class="party-box">
+                <h4>2. EL CENTRO DE FORMACIÓN PROFESIONAL:</h4>
+                <p>
+                  <strong><span id="docInstRazonSocial">UNIVERSIDAD / INSTITUTO</span></strong>, con RUC N° <strong><span id="docInstRuc">--</span></strong>, con domicilio en <span id="docInstDomicilio">--</span>, debidamente representada por su <span id="docInstCargo">Director(a) de Escuela</span>, don(a) <strong><span id="docInstRep">--</span></strong>, con <span id="docInstDoc">--</span>.
+                </p>
+              </div>
+
+              <div class="party-box">
+                <h4>3. EL PRACTICANTE:</h4>
+                <p>
+                  Don(a) <strong><span id="docPracNombre">--</span></strong>, identificado(a) con documento N° <strong><span id="docPracDoc">--</span></strong>, de nacionalidad <span id="docPracNac">Peruana</span>, con domicilio en <span id="docPracDom">--</span>, en su calidad de <span id="docPracSit">Estudiante</span> de la especialidad de <strong><span id="docPracEsp">--</span></strong>.
+                </p>
+              </div>
+            </section>
+
+            <h3 class="doc-subtitle">CLÁUSULAS DEL CONVENIO</h3>
+
+            <div class="doc-clauses" id="docClausesContainer">
+              <!-- Cláusulas inyectadas dinámicamente conservando el texto de la plantilla Word -->
+            </div>
+
+            <!-- Bloque de suscripción -->
+            <p class="doc-signing-place">
+              En señal de conformidad y aceptación, se suscribe el presente convenio en la ciudad de <strong><span id="docSuscCiudad">Lima</span></strong>, a los <strong id="docSuscFecha">--</strong>.
+            </p>
+
+            <!-- Firmas tripartitas -->
+            <div class="doc-signatures">
+              <div class="sig-col">
+                <div class="sig-line"></div>
+                <strong>DEVDATEP CONSULTING S.A.C.</strong>
+                <p><span id="docSigEmpRep">Christian Mendoza Portocarrero</span><br><small>Gerente General</small></p>
+              </div>
+              <div class="sig-col">
+                <div class="sig-line"></div>
+                <strong>EL PRACTICANTE</strong>
+                <p><span id="docSigPracNombre">--</span><br><small id="docSigPracDoc">DNI --</small></p>
+              </div>
+              <div class="sig-col">
+                <div class="sig-line"></div>
+                <strong>CENTRO DE FORMACIÓN</strong>
+                <p><span id="docSigInstRep">--</span><br><small id="docSigInstCargo">Dirección / Prácticas</small></p>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" class="th-btn th-btn-secondary" id="btnCerrarPreviewBottom">Cerrar</button>
+        </footer>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: REGISTRAR ENTREGA DE CONVENIO FIRMADO Y CREDENCIALES       -->
+    <!-- ================================================================= -->
+    <div id="modalRegistrarFirma" class="modal-backdrop" hidden>
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="regFirmaTitle">
+        <header class="modal-header">
+          <h2 id="regFirmaTitle">Registrar Entrega de Convenio Firmado</h2>
+          <button type="button" class="btn-close-modal" id="btnCloseModalFirma" aria-label="Cerrar ventana">✕</button>
+        </header>
+
+        <form id="formRegistrarFirma">
+          <div class="modal-body">
+            <p class="muted-text">
+              Registra la recepción formal del documento firmado por las partes, asigna el <strong>código definitivo</strong> y registra la entrega de sus <strong>credenciales institucionales</strong>.
+            </p>
+
+            <div class="form-field">
+              <label for="inputFechaFirma" class="th-label">Fecha de Firma / Suscripción formal:</label>
+              <input type="date" id="inputFechaFirma" class="th-input" required>
+            </div>
+
+            <div class="form-field">
+              <label for="inputArchivoFirmado" class="th-label">Archivo escaneado del convenio firmado:</label>
+              <input type="file" id="inputArchivoFirmado" class="th-input" accept=".pdf,.png,.jpg,.jpeg">
+              <div class="file-demo-option">
+                <small class="muted-text">¿No dispones del escaneado físico?</small>
+                <button type="button" id="btnUsarArchivoDemo" class="btn-link">
+                  Usar documento firmado de demostración (firma.pdf)
+                </button>
+              </div>
+              <span id="archivoFirmadoSeleccionado" class="file-chosen-text"></span>
+            </div>
+
+            <!-- Sección de Entrega de Credenciales Institucionales -->
+            <div class="credentials-box" style="background: #f0f7ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 14px 16px; margin: 16px 0;">
+              <h4 style="margin: 0 0 10px; font-size: 13.5px; color: #1e3a8a; display: flex; align-items: center; gap: 8px;">
+                <span>🔐</span> Entrega de Credenciales Institucionales
+              </h4>
+              <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer; color: #1e293b; margin-bottom: 12px;">
+                <input type="checkbox" id="checkCredenciales" checked required style="margin-top: 2px;">
+                <span>Registrar entrega de credenciales corporativas (correo institucional y accesos)</span>
+              </label>
+              <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-field">
+                  <label for="correoInstitucionalAsignado" class="th-label">Correo institucional asignado:</label>
+                  <input type="email" id="correoInstitucionalAsignado" class="th-input" readonly style="background: #ffffff; font-weight: 600; color: #2563eb;">
+                </div>
+                <div class="form-field">
+                  <label for="passProvisionalAsignada" class="th-label">Acceso provisional:</label>
+                  <input type="text" id="passProvisionalAsignada" class="th-input" value="Devdatep2026*" readonly style="background: #ffffff; color: #64748b;">
+                </div>
+              </div>
+              <p class="muted-text" style="font-size: 11.5px; margin: 8px 0 0; color: #2563eb;">
+                ℹ️ Al confirmar la entrega, se asigna el <strong>código definitivo</strong> del colaborador (generado una sola vez), se formaliza su estado como Activo y el convenio se traslada a la pestaña de <strong>Convenios firmados</strong> con contenido fijo para consulta.
+              </p>
+            </div>
+
+            <div class="form-field">
+              <label for="inputNotasFirma" class="th-label">Observaciones o notas de archivo (Opcional):</label>
+              <textarea id="inputNotasFirma" class="th-textarea" rows="2" placeholder="Ej. Copia tripartita recibida y sellada, credenciales entregadas satisfactoriamente..."></textarea>
+            </div>
+          </div>
+
+          <footer class="modal-footer">
+            <button type="button" class="th-btn th-btn-secondary" id="btnCancelarFirma">Cancelar</button>
+            <button type="submit" class="th-btn th-btn-success">
+              <span aria-hidden="true">✓</span> Confirmar entrega y formalizar
+            </button>
+          </footer>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: CONSULTA Y DETALLE DE CONVENIO FIRMADO (FIJO)              -->
+    <!-- ================================================================= -->
+    <div id="modalVerConvenioFirmado" class="modal-backdrop" hidden>
+      <div class="modal-dialog modal-lg" role="dialog" aria-modal="true" aria-labelledby="verFirmadoTitle">
+        <header class="modal-header">
+          <div>
+            <span class="code-pill code-pill-definitive" id="verFirmadoCodigo">CÓDIGO: ----</span>
+            <h2 id="verFirmadoTitle">Detalle de Convenio Firmado</h2>
+          </div>
+          <button type="button" class="btn-close-modal" id="btnCloseVerFirmado" aria-label="Cerrar ventana">✕</button>
+        </header>
+
+        <div class="modal-body">
+          <div class="firmado-summary-header">
+            <div class="firmado-avatar" id="verFirmadoAvatar">TH</div>
+            <div>
+              <h3 id="verFirmadoColaborador">Nombre del Practicante</h3>
+              <p id="verFirmadoArea" class="muted-text">Área · Carrera</p>
+            </div>
+            <span id="verFirmadoEstadoBadge" class="status-badge status-vigente">Convenio firmado</span>
+          </div>
+
+          <div class="colab-data-summary">
+            <div class="summary-card">
+              <h4>📅 Periodo y Jornada</h4>
+              <p><strong>Inicio:</strong> <span id="verFirmadoInicio">--</span></p>
+              <p><strong>Fin:</strong> <span id="verFirmadoFin">--</span></p>
+              <p><strong>Horas acordadas:</strong> <span id="verFirmadoHoras">--</span></p>
+              <p><strong>Fecha de firma:</strong> <span id="verFirmadoFechaFirma">--</span></p>
+            </div>
+            <div class="summary-card">
+              <h4>🔐 Credenciales y Formalización</h4>
+              <p><strong>Código definitivo:</strong> <span id="verFirmadoCodigoDefinitivo" style="font-weight: 700; color: #166534;">--</span></p>
+              <p><strong>Correo corporativo:</strong> <span id="verFirmadoCorreo">--</span></p>
+              <p><strong>Estado:</strong> <span class="badge green">Activo</span></p>
+              <p><strong>Fecha de entrega:</strong> <span id="verFirmadoFechaCredenciales">--</span></p>
+            </div>
+          </div>
+
+          <!-- Visor de archivo firmado -->
+          <div class="doc-attachment-card">
+            <h4>📄 Documento de Convenio Firmado</h4>
+            <div class="doc-attachment-info">
+              <span class="pdf-icon">PDF</span>
+              <div>
+                <strong id="verFirmadoNombreArchivo">convenio_firmado.pdf</strong>
+                <p class="muted-text">Documento con firmas tripartitas y registro oficial</p>
+              </div>
+              <button type="button" id="btnDescargarArchivoFirmado" class="th-btn th-btn-secondary">
+                <span aria-hidden="true">⬇️</span> Ver archivo
+              </button>
+            </div>
+          </div>
+
+          <!-- Historial de trazabilidad -->
+          <div class="history-timeline">
+            <h4>Trazabilidad del Proceso</h4>
+            <ul id="verFirmadoHistorial" class="timeline-list">
+              <!-- Inyectado por JS -->
+            </ul>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <button type="button" id="btnVerClausulasFirmadas" class="th-btn th-btn-secondary">
+            <span aria-hidden="true">📜</span> Ver Cláusulas Completas
+          </button>
+          <button type="button" class="th-btn th-btn-primary" id="btnCloseVerFirmadoBottom">Cerrar</button>
+        </footer>
+      </div>
+    </div>
+
+  </main>
+</body>
+</html>

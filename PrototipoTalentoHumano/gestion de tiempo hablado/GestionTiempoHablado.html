@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tiempo hablado | Talento Humano</title>
+  <link rel="stylesheet" href="GestionTiempoHablado.css?v=2">
+  <script type="module" src="GestionTiempoHablado.js?v=2"></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">VOZ Y PARTICIPACIÓN · TALENTO HUMANO</p>
+        <h1>Tiempo hablado</h1>
+        <p>Supervisión de participación por voz, horas en canales activos y tiempo con micrófono abierto durante la jornada.</p>
+      </div>
+      <span class="source-badge">Monitoreo de voz</span>
+    </header>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- KPIs generales de Talento Humano -->
+    <section class="stats" aria-label="Resumen de participación por voz">
+      <div>
+        <span>Practicantes monitoreados</span>
+        <strong id="kpiTotalColabs">0</strong>
+      </div>
+      <div>
+        <span>Promedio grupal hablado</span>
+        <strong id="kpiPromedioGrupal" style="color:var(--primary)">1.8h / día</strong>
+      </div>
+      <div>
+        <span>En nivel óptimo (+70%)</span>
+        <strong id="kpiNivelOptimo" style="color:var(--green)">0</strong>
+      </div>
+      <div>
+        <span>Baja participación (-40%)</span>
+        <strong id="kpiNivelBajo" style="color:var(--red)">0</strong>
+      </div>
+    </section>
+
+    <div class="panel">
+      <!-- Filtros de la tabla general -->
+      <div class="filters">
+        <label class="search">
+          Buscar
+          <input id="search" type="search" placeholder="Nombre, código, área o departamento">
+        </label>
+        <label>
+          Departamento
+          <select id="department">
+            <option value="">Todos los departamentos</option>
+          </select>
+        </label>
+        <label>
+          Nivel de participación
+          <select id="nivelFilter">
+            <option value="">Todos los niveles</option>
+            <option value="OPTIMO">Óptimo (+70%)</option>
+            <option value="MODERADO">Moderado (40% - 70%)</option>
+            <option value="BAJO">Bajo (-40%)</option>
+          </select>
+        </label>
+      </div>
+
+      <p id="listHint" class="hint">Control institucional de tiempo hablado: muestra conexiones a canales de voz, tiempo con micro abierto y nivel de participación por colaborador.</p>
+
+      <!-- Tabla general de colaboradores -->
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Colaborador</th>
+              <th>Ubicación</th>
+              <th>Conexiones a canal</th>
+              <th>Tiempo total hablado</th>
+              <th>Promedio diario</th>
+              <th>Nivel de voz</th>
+              <th>Canal frecuente</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <p id="empty" class="empty" hidden>No hay registros para estos filtros.</p>
+      <div id="count" class="table-footer"></div>
+    </div>
+
+    <!-- Regla de negocio al pie -->
+    <p class="footnote">
+      <strong>Métricas de tiempo hablado:</strong> Se registran las horas de permanencia en canales de voz de trabajo (meta base: 50 h mensuales) y el tiempo efectivo con micrófono abierto (meta base: 36 h mensuales, 3 h diarias). Un porcentaje acumulado $\ge 70\%$ es considerado óptimo; entre $40\%$ y $70\%$ moderado; y menor al $40\%$ bajo con requerimiento de seguimiento en clima y participación activa.
+    </p>
+  </main>
+
+  <!-- Modal Detalle: Dashboard de Tiempo Hablado Individual -->
+  <dialog id="modalDetalleHablado" class="dashboard-dialog" aria-labelledby="modalHabladoTitle">
+    <div class="dash-modal-topbar">
+      <div class="dash-modal-left">
+        <button type="button" data-close="modalDetalleHablado" class="dash-back-btn">
+          ← Volver a la lista general
+        </button>
+        <span class="dash-modal-badge">Vista individual del colaborador</span>
+      </div>
+      <div class="dash-modal-center">
+        <label class="dash-colab-picker-label">
+          <span>Consultar otro colaborador:</span>
+          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
+        </label>
+      </div>
+      <div class="dash-modal-right">
+        <button type="button" data-close="modalDetalleHablado" class="dash-close-x" aria-label="Cerrar modal">×</button>
+      </div>
+    </div>
+
+    <div id="modalHabladoBody" class="dash-modal-scrollable"></div>
+
+    <footer class="dialog-actions dash-modal-footer">
+      <button type="button" data-close="modalDetalleHablado" class="primary">Volver al control general</button>
+    </footer>
+  </dialog>
+</body>
+</html>

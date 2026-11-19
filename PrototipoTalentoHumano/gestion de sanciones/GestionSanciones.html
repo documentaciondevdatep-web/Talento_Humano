@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de Sanciones | Talento Humano</title>
+  <link rel="stylesheet" href="GestionSanciones.css?v=2">
+  <script type="module" src="GestionSanciones.js?v=2"></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">RÉGIMEN DISCIPLINARIO Y CONTROL INSTITUCIONAL · TALENTO HUMANO</p>
+        <h1>Gestión de Sanciones y Medidas Disciplinarias</h1>
+        <p>Registro, control y seguimiento de amonestaciones y memorándums por incidencias de asistencia, tiempo hablado, tiempo de conexión o conducta y respeto mutuo.</p>
+      </div>
+      <span class="source-badge">Régimen Disciplinario</span>
+    </header>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- KPIs de Sanciones -->
+    <section class="stats" aria-label="Resumen de sanciones y estado disciplinario">
+      <div>
+        <span>Sanciones Activas</span>
+        <strong id="kpiSancionesActivas" style="color:var(--navy)">0</strong>
+        <small id="kpiSubActivas">En seguimiento vigente</small>
+      </div>
+      <div>
+        <span>Amonestaciones Escritas</span>
+        <strong id="kpiAmonestaciones" style="color:var(--orange)">0</strong>
+        <small>1ª Medida disciplinaria formal</small>
+      </div>
+      <div>
+        <span>Memorándums (+1 día convenio)</span>
+        <strong id="kpiMemorandums" style="color:#d97706">0</strong>
+        <small>Reincidencia / Falta grave</small>
+      </div>
+      <div>
+        <span>En Causal de Baja / Críticas</span>
+        <strong id="kpiBajas" style="color:var(--red)">0</strong>
+        <small>Acumulación de faltas o tardanzas</small>
+      </div>
+    </section>
+
+    <div class="panel">
+      <!-- Navegación por pestañas -->
+      <nav class="tabs" aria-label="Secciones de sanciones">
+        <button type="button" id="tabActivas" data-tab="activas" aria-pressed="true">
+          <span>Relación de Sanciones Vigentes</span>
+          <span class="tab-badge" id="badgeTabActivas">0</span>
+        </button>
+        <button type="button" id="tabRevocadas" data-tab="revocadas" aria-pressed="false">
+          <span>Historial de Sanciones Revocadas / Anuladas</span>
+          <span class="tab-badge" id="badgeTabRevocadas">0</span>
+        </button>
+      </nav>
+
+      <!-- ========================================== -->
+      <!-- VISTA 1: SANCIONES ACTIVAS / VIGENTES -->
+      <!-- ========================================== -->
+      <section id="viewActivas" aria-label="Sanciones vigentes">
+        <div class="tab-info-banner">
+          <span class="icon" aria-hidden="true">⚖️</span>
+          <div>
+            <strong>Escala y progresión de sanciones:</strong> La normativa contempla sanciones proporcionales por <em>faltas injustificadas</em> (1ª Amonestación escrita, 2ª Memorándum +1 día al convenio, 3ª Baja definitiva / Blacklist), <em>tiempo de conexión insuficiente</em>, <em>déficit en tiempo hablado en canales de voz</em>, y <em>faltas de respeto o conducta indebida</em>. Todo registro o anulación exige obligatoriamente fundamentar el motivo.
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <span aria-hidden="true">🔍</span>
+              <input id="searchSanciones" type="search" placeholder="Buscar por colaborador, código, motivo o N° de memorándum...">
+            </div>
+            <label class="filter-select">
+              Categoría:
+              <select id="filterCategoria" aria-label="Filtrar por origen del incumplimiento">
+                <option value="TODOS">Todas las categorías</option>
+                <option value="Asistencia y faltas">Asistencia y faltas</option>
+                <option value="Tiempo hablado">Tiempo hablado (Canales de voz)</option>
+                <option value="Tiempo de conexión">Tiempo de conexión (Jornada)</option>
+                <option value="Conducta y respeto">Conducta y falta de respeto</option>
+                <option value="Rendimiento y entregables">Rendimiento y entregables</option>
+              </select>
+            </label>
+            <label class="filter-select">
+              Tipo:
+              <select id="filterTipo" aria-label="Filtrar por tipo de sanción">
+                <option value="TODOS">Todos los tipos</option>
+                <option value="Amonestación escrita">Amonestación escrita</option>
+                <option value="1er Memorándum (+1 día convenio)">1er Memorándum (+1 día)</option>
+                <option value="2do Memorándum (+2 días convenio)">2do Memorándum (+2 días)</option>
+                <option value="Suspensión temporal">Suspensión temporal</option>
+                <option value="Baja definitiva / Blacklist">Baja definitiva / Blacklist</option>
+              </select>
+            </label>
+          </div>
+          <div class="toolbar-right">
+            <button type="button" class="primary" id="btnNuevaSancion">
+              + Registrar sanción disciplinaria
+            </button>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Tipo de Sanción</th>
+                <th>Categoría / Origen</th>
+                <th>Motivo y Fundamentación</th>
+                <th>Expediente / Ref</th>
+                <th>Fecha Emisión</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rowsActivas"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyActivas" class="empty-state" hidden>
+          <strong>No se encontraron sanciones con los filtros aplicados</strong>
+          <p>Prueba limpiando los filtros o registra una nueva sanción disciplinaria.</p>
+        </div>
+
+        <div id="footerActivas" class="table-footer">
+          <span id="footerCountActivas">0 sanciones vigentes</span>
+          <span>Actualizado en tiempo real</span>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- VISTA 2: HISTORIAL DE REVOCADAS / ANULADAS -->
+      <!-- ========================================== -->
+      <section id="viewRevocadas" aria-label="Sanciones revocadas o anuladas" hidden>
+        <div class="tab-info-banner">
+          <span class="icon" aria-hidden="true">📜</span>
+          <div>
+            <strong>Auditoría de Reconsideraciones y Revocaciones:</strong> Registro de medidas disciplinarias que fueron anuladas o levantadas por Talento Humano tras la presentación y validación de descargos, justificaciones médicas extemporáneas o rectificación técnica.
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <div class="toolbar-left">
+            <div class="search-box">
+              <span aria-hidden="true">🔍</span>
+              <input id="searchRevocadas" type="search" placeholder="Buscar en historial de revocaciones...">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>Colaborador</th>
+                <th>Medida Original</th>
+                <th>Categoría</th>
+                <th>Motivo Original de Sanción</th>
+                <th>Motivo Obligatorio de Anulación / Revocación</th>
+                <th>Fecha Revocación</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="rowsRevocadas"></tbody>
+          </table>
+        </div>
+
+        <div id="emptyRevocadas" class="empty-state" hidden>
+          <strong>No hay sanciones revocadas o anuladas</strong>
+          <p>Las sanciones levantadas con su respectivo motivo de justificación aparecerán aquí.</p>
+        </div>
+
+        <div id="footerRevocadas" class="table-footer">
+          <span id="footerCountRevocadas">0 registros revocados</span>
+          <span>Trazabilidad institucional de Talento Humano</span>
+        </div>
+      </section>
+    </div>
+
+    <!-- Regla de negocio al pie -->
+    <p class="footnote">
+      <strong>Reglamento Interno y Ley N° 28518:</strong> Todo proceso disciplinario salvaguarda el derecho al descargo y la proporcionalidad de la medida. Las sanciones no solo proceden por inasistencias o tardanzas, sino también por incumplimiento de permanencia en canales de voz, desconexiones injustificadas, desatención de tareas o faltas de respeto que vulneren la sana convivencia institucional.
+    </p>
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REGISTRAR NUEVA SANCIÓN -->
+  <!-- ========================================== -->
+  <dialog id="modalNuevaSancion" aria-labelledby="modalNuevaTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">MEDIDA DISCIPLINARIA</p>
+        <h2 id="modalNuevaTitle">Registrar nueva sanción disciplinaria</h2>
+      </div>
+      <button type="button" class="dialog-close-btn" data-close="modalNuevaSancion" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <form id="formNuevaSancion" novalidate>
+      <div class="form-grid">
+        <div class="form-group full-width">
+          <label for="sancionColaborador">Colaborador sancionado *</label>
+          <select id="sancionColaborador" required></select>
+          <span class="form-hint">Selecciona el colaborador sobre el que recae la medida disciplinaria.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="sancionCategoria">Categoría / Causa del Incumplimiento *</label>
+          <select id="sancionCategoria" required>
+            <option value="Asistencia y faltas">Asistencia y faltas (Inasistencia / Tardanzas)</option>
+            <option value="Tiempo hablado">Tiempo hablado (Canal de voz / Micrófono silenciado)</option>
+            <option value="Tiempo de conexión">Tiempo de conexión (Desconexión / Menos de 5h)</option>
+            <option value="Conducta y respeto">Conducta y falta de respeto (Convivencia / Clima)</option>
+            <option value="Rendimiento y entregables">Rendimiento y entregables (Incumplimiento de tareas)</option>
+            <option value="Confidencialidad y accesos">Confidencialidad y uso de recursos</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sancionTipo">Tipo de Sanción Aplicada *</label>
+          <select id="sancionTipo" required>
+            <option value="Amonestación escrita">Amonestación escrita (Llamada de atención formal)</option>
+            <option value="1er Memorándum (+1 día convenio)">1er Memorándum (+1 día adicional al convenio)</option>
+            <option value="2do Memorándum (+2 días convenio)">2do Memorándum (+2 días adicionales al convenio)</option>
+            <option value="Suspensión temporal">Suspensión temporal de accesos (1 a 3 días)</option>
+            <option value="Baja definitiva / Blacklist">Baja definitiva + Envío a Blacklist</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sancionDocumento">N° de Documento / Cédula / Memorándum *</label>
+          <input type="text" id="sancionDocumento" placeholder="Ej. MEMO-2026-005" required maxlength="50">
+        </div>
+
+        <div class="form-group">
+          <label for="sancionFechaIncidencia">Fecha de la Incidencia *</label>
+          <input type="date" id="sancionFechaIncidencia" required>
+        </div>
+
+        <div class="form-group full-width">
+          <label for="sancionMotivo">Motivo y fundamentación detallada de la sanción *</label>
+          <textarea id="sancionMotivo" rows="3" placeholder="Describe claramente el hecho o incumplimiento sancionado (Ej: Falta de respeto al líder de equipo durante la sesión de frontend / Ausencia en sala de voz con micro silenciado durante la jornada / Falta injustificada sin sustento en 2 días)..." required></textarea>
+          <span class="form-hint"><strong>Obligatorio:</strong> Es indispensable consignar los hechos exactos, fechas y afectación al equipo para validar la sanción.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="sancionImpacto">Impacto en vigencia de convenio / accesos</label>
+          <select id="sancionImpacto">
+            <option value="Anotación en legajo (Sin extensión)">Anotación en legajo (Sin extensión)</option>
+            <option value="+1 día adicional al convenio">+1 día adicional al convenio formal</option>
+            <option value="+2 días adicionales al convenio">+2 días adicionales al convenio formal</option>
+            <option value="Bloqueo preventivo de accesos">Bloqueo preventivo de accesos</option>
+            <option value="Baja inmediata y traslado a Blacklist">Baja inmediata y traslado a Blacklist</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="sancionResponsable">Responsable de emisión (Talento Humano)</label>
+          <input type="text" id="sancionResponsable" value="Área de Talento Humano - Devdatep" required maxlength="80">
+        </div>
+
+        <div class="form-group full-width">
+          <label for="sancionEvidencia">Referencia de evidencia / Acta / Sustento adjunto</label>
+          <input type="text" id="sancionEvidencia" placeholder="Ej. Reporte mensual de asistencias Nov 2026 / Captura de chat y log de voz Discord">
+        </div>
+
+        <p id="formNuevaError" class="form-error" role="alert"></p>
+      </div>
+
+      <footer class="dialog-actions">
+        <button type="button" data-close="modalNuevaSancion">Cancelar</button>
+        <button type="submit" class="primary" id="btnSubmitSancion">Registrar sanción</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ========================================== -->
+  <!-- MODAL: REVOCAR / BORRAR SANCIÓN (CON MOTIVO OBLIGATORIO) -->
+  <!-- ========================================== -->
+  <dialog id="modalRevocarSancion" aria-labelledby="modalRevocarTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow" style="color:var(--red)">PROCEDIMIENTO DE ANULACIÓN / BORRADO</p>
+        <h2 id="modalRevocarTitle">Revocar o borrar sanción disciplinaria</h2>
+      </div>
+      <button type="button" class="dialog-close-btn" data-close="modalRevocarSancion" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <div id="revocarTargetCard" class="revocar-target-card">
+      <!-- Se inyectan los datos de la sanción a borrar/revocar -->
+    </div>
+
+    <form id="formRevocarSancion" novalidate>
+      <input type="hidden" id="revocarSancionId" value="">
+
+      <div class="form-group full-width">
+        <label for="revocarMotivo">Motivo obligatorio de la revocación o borrado *</label>
+        <textarea id="revocarMotivo" rows="3" placeholder="Ingresa de forma obligatoria la razón y sustento para levantar o borrar la sanción (Ej: Se recepcionó certificado médico emitido por EsSalud convalidado por Talento Humano / Rectificación por error de marcación técnica en Discord / Acuerdo de regularización con el líder de área)..." required></textarea>
+        <span class="form-hint" style="color:var(--red); font-weight:600;">
+          ⚠️ Por política de auditoría interna de Talento Humano, no es posible revocar o eliminar una sanción sin fundamentar el motivo específico.
+        </span>
+      </div>
+
+      <div class="form-group full-width" style="margin-top: 14px;">
+        <label for="revocarAccion">Tipo de acción a ejecutar *</label>
+        <select id="revocarAccion">
+          <option value="REVOCAR" selected>Anular y conservar en historial de Revocadas (Recomendado para auditoría)</option>
+          <option value="ELIMINAR_TOTAL">Eliminar definitivamente del sistema (Borrado completo)</option>
+        </select>
+      </div>
+
+      <p id="formRevocarError" class="form-error" role="alert"></p>
+
+      <footer class="dialog-actions">
+        <button type="button" data-close="modalRevocarSancion">Cancelar</button>
+        <button type="submit" class="btn-danger" id="btnConfirmRevocar">Confirmar revocación / borrado</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- ========================================== -->
+  <!-- MODAL: VER DETALLE / EXPEDIENTE DISCIPLINARIO -->
+  <!-- ========================================== -->
+  <dialog id="modalDetalleSancion" aria-labelledby="detalleTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">EXPEDIENTE DISCIPLINARIO</p>
+        <h2 id="detalleTitle">Cédula de Notificación de Medida Disciplinaria</h2>
+      </div>
+      <button type="button" class="dialog-close-btn" data-close="modalDetalleSancion" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <div id="detalleContent" class="cedula-container">
+      <!-- Inyectado dinámicamente -->
+    </div>
+
+    <footer class="dialog-actions">
+      <button type="button" class="primary" data-close="modalDetalleSancion">Cerrar expediente</button>
+    </footer>
+  </dialog>
+</body>
+</html>
