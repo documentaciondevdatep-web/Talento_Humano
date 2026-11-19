@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistencia y faltas | Talento Humano</title>
+  <link rel="stylesheet" href="GestionAsistencia.css?v=2">
+  <script type="module" src="GestionAsistencia.js?v=2"></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">ASISTENCIA Y DISCIPLINA · TALENTO HUMANO</p>
+        <h1>Asistencia y faltas</h1>
+        <p>Control de asistencias del convenio, récord de tardanzas y faltas acumuladas (3 tardanzas = 1 falta, 3 faltas = causal de baja).</p>
+      </div>
+      <span class="source-badge">Control de asistencia</span>
+    </header>
+
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- Tarjetas de resumen / KPIs -->
+    <section class="stats" aria-label="Resumen de asistencia y disciplina">
+      <div>
+        <span>Practicantes en control</span>
+        <strong id="kpiActivos">0</strong>
+      </div>
+      <div>
+        <span>En advertencia / riesgo</span>
+        <strong id="kpiRiesgo" style="color:var(--yellow)">0</strong>
+      </div>
+      <div>
+        <span>En causal de baja (3 faltas)</span>
+        <strong id="kpiBajas" style="color:var(--red)">0</strong>
+      </div>
+      <div>
+        <span>Justificaciones pendientes</span>
+        <strong id="kpiPendientes">0</strong>
+      </div>
+    </section>
+
+    <div class="panel">
+      <!-- Navegación por pestañas -->
+      <nav class="tabs" aria-label="Secciones de asistencia">
+        <button data-tab="control" aria-pressed="true">Control general y récord acumulado</button>
+        <button data-tab="incidencias" aria-pressed="false">Validación de incidencias y evidencias</button>
+      </nav>
+
+      <!-- Barra de filtros -->
+      <div class="filters">
+        <label class="search">
+          Buscar
+          <input id="search" type="search" placeholder="Nombre, código, área o sustento">
+        </label>
+        <label>
+          Departamento
+          <select id="department">
+            <option value="">Todos los departamentos</option>
+          </select>
+        </label>
+        <label id="tipoFilterContainer" hidden>
+          Tipo
+          <select id="tipoFilter">
+            <option value="">Todos los tipos</option>
+            <option value="FALTA">Faltas</option>
+            <option value="TARDANZA">Tardanzas</option>
+          </select>
+        </label>
+        <label id="estadoFilterContainer">
+          <span id="lblEstadoFilterText">Estado de permanencia</span>
+          <select id="estadoFilter">
+            <option value="">Todos los estados</option>
+            <option value="NORMAL">Normal (0 faltas)</option>
+            <option value="ADVERTENCIA">Advertencia (1 falta)</option>
+            <option value="RIESGO">Riesgo crítico (2 faltas)</option>
+            <option value="BAJA">Causal de baja (3+ faltas)</option>
+          </select>
+        </label>
+      </div>
+
+      <p id="listHint" class="hint"></p>
+
+      <!-- Tabla de datos -->
+      <div class="table-scroll">
+        <table>
+          <thead id="tableHead"></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <p id="empty" class="empty" hidden>No hay registros para estos filtros.</p>
+      <div id="count" class="table-footer"></div>
+    </div>
+
+    <!-- Regla de negocio al pie -->
+    <p class="footnote">
+      <strong>Reglas disciplinarias de asistencia:</strong> Las tardanzas y faltas justificadas dentro del plazo de 2 días no suman penalización. Cada 3 tardanzas injustificadas equivalen a 1 falta. El tope de tardanzas permitidas se ajusta dinámicamente según las faltas previas: con 0 faltas son <strong>9 permitidas</strong>, con 1 falta se reduce a <strong>6 permitidas</strong>, con 2 faltas a <strong>3 permitidas</strong>, y con 3 faltas el colaborador entra en causal de retiro / baja de la empresa.
+    </p>
+  </main>
+
+  <!-- Modal para registrar nueva falta o tardanza -->
+  <dialog id="modalNuevaIncidencia" aria-labelledby="modalNuevaTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">REGISTRO DE INCIDENCIA</p>
+        <h2 id="modalNuevaTitle">Registrar nueva falta o tardanza</h2>
+      </div>
+      <button data-close="modalNuevaIncidencia" aria-label="Cerrar modal">×</button>
+    </header>
+
+    <form id="formNuevaIncidencia">
+      <div class="form-grid">
+        <label class="full-width">
+          Colaborador
+          <select id="nuevaColaborador" name="idColaborador" required>
+            <option value="">Selecciona un colaborador...</option>
+          </select>
+        </label>
+
+        <label>
+          Tipo de incidencia
+          <select id="nuevaTipo" name="tipo" required>
+            <option value="FALTA">Falta</option>
+            <option value="TARDANZA">Tardanza</option>
+          </select>
+        </label>
+
+        <label>
+          Fecha del evento (Calendario)
+          <input type="date" id="nuevaFecha" name="fecha" required>
+        </label>
+
+        <div class="full-width plazo-info-box">
+          <span style="font-size:0.8rem;color:var(--muted)">Días transcurridos calculados:</span>
+          <strong id="lblDiasCalculados">0 día(s)</strong>
+          <div id="lblEstadoPlazo" class="plazo-estado" style="color:var(--green)">
+            ✅ Dentro del plazo permitido (Máximo 2 días). Se registrará como PENDIENTE.
+          </div>
+        </div>
+
+        <label class="full-width">
+          Descripción del sustento
+          <textarea id="nuevaEvidencia" name="evidencia" placeholder="Ej. Boleta médica de atención en clínica con sello / Reporte de corte de servicio de internet..." required></textarea>
+        </label>
+
+        <div class="full-width">
+          <label style="margin-bottom:6px">Adjuntar evidencia (Foto, video o documento PDF)</label>
+          <div class="file-upload-box" id="fileUploadContainer">
+            <input type="file" id="nuevaArchivo" accept="image/*,video/*,.pdf,.doc,.docx" style="display:none">
+            <button type="button" id="btnExaminarArchivo" class="subtle">📎 Seleccionar archivo</button>
+            <span id="nuevaArchivoInfo" class="file-name-text">Ningún archivo seleccionado</span>
+          </div>
+        </div>
+      </div>
+
+      <p id="nuevaError" class="error" role="alert"></p>
+
+      <footer class="dialog-actions">
+        <button type="button" data-close="modalNuevaIncidencia">Cancelar</button>
+        <button type="submit" class="primary">Registrar incidencia</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <!-- Modal Detalle de Récord del Colaborador (Dashboard Asistencia Individual) -->
+  <dialog id="modalRecordDetalle" class="dashboard-dialog" aria-labelledby="recordDetalleTitle">
+    <div class="dash-modal-topbar">
+      <div class="dash-modal-left">
+        <button type="button" data-close="modalRecordDetalle" class="dash-back-btn">
+          ← Volver al control general
+        </button>
+        <span class="dash-modal-badge">Vista individual del colaborador</span>
+      </div>
+      <div class="dash-modal-center">
+        <label class="dash-colab-picker-label">
+          <span>Consultar otro colaborador:</span>
+          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
+        </label>
+      </div>
+      <div class="dash-modal-right">
+        <button type="button" data-close="modalRecordDetalle" class="dash-close-x" aria-label="Cerrar modal">×</button>
+      </div>
+    </div>
+
+    <div id="recordDetalleBody" class="dash-modal-scrollable"></div>
+
+    <footer class="dialog-actions dash-modal-footer">
+      <button type="button" data-close="modalRecordDetalle" class="primary">Volver al control general</button>
+    </footer>
+  </dialog>
+
+  <!-- Modal Visor de Evidencia Adjunta -->
+  <dialog id="modalVisor" aria-labelledby="visorTitulo">
+    <header class="dialog-header">
+      <h3 id="visorTitulo" style="margin:0;font-size:16px">Evidencia adjunta</h3>
+      <button data-close="modalVisor" aria-label="Cerrar visor">×</button>
+    </header>
+    <div id="visorCuerpo" style="padding:10px 0;text-align:center"></div>
+    <footer class="dialog-actions" style="margin-top:16px;padding-top:12px">
+      <button type="button" data-close="modalVisor" class="primary">Cerrar</button>
+    </footer>
+  </dialog>
+</body>
+</html>

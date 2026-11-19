@@ -1,0 +1,199 @@
+
+/* =========================================
+   DEVDATEP CONSULTING
+   PALETA DEL ORGANIGRAMA
+   Archivo: shared/css/organigrama-colores.css
+========================================= */
+
+:root {
+
+  /* GERENCIA */
+  --org-gerente: #97C2BE;
+  --org-gerencia: #006AAD;
+  --org-gerente-texto: #352354;
+
+  /* DEPARTAMENTOS */
+  --org-dep-talento:
+    linear-gradient(90deg,
+      #9F4FC8, #22BECB, #9F4FC8);
+
+  --org-dep-desarrollo:
+    linear-gradient(90deg,
+      #064BAF, #C66BE4);
+
+  --org-dep-comercial: #C77902;
+
+  /* TALENTO HUMANO */
+  --org-reclutamiento: #FFEE7C;
+  --org-capacitacion: #B190F5;
+  --org-clima-cultura: #EBB5D6;
+
+  /* DESARROLLO WEB */
+  --org-backend: #FF5757;
+  --org-frontend: #8BBCFF;
+  --org-base-datos: #5FCE99;
+  --org-documentacion: #72E1FF;
+  --org-diseno-web: #A0F068;
+
+  --org-desarrollo-rapido:
+    linear-gradient(90deg,
+      #46D7F3, #F5E40D);
+
+  /* COMERCIAL */
+  --org-diseno-grafico:
+    linear-gradient(90deg,
+      #FF611F, #FFCA01);
+
+  --org-marketing: #EECE27;
+
+  /* SUBÁREAS */
+  --org-audiovisual:
+    linear-gradient(90deg,
+      #C47CD1, #FAB674);
+
+  /* COLORES GENERALES DEL DIAGRAMA */
+  --org-conector: #222222;
+  --org-borde-tarjeta: #555555;
+  --org-texto-oscuro: #111111;
+  --org-texto-claro: #FFFFFF;
+  --org-foto-fondo: #F0F0F0;
+}
+
+/* =========================================
+   COLORES POR DEPARTAMENTO
+========================================= */
+
+.department-column.department--people,
+.department-column[data-departamento-id="DEP-001"] {
+  --org-fondo: var(--org-dep-talento);
+  --org-texto: #FFFFFF;
+}
+
+.department-column.department--development,
+.department-column[data-departamento-id="DEP-002"] {
+  --org-fondo: var(--org-dep-desarrollo);
+  --org-texto: #FFFFFF;
+}
+
+.department-column.department--commercial,
+.department-column[data-departamento-id="DEP-003"] {
+  --org-fondo: var(--org-dep-comercial);
+  --org-texto: #FFFFFF;
+}
+
+/* =========================================
+   COLORES POR ÁREA
+========================================= */
+
+/* TALENTO HUMANO */
+
+.area-group[data-area-id="ARE-001"] {
+  --org-fondo: var(--org-reclutamiento);
+}
+
+.area-group[data-area-id="ARE-002"] {
+  --org-fondo: var(--org-capacitacion);
+}
+
+.area-group[data-area-id="ARE-003"] {
+  --org-fondo: var(--org-clima-cultura);
+}
+
+/* DESARROLLO WEB */
+
+.area-group[data-area-id="ARE-004"] {
+  --org-fondo: var(--org-backend);
+}
+
+.area-group[data-area-id="ARE-005"] {
+  --org-fondo: var(--org-frontend);
+}
+
+.area-group[data-area-id="ARE-006"] {
+  --org-fondo: var(--org-base-datos);
+}
+
+.area-group[data-area-id="ARE-007"] {
+  --org-fondo: var(--org-documentacion);
+}
+
+.area-group[data-area-id="ARE-008"] {
+  --org-fondo: var(--org-diseno-web);
+}
+
+.area-group[data-area-id="ARE-009"] {
+  --org-fondo: var(--org-desarrollo-rapido);
+}
+
+/* COMERCIAL */
+
+.area-group[data-area-id="ARE-010"] {
+  --org-fondo: var(--org-diseno-grafico);
+}
+
+.area-group[data-area-id="ARE-012"] {
+  --org-fondo: var(--org-marketing);
+}
+
+/* =========================================
+   COLORES POR SUBÁREA
+========================================= */
+
+.subarea-group[data-subarea-id="SUB-001"] {
+  --org-fondo: var(--org-audiovisual);
+}
+
+/* =========================================
+   APLICACIÓN DE COLORES
+========================================= */
+
+/* Encabezados departamentales */
+#orgChart .department-column .department-heading {
+  background: var(--org-fondo);
+  color: var(--org-texto, #FFFFFF);
+  border-top-color: transparent;
+}
+
+#orgChart .department-column .department-heading h2 {
+  color: inherit;
+}
+
+/* Encabezados de áreas */
+#orgChart .area-group[data-area-id] .area-heading {
+  background: var(--org-fondo);
+  color: var(--org-texto-oscuro);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+#orgChart .area-group[data-area-id] .area-heading h3 {
+  color: inherit;
+}
+
+/* Tarjetas de colaboradores por área */
+#orgChart .area-group[data-area-id] .person-card {
+  background: var(--org-fondo);
+  color: var(--org-texto-oscuro);
+}
+
+/* Nombres y roles */
+#orgChart .area-group[data-area-id] .person-name,
+#orgChart .area-group[data-area-id] .person-role {
+  color: var(--org-texto-oscuro);
+}
+
+/* Subáreas */
+#orgChart .subarea-group[data-subarea-id] .subarea-heading,
+#orgChart .subarea-group[data-subarea-id] .person-card {
+  background: var(--org-fondo);
+  color: var(--org-texto-oscuro);
+}
+
+/* Nodo de Gerente General */
+#orgChart .management-node {
+  background: var(--org-gerente);
+}
+
+#orgChart .management-title {
+  color: var(--org-gerente-texto);
+}

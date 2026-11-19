@@ -1,0 +1,207 @@
+
+/* =========================================
+   DEVDATEP CONSULTING
+   COMPONENTES COMPARTIDOS
+   Archivo: shared/css/components.css
+========================================= */
+
+/* BOTONES */
+
+.th-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 10px 18px;
+  border: 1px solid transparent;
+  border-radius: var(--th-radius-md);
+
+  font-family: var(--th-font);
+  font-size: var(--th-font-sm);
+  font-weight: 600;
+  line-height: 1.4;
+
+  cursor: pointer;
+  transition: var(--th-transition);
+}
+
+/* Botón principal */
+.th-btn-primary {
+  background: var(--th-primary);
+  color: var(--th-text-white);
+}
+
+.th-btn-primary:hover {
+  background: var(--th-primary-hover);
+}
+
+/* Botón secundario */
+.th-btn-secondary {
+  background: var(--th-surface);
+  color: var(--th-text);
+  border-color: var(--th-border);
+}
+
+.th-btn-secondary:hover {
+  background: var(--th-surface-hover);
+}
+
+/* Botón de éxito */
+.th-btn-success {
+  background: var(--th-success);
+  color: white;
+}
+
+/* Botón de peligro */
+.th-btn-danger {
+  background: var(--th-danger);
+  color: white;
+}
+
+.th-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.th-btn:focus-visible {
+  outline: 3px solid var(--th-border-focus);
+  outline-offset: 2px;
+}
+
+/* FORMULARIOS */
+
+.th-input,
+.th-select,
+.th-textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+
+  background: var(--th-surface);
+  color: var(--th-text);
+
+  border: 1px solid var(--th-border);
+  border-radius: var(--th-radius-md);
+
+  font-family: var(--th-font);
+  font-size: var(--th-font-sm);
+
+  transition: var(--th-transition);
+}
+
+.th-input:focus,
+.th-select:focus,
+.th-textarea:focus {
+  outline: none;
+  border-color: var(--th-primary);
+  box-shadow: 0 0 0 3px
+    rgba(40, 103, 199, 0.12);
+}
+
+.th-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.th-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--th-text);
+  font-family: var(--th-font);
+  font-size: var(--th-font-sm);
+  font-weight: 600;
+}
+
+/* TARJETAS */
+
+.th-card {
+  padding: 20px;
+  background: var(--th-surface);
+  border: 1px solid var(--th-border);
+  border-radius: var(--th-radius-lg);
+  box-shadow: var(--th-shadow-sm);
+}
+
+.th-card-title {
+  margin: 0 0 12px;
+  color: var(--th-text);
+  font-size: var(--th-font-lg);
+  font-weight: 700;
+}
+
+/* ETIQUETAS DE ESTADO */
+
+.th-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: var(--th-radius-pill);
+  font-size: var(--th-font-xs);
+  font-weight: 600;
+}
+
+.th-badge-success {
+  background: var(--th-success-light);
+  color: var(--th-success);
+}
+
+.th-badge-danger {
+  background: var(--th-danger-light);
+  color: var(--th-danger);
+}
+
+.th-badge-warning {
+  background: var(--th-warning-light);
+  color: #8B6200;
+}
+
+.th-badge-info {
+  background: var(--th-info-light);
+  color: var(--th-info);
+}
+
+/* MENSAJES */
+
+.th-alert {
+  padding: 12px 16px;
+  border-radius: var(--th-radius-md);
+  font-size: var(--th-font-sm);
+  border: 1px solid var(--th-border);
+}
+
+.th-alert-success {
+  background: var(--th-success-light);
+  color: var(--th-success);
+}
+
+.th-alert-danger {
+  background: var(--th-danger-light);
+  color: var(--th-danger);
+}
+
+/* TABLAS */
+
+.th-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--th-font);
+  font-size: var(--th-font-sm);
+}
+
+.th-table th,
+.th-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--th-border);
+  text-align: left;
+}
+
+.th-table th {
+  background: var(--th-background);
+  color: var(--th-text);
+  font-weight: 700;
+}
+
+.th-table tbody tr:hover {
+  background: var(--th-surface-hover);
+}

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f6fb" />
+    <title>Gestión de Cruces y Horarios</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="page-shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">Talento Humano</p>
+          <h1>Gestión de Cruces y Horarios</h1>
+          <p class="page-description">
+            Consulta, revisa y valida los cruces de horario registrados por los colaboradores.
+          </p>
+        </div>
+        <button class="button button-primary" type="button" id="rulesButton">
+          <span aria-hidden="true">✓</span>
+          Reglas pendientes
+        </button>
+      </header>
+
+      <section class="records-card" aria-labelledby="recordsHeading">
+        <div class="section-heading">
+          <div>
+            <h2 id="recordsHeading">Cruces registrados</h2>
+            <p id="recordsCount" class="muted-text">0 registros</p>
+          </div>
+        </div>
+
+        <div class="toolbar">
+          <label class="search-field" for="searchInput">
+            <span class="visually-hidden">Buscar registros por ID o nombre</span>
+            <span class="search-icon" aria-hidden="true"></span>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="Buscar por ID o nombre"
+              autocomplete="off"
+            />
+          </label>
+
+          <label class="filter-field" for="departmentFilter">
+            <span class="visually-hidden">Filtrar por departamento</span>
+            <select id="departmentFilter">
+              <option value="">Todos los departamentos</option>
+            </select>
+          </label>
+
+          <label class="filter-field" for="dayFilter">
+            <span class="visually-hidden">Filtrar por día</span>
+            <select id="dayFilter">
+              <option value="">Todos los días</option>
+            </select>
+          </label>
+
+          <label class="filter-field" for="statusFilter">
+            <span class="visually-hidden">Filtrar por estado</span>
+            <select id="statusFilter">
+              <option value="">Todos los estados</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <colgroup>
+              <col class="column-id" />
+              <col class="column-name" />
+              <col class="column-day" />
+              <col class="column-entry" />
+              <col class="column-exit" />
+              <col class="column-hours" />
+              <col class="column-from" />
+              <col class="column-to" />
+              <col class="column-status" />
+              <col class="column-actions" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">NOMBRE COMPLETO</th>
+                <th scope="col">DÍA</th>
+                <th scope="col">HORA DE INGRESO</th>
+                <th scope="col">HORA DE SALIDA</th>
+                <th scope="col">HORAS QUE DEBEN</th>
+                <th scope="col">DESDE</th>
+                <th scope="col">HASTA</th>
+                <th scope="col">ESTADO</th>
+                <th scope="col" class="actions-heading">ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="recordsTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog id="detailsDialog" class="dialog" aria-labelledby="detailsDialogTitle">
+      <div class="dialog-content">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Consulta y validación</p>
+            <h2 id="detailsDialogTitle">Detalle del cruce</h2>
+          </div>
+          <button class="icon-button" id="closeDetailsButton" type="button" aria-label="Cerrar detalle">×</button>
+        </div>
+
+        <div class="detail-layout">
+          <section class="detail-panel">
+            <dl id="recordDetails" class="details-grid"></dl>
+          </section>
+
+          <aside class="evidence-panel">
+            <div class="evidence-header">
+              <h3>Evidencia del horario</h3>
+              <span id="evidenceStatus" class="evidence-status">Sin evidencia</span>
+            </div>
+            <div id="evidencePreview" class="evidence-preview evidence-placeholder" aria-live="polite">
+              <div class="placeholder-icon" aria-hidden="true">🗂️</div>
+              <p id="evidenceText">No se adjuntó evidencia para este registro.</p>
+            </div>
+            <p id="evidenceMeta" class="evidence-meta"></p>
+          </aside>
+        </div>
+
+        <div class="dialog-actions">
+          <button class="button button-secondary" id="closeDetailsAction" type="button">Cerrar</button>
+          <div class="inline-actions">
+            <button class="button button-warning" id="pendingReviewButton" type="button">Pendiente</button>
+            <button class="button button-primary" id="validateButton" type="button">Aceptar / Validar cruce</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
+  </body>
+</html>

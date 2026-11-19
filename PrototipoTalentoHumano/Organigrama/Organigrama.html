@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Organigrama dinámico de Devdatep Consulting."
+    />
+    <title>Organigrama | Devdatep Consulting</title>
+    <link rel="stylesheet" href="Organigrama.css?v=20261117-vertical-2" />
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script type="module" src="Organigrama.js?v=20261117-vertical-2"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="Organigrama.html" aria-label="Devdatep Consulting">
+        <span class="brand-mark" aria-hidden="true">D</span>
+        <span class="brand-name">
+          <strong>Devdatep</strong>
+          <span>CONSULTING</span>
+        </span>
+      </a>
+      <span class="topbar-context">Gestión de talento humano</span>
+    </header>
+
+    <main class="page-shell">
+      <section class="page-heading" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">ESTRUCTURA ORGANIZACIONAL</p>
+          <h1 id="page-title">Organigrama</h1>
+          <p class="page-description">
+            Explora la estructura y despliega progresivamente sus niveles.
+          </p>
+        </div>
+        <div class="sync-indicator">
+          <span class="sync-dot" aria-hidden="true"></span>
+          Datos compartidos
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Controles del organigrama">
+        <label class="search-control" for="searchInput">
+          <span class="control-icon" aria-hidden="true">⌕</span>
+          <span class="visually-hidden">Buscar por nombre, apellido o rol</span>
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Buscar colaborador o rol..."
+            autocomplete="off"
+          />
+        </label>
+
+        <label class="department-filter" for="departmentFilter">
+          <span class="visually-hidden">Filtrar por departamento</span>
+          <select id="departmentFilter">
+            <option value="">Todos los departamentos</option>
+          </select>
+        </label>
+
+        <button id="toggleAllSectionsButton" class="secondary-button" type="button" aria-expanded="false">
+          Mostrar todo
+        </button>
+
+        <div class="toolbar-spacer"></div>
+
+        <div class="zoom-control" aria-label="Controles de zoom">
+          <button id="zoomOutButton" class="icon-button" type="button" aria-label="Alejar" title="Alejar">
+            −
+          </button>
+          <output id="zoomValue" class="zoom-value" aria-live="polite">100%</output>
+          <button id="zoomInButton" class="icon-button" type="button" aria-label="Acercar" title="Acercar">
+            +
+          </button>
+          <span class="toolbar-divider" aria-hidden="true"></span>
+          <button
+            id="resetViewButton"
+            class="icon-button reset-button"
+            type="button"
+            aria-label="Restablecer vista"
+            title="Restablecer vista"
+          >
+            ↺
+          </button>
+        </div>
+
+        <button id="fitViewButton" class="secondary-button" type="button">Ajustar a pantalla</button>
+        <div class="export-controls" aria-label="Exportar organigrama">
+          <button id="openExportDialogButton" class="secondary-button" type="button">
+            Exportar
+          </button>
+        </div>
+      </section>
+
+      <div class="results-bar">
+        <p id="resultsSummary" class="results-summary" aria-live="polite"></p>
+        <p id="liveStatus" class="live-status" role="status" aria-live="polite"></p>
+      </div>
+
+      <section class="chart-panel" aria-label="Vista del organigrama">
+        <div
+          id="chartViewport"
+          class="chart-viewport"
+          tabindex="0"
+          role="region"
+          aria-label="Organigrama desplazable. Usa las barras de desplazamiento para explorar."
+        >
+          <div id="orgChart" class="org-chart"></div>
+        </div>
+        <div class="chart-footer">
+          <span>Desplázate para explorar la estructura</span>
+          <span class="chart-legend"><i aria-hidden="true"></i> Colaboradores activos</span>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="exportDialog" class="export-dialog" aria-labelledby="exportDialogTitle">
+      <form id="exportForm" method="dialog">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">DESCARGA DEL ORGANIGRAMA</p>
+            <h2 id="exportDialogTitle">Configurar exportación</h2>
+          </div>
+          <button
+            id="closeExportDialogButton"
+            class="dialog-close"
+            type="button"
+            aria-label="Cerrar exportación"
+          >
+            ×
+          </button>
+        </div>
+
+        <fieldset class="export-options">
+          <legend>Tipo de organigrama</legend>
+          <label class="export-choice">
+            <input type="radio" name="exportType" value="basic" checked />
+            <span>
+              <strong>Básico</strong>
+              <small>Departamentos, áreas y subáreas</small>
+            </span>
+          </label>
+          <label class="export-choice">
+            <input type="radio" name="exportType" value="complete" />
+            <span>
+              <strong>Completo</strong>
+              <small>Incluye todas las personas activas</small>
+            </span>
+          </label>
+        </fieldset>
+
+        <fieldset class="export-options">
+          <legend>Formato</legend>
+          <label class="export-choice export-choice--inline">
+            <input type="radio" name="exportFormat" value="png" checked />
+            <span><strong>PNG</strong></span>
+          </label>
+          <label class="export-choice export-choice--inline">
+            <input type="radio" name="exportFormat" value="pdf" />
+            <span><strong>PDF</strong></span>
+          </label>
+        </fieldset>
+
+        <div class="export-dialog-actions">
+          <button id="cancelExportButton" class="secondary-button" type="button">
+            Cancelar
+          </button>
+          <button id="startExportButton" class="primary-button" type="submit">
+            Exportar archivo
+          </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="detailDialog" class="detail-dialog" aria-labelledby="dialogName">
+      <div class="dialog-header">
+        <p class="eyebrow">FICHA DEL COLABORADOR</p>
+        <button
+          id="closeDialogButton"
+          class="dialog-close"
+          type="button"
+          aria-label="Cerrar detalles"
+        >
+          ×
+        </button>
+      </div>
+      <div id="dialogContent" class="dialog-content"></div>
+    </dialog>
+  </body>
+</html>

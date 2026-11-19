@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Portal de módulos de Talento Humano de Devdatep Consulting">
+  <title>Inicio | Talento Humano</title>
+  <link rel="stylesheet" href="Dashboard.css?v=20261119-personalized-v2">
+  <script src="Dashboard.js?v=20261119-personalized-v2" defer></script>
+</head>
+
+<body>
+  <a class="skip-link" href="#main">Ir al contenido</a>
+
+  <!-- Encabezado superior con perfil de usuario personalizado -->
+  <header class="topbar">
+    <a class="brand" href="#inicio" aria-label="Devdatep Consulting, inicio">
+      <span class="brand-symbol" aria-hidden="true">D<span>•</span></span>
+      <span><strong>devdatep</strong><small>CONSULTING</small></span>
+    </a>
+    <div class="header-divider"></div>
+    <span class="product">Talento Humano <span>/</span> <span id="breadcrumb">Inicio</span></span>
+
+    <div class="header-end">
+      <!-- Acciones de barra superior inspiradas en la captura -->
+      <button type="button" class="topbar-icon-btn" title="Notificaciones activas" aria-label="Notificaciones">
+        <span class="icon-bell">🔔</span>
+        <span class="dot-indicator" aria-hidden="true"></span>
+      </button>
+
+      <span class="country-pill" title="Perú">
+        <span class="flag-icon" aria-hidden="true">🇵🇪</span>
+      </span>
+
+      <!-- Chip interactivo de la persona en sesión -->
+      <button type="button" id="userProfileBtn" class="user-chip-btn" aria-haspopup="dialog"
+        title="Cuenta actual · Haz clic para cambiar de colaborador">
+        <div class="user-avatar" id="headerAvatar">MP</div>
+        <div class="user-meta">
+          <strong class="user-name" id="headerUserName">Mariana Lucía Paredes Silva</strong>
+          <small class="user-role" id="headerUserRole">LÍDER DE ÁREA</small>
+        </div>
+        <span class="user-caret" aria-hidden="true">▾</span>
+      </button>
+
+      <!-- Badge de área actual -->
+      <span class="area-badge" id="headerAreaBadge">TALENTO HUMANO</span>
+    </div>
+  </header>
+
+  <!-- Barra lateral de navegación -->
+  <aside id="sidebar" hidden>
+    <div class="sidebar-header-box">
+      <div class="sidebar-caption">ESPACIO DE TRABAJO</div>
+      <span class="sidebar-area-pill" id="sidebarAreaPill">TALENTO HUMANO</span>
+    </div>
+
+    <a class="home-link" href="#inicio"><span aria-hidden="true">⌂</span> Inicio</a>
+    <p class="nav-label">MÓDULOS</p>
+    <nav id="navigation" aria-label="Módulos de Talento Humano"></nav>
+
+    <!-- Pie lateral con usuario activo -->
+    <div class="sidebar-user-card">
+      <div class="user-avatar mini" id="sidebarAvatar">MP</div>
+      <div class="user-info-mini">
+        <strong id="sidebarUserName">Mariana Lucía</strong>
+        <small id="sidebarUserRole">Líder de Área</small>
+      </div>
+      <button type="button" id="sidebarSwitchBtn" class="sidebar-switch-btn" title="Cambiar cuenta">⇆</button>
+    </div>
+    <div class="sidebar-foot"><span class="status-dot"></span> Devdatep Consulting</div>
+  </aside>
+
+  <!-- Contenido principal -->
+  <main id="main">
+    <section id="home">
+      <!-- BANNER DE BIENVENIDA PERSONALIZADO (Idéntico a la captura de referencia) -->
+      <div class="welcome-banner" role="region" aria-label="Bienvenida al módulo">
+        <div class="banner-body">
+          <h1 class="welcome-heading">¡Bienvenido/a <span id="bannerUserName">Mariana Lucía Paredes Silva</span>!</h1>
+          <p class="welcome-subheading">Bienvenido/a al módulo de <strong id="bannerUserArea">Talento Humano</strong></p>
+          <p class="welcome-question">¿Qué quieres hacer el día de hoy?</p>
+
+          <div class="banner-quick-actions">
+            <a href="#colaboradores-validados" class="action-pill btn-postulantes"
+              title="Ir a colaboradores con documentos validados">
+              <span class="action-icon">👥</span> VER COLABORADORES
+            </a>
+            <a href="#asistencia" class="action-pill btn-asistencia" title="Consultar seguimiento y marcaciones">
+              <span class="action-icon">📅</span> VER ASISTENCIA
+            </a>
+            <a href="#horarios" class="action-pill btn-agenda" title="Consultar horarios y turnos semanales">
+              <span class="action-icon">▦</span> VER AGENDA
+            </a>
+            <a href="#organigrama" class="action-pill btn-organigrama" title="Ver estructura de equipos y liderazgo">
+              <span class="action-icon">◎</span> ORGANIGRAMA
+            </a>
+          </div>
+        </div>
+
+        <!-- Mascota tecnológica 3D con fondo curvo ámbar/amarillo -->
+        <div class="banner-mascot-wrapper" aria-hidden="true">
+          <div class="mascot-backdrop"></div>
+          <div class="mascot-robot">
+            <svg viewBox="0 0 200 200" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#ffffff" />
+                  <stop offset="60%" stop-color="#f0f5fa" />
+                  <stop offset="100%" stop-color="#d9e6f2" />
+                </linearGradient>
+                <linearGradient id="visorGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#0a1128" />
+                  <stop offset="100%" stop-color="#050814" />
+                </linearGradient>
+                <linearGradient id="cyanGlow" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#0284c7" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                  <feMerge>
+                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Sombra sutil de levitación -->
+              <ellipse cx="100" cy="188" rx="46" ry="7" fill="#000000" opacity="0.14" />
+
+              <!-- Antena -->
+              <path d="M100 48 L100 28" stroke="#334155" stroke-width="4.5" stroke-linecap="round" />
+              <circle cx="100" cy="24" r="8" fill="#f59e0b" filter="url(#glow)" />
+              <circle cx="100" cy="24" r="4.5" fill="#fef08a" />
+
+              <!-- Orejeras / Auriculares laterales -->
+              <rect x="35" y="66" width="14" height="28" rx="7" fill="url(#cyanGlow)" />
+              <rect x="151" y="66" width="14" height="28" rx="7" fill="url(#cyanGlow)" />
+
+              <!-- Cabeza del Robot -->
+              <rect x="42" y="44" width="116" height="74" rx="28" fill="url(#bodyGrad)" stroke="#cbd5e1"
+                stroke-width="2" />
+
+              <!-- Pantalla / Visor negro brillante -->
+              <rect x="52" y="54" width="96" height="52" rx="18" fill="url(#visorGrad)" stroke="#1e293b"
+                stroke-width="1.5" />
+
+              <!-- Brillo sutil de pantalla -->
+              <path d="M58 60 Q100 56 142 60" stroke="#ffffff" stroke-width="1" opacity="0.25" fill="none" />
+
+              <!-- Ojos LED cian brillantes -->
+              <rect x="66" y="66" width="22" height="15" rx="7.5" fill="#38bdf8" filter="url(#glow)" />
+              <rect x="112" y="66" width="22" height="15" rx="7.5" fill="#38bdf8" filter="url(#glow)" />
+              <circle cx="75" cy="71" r="3" fill="#ffffff" />
+              <circle cx="121" cy="71" r="3" fill="#ffffff" />
+
+              <!-- Sonrisa luminosa -->
+              <path d="M90 92 Q100 99 110 92" stroke="#38bdf8" stroke-width="3" stroke-linecap="round" fill="none"
+                filter="url(#glow)" />
+
+              <!-- Cuello flotante -->
+              <rect x="88" y="118" width="24" height="8" rx="4" fill="#64748b" />
+
+              <!-- Cuerpo / Torso -->
+              <rect x="58" y="125" width="84" height="56" rx="22" fill="url(#bodyGrad)" stroke="#cbd5e1"
+                stroke-width="2" />
+
+              <!-- Placa frontal con símbolo -->
+              <rect x="76" y="136" width="48" height="28" rx="10" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1.5" />
+              <circle cx="100" cy="150" r="7" fill="url(#cyanGlow)" filter="url(#glow)" />
+              <path d="M97 150 L103 150" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+
+              <!-- Brazos / Manos amigables -->
+              <rect x="42" y="134" width="12" height="26" rx="6" fill="url(#bodyGrad)" transform="rotate(18 42 134)"
+                stroke="#cbd5e1" stroke-width="1.5" />
+              <rect x="146" y="134" width="12" height="26" rx="6" fill="url(#bodyGrad)" transform="rotate(-24 146 134)"
+                stroke="#cbd5e1" stroke-width="1.5" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de catálogo de módulos -->
+      <div class="home-section-header">
+        <div>
+          <p class="eyebrow">MÓDULOS · TALENTO HUMANO</p>
+          <h2 class="section-title">Planeación y Operaciones de Talento Humano</h2>
+          <p class="section-subtitle">Selecciona un módulo para acceder a su espacio de trabajo y registros.</p>
+        </div>
+      </div>
+
+      <div id="catalog" class="general-cards"></div>
+    </section>
+
+    <!-- Espacio de trabajo del módulo activo -->
+    <section id="workspace" hidden>
+      <div class="workspace-toolbar">
+        <button id="menuToggle" aria-label="Mostrar u ocultar navegación" aria-controls="sidebar"
+          aria-expanded="false">☰</button>
+        <div>
+          <p class="eyebrow">TALENTO HUMANO</p>
+          <h1 id="moduleTitle" tabindex="-1"></h1>
+        </div>
+        <a id="directLink" target="_blank" rel="noopener">Abrir por separado ↗</a>
+      </div>
+      <div id="groupOverview" class="group-overview" hidden></div>
+      <iframe id="moduleFrame" title="Vista del módulo"></iframe>
+    </section>
+  </main>
+
+  <!-- MODAL PARA CAMBIAR PERFIL DE USUARIO / CUENTA -->
+  <dialog id="profileDialog" aria-labelledby="profileDialogTitle">
+    <header class="dialog-header">
+      <div>
+        <p class="eyebrow">CUENTA Y PERFIL ACTIVO</p>
+        <h2 id="profileDialogTitle">Personalización del Dashboard</h2>
+      </div>
+      <button type="button" id="closeProfileBtn" class="close-btn" aria-label="Cerrar ventana">×</button>
+    </header>
+
+    <div class="dialog-content">
+      <p class="dialog-description">
+        Selecciona con qué colaborador deseas visualizar el Dashboard o ingresa tus propios datos para ver cómo se
+        adapta la bienvenida y la información en tiempo real:
+      </p>
+
+      <div class="preset-users-grid" id="presetUsersGrid">
+        <!-- Generado dinámicamente con perfiles de prueba -->
+      </div>
+
+      <div class="custom-user-form">
+        <h3>O ingresa tu propio nombre:</h3>
+        <div class="form-row">
+          <label>Nombres
+            <input type="text" id="customNombres" placeholder="Ej. Genesis Abigail" autocomplete="given-name">
+          </label>
+          <label>Apellidos
+            <input type="text" id="customApellidos" placeholder="Ej. Reyes Ñuflo" autocomplete="family-name">
+          </label>
+        </div>
+        <div class="form-row">
+          <label>Cargo / Rol
+            <input type="text" id="customRol" placeholder="Ej. Líder de Área, Gerente, Analista">
+          </label>
+          <label>Área o Departamento
+            <input type="text" id="customArea" placeholder="Ej. Reclutamiento, Capacitación, Backend">
+          </label>
+        </div>
+        <div class="form-actions">
+          <button type="button" id="btnGuardarPersonalizado" class="primary-btn">Aplicar a mi Dashboard</button>
+        </div>
+      </div>
+    </div>
+  </dialog>
+</body>
+
+</html>

@@ -1,0 +1,80 @@
+
+/* =========================================
+   DEVDATEP CONSULTING
+   TEMA GENERAL DEL SISTEMA
+   Archivo: shared/css/theme.css
+========================================= */
+
+:root {
+
+  /* COLORES CORPORATIVOS */
+  --th-primary: #2867C7;
+  --th-primary-hover: #1F56AA;
+  --th-primary-light: #EDF4FF;
+
+  /* COLORES DE FONDO */
+  --th-background: #F4F7FB;
+  --th-surface: #FFFFFF;
+  --th-surface-hover: #F8FAFD;
+
+  /* TEXTOS */
+  --th-text: #17243B;
+  --th-text-secondary: #59677B;
+  --th-text-muted: #8592A4;
+  --th-text-white: #FFFFFF;
+
+  /* BORDES */
+  --th-border: #DFE7F0;
+  --th-border-focus: #80A9E3;
+
+  /* ESTADOS */
+  --th-success: #278A6D;
+  --th-success-light: #E7F6EF;
+
+  --th-danger: #B42318;
+  --th-danger-light: #FDECEA;
+
+  --th-warning: #D99A16;
+  --th-warning-light: #FFF5DB;
+
+  --th-info: #2867C7;
+  --th-info-light: #EDF4FF;
+
+  /* TIPOGRAFÍA */
+  --th-font:
+    "Segoe UI", Arial, sans-serif;
+
+  --th-font-xs: 12px;
+  --th-font-sm: 14px;
+  --th-font-md: 16px;
+  --th-font-lg: 20px;
+  --th-font-xl: 26px;
+
+  /* BORDES REDONDEADOS */
+  --th-radius-sm: 6px;
+  --th-radius-md: 10px;
+  --th-radius-lg: 16px;
+  --th-radius-pill: 999px;
+
+  /* ESPACIADOS */
+  --th-space-1: 4px;
+  --th-space-2: 8px;
+  --th-space-3: 12px;
+  --th-space-4: 16px;
+  --th-space-5: 20px;
+  --th-space-6: 24px;
+
+  /* SOMBRAS */
+  --th-shadow-sm:
+    0 2px 6px rgba(23, 36, 59, 0.06);
+
+  --th-shadow-md:
+    0 6px 18px rgba(23, 36, 59, 0.10);
+
+  --th-shadow-lg:
+    0 12px 32px rgba(23, 36, 59, 0.14);
+
+  /* TRANSICIONES */
+  --th-transition: 0.2s ease;
+
+}
