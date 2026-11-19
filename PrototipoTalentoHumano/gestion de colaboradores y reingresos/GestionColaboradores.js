@@ -1041,10 +1041,22 @@ function cargarExpedientesDemostracion() {
   const finStr = fin.toISOString().slice(0, 10);
 
   const casos = [
-    { clave: "001", nombres: "Camila", apellidoPaterno: "Salazar", apellidoMaterno: "Vega", idDepartamento: "DEP-001", idArea: "ARE-002", horas: 330, estadoRevision: "Pendiente" },
-    { clave: "002", nombres: "Andrés", apellidoPaterno: "Molina", apellidoMaterno: "Paz", idDepartamento: "DEP-002", idArea: "ARE-004", horas: 350, estadoRevision: "Validado", aceptadoPrevio: true },
-    { clave: "003", nombres: "Renata", apellidoPaterno: "Delgado", apellidoMaterno: "Ruiz", idDepartamento: "DEP-003", idArea: "ARE-010", horas: 330, estadoRevision: "Pendiente", observado: "foto" },
-    { clave: "004", nombres: "Sebastián", apellidoPaterno: "Castro", apellidoMaterno: "León", idDepartamento: "DEP-002", idArea: "ARE-005", horas: 340, estadoRevision: "Pendiente" }
+    { clave: "001", nombres: "Camila", apellidoPaterno: "Salazar", apellidoMaterno: "Vega", idDepartamento: "DEP-001", idArea: "ARE-002", horas: 330, estadoRevision: "Pendiente", institucion: "Universidad Nacional Mayor de San Marcos", carrera: "Psicología Organizacional", direccion: "Av. Brasil 1420, Jesús María, Lima" },
+    { clave: "002", nombres: "Andrés", apellidoPaterno: "Molina", apellidoMaterno: "Paz", idDepartamento: "DEP-002", idArea: "ARE-004", horas: 350, estadoRevision: "Validado", aceptadoPrevio: true, institucion: "Universidad Nacional Mayor de San Marcos", carrera: "Ingeniería de Sistemas", direccion: "Calle Las Begonias 320, San Isidro, Lima" },
+    { clave: "003", nombres: "Renata", apellidoPaterno: "Delgado", apellidoMaterno: "Ruiz", idDepartamento: "DEP-003", idArea: "ARE-010", horas: 330, estadoRevision: "Pendiente", observado: "foto", motivoObservacion: "La fotografía no tiene fondo blanco. Se solicita una nueva imagen formal.", institucionTipo: "Instituto de Educación Superior", institucion: "Toulouse Lautrec", carrera: "Diseño Gráfico Publicitario", direccion: "Av. Javier Prado Este 2450, San Borja, Lima" },
+    { clave: "004", nombres: "Sebastián", apellidoPaterno: "Castro", apellidoMaterno: "León", idDepartamento: "DEP-002", idArea: "ARE-005", horas: 340, estadoRevision: "Pendiente", todosAceptados: true, institucion: "Universidad Nacional de Ingeniería", carrera: "Ciencia de la Computación", direccion: "Jr. Huiracocha 1845, Jesús María, Lima" },
+    { clave: "005", nombres: "Mateo Ignacio", apellidoPaterno: "Alvarado", apellidoMaterno: "Paredes", idDepartamento: "DEP-002", idArea: "ARE-006", horas: 360, estadoRevision: "Pendiente", docsAceptados: ["copia", "recibo"], institucion: "Universidad Peruana de Ciencias Aplicadas", carrera: "Ingeniería de Software", direccion: "Av. La Marina 1840, San Miguel, Lima", rucInstitucion: "20211617747", direccionInstitucion: "Prolongación Primavera 2390, Monterrico, Lima", representanteNombre: "Mg. Jorge Luis Ramos", representanteDocumento: "DNI 09847120", representanteCargo: "Director de Escuela Profesional" },
+    { clave: "006", nombres: "Valeria Sofía", apellidoPaterno: "Quispe", apellidoMaterno: "Morales", idDepartamento: "DEP-001", idArea: "ARE-001", horas: 330, estadoRevision: "Pendiente", observado: "copia", motivoObservacion: "La copia del documento de identidad es ilegible en el reverso. Adjuntar escaneo nítido.", docsAceptados: ["recibo", "firma", "foto"], institucion: "Pontificia Universidad Católica del Perú", carrera: "Psicología Organizacional", direccion: "Calle Berlín 450, Miraflores, Lima", rucInstitucion: "20155945860", direccionInstitucion: "Av. Universitaria 1801, San Miguel, Lima", representanteNombre: "Dra. Patricia Villanueva Casas", representanteDocumento: "DNI 10293847", representanteCargo: "Coordinadora de Prácticas Preprofesionales" },
+    { clave: "007", nombres: "Diego Alonso", apellidoPaterno: "Navarro", apellidoMaterno: "Chávez", idDepartamento: "DEP-002", idArea: "ARE-004", horas: 350, estadoRevision: "Pendiente", institucion: "Universidad Nacional de Ingeniería", carrera: "Ingeniería de Sistemas", direccion: "Jr. Huáscar 1240, Jesús María, Lima", rucInstitucion: "20169004359", direccionInstitucion: "Av. Túpac Amaru 210, Rímac, Lima", representanteNombre: "Dr. Carlos Mendoza Silva", representanteDocumento: "DNI 07182934", representanteCargo: "Decano de la Facultad de Ingeniería" },
+    { clave: "008", nombres: "Luciana Belén", apellidoPaterno: "Herrera", apellidoMaterno: "Gutiérrez", idDepartamento: "DEP-003", idArea: "ARE-012", horas: 330, estadoRevision: "Pendiente", observado: "recibo", motivoObservacion: "El recibo de servicios públicos tiene más de dos meses de antigüedad; adjuntar recibo del mes en curso.", docsAceptados: ["copia", "firma"], institucion: "Universidad de Lima", carrera: "Marketing y Gestión Comercial", direccion: "Calle Las Dalias 315, Surco, Lima", rucInstitucion: "20131343714", direccionInstitucion: "Av. Javier Prado Este 4600, Santiago de Surco, Lima", representanteNombre: "Lic. Carmen Rosa Medina", representanteDocumento: "DNI 08234719", representanteCargo: "Jefa de Prácticas y Empleabilidad" },
+    { clave: "009", nombres: "Gabriel Alejandro", apellidoPaterno: "Espinoza", apellidoMaterno: "Flores", idDepartamento: "DEP-002", idArea: "ARE-007", horas: 340, estadoRevision: "Pendiente", todosAceptados: true, institucion: "Universidad Tecnológica del Perú", carrera: "Ingeniería de Sistemas e Informática", direccion: "Av. Arequipa 2980, San Isidro, Lima", rucInstitucion: "20469951680", direccionInstitucion: "Av. Natalio Sánchez 125, Jesús María, Lima", representanteNombre: "Ing. Roberto Seminario Paz", representanteDocumento: "DNI 09384756", representanteCargo: "Director Académico de Campus" },
+    { clave: "010", nombres: "Ariana Marcela", apellidoPaterno: "Cárdenas", apellidoMaterno: "Soto", idDepartamento: "DEP-002", idArea: "ARE-008", horas: 330, estadoRevision: "Pendiente", institucionTipo: "Instituto Superior Tecnológico", institucion: "TECSUP", carrera: "Diseño y Desarrollo de Software", direccion: "Calle Los Cedros 210, Magdalena del Mar, Lima", rucInstitucion: "20138656785", direccionInstitucion: "Av. Cascanueces 2221, Santa Anita, Lima", representanteNombre: "Ing. Miguel Ángel Benites", representanteDocumento: "DNI 08192837", representanteCargo: "Jefe de Departamento de Tecnologías Digitales" },
+    { clave: "011", nombres: "Joaquín Ernesto", apellidoPaterno: "Mendoza", apellidoMaterno: "Vidal", idDepartamento: "DEP-002", idArea: "ARE-009", horas: 360, estadoRevision: "Pendiente", observado: "firma", motivoObservacion: "La firma digital no coincide con el trazo del DNI adjunto o carece de nitidez.", docsAceptados: ["copia", "recibo", "foto"], institucion: "Universidad San Ignacio de Loyola", carrera: "Ingeniería de Software", direccion: "Calle Alcanfores 580, Miraflores, Lima", rucInstitucion: "20297868790", direccionInstitucion: "Av. La Fontana 550, La Molina, Lima", representanteNombre: "Dra. Elena Cornejo Tapia", representanteDocumento: "DNI 10492837", representanteCargo: "Decana de Facultad de Ingeniería" },
+    { clave: "012", nombres: "Claudia Ximena", apellidoPaterno: "Paredes", apellidoMaterno: "Ramos", idDepartamento: "DEP-001", idArea: "ARE-003", horas: 330, estadoRevision: "Pendiente", docsAceptados: ["copia", "foto"], institucion: "Universidad Nacional Mayor de San Marcos", carrera: "Administración de Recursos Humanos", direccion: "Jr. Capac Yupanqui 980, Lince, Lima", rucInstitucion: "20148092282", direccionInstitucion: "Av. Carlos Germán Amézaga 375, Lima", representanteNombre: "Dr. Walter Arana Mendoza", representanteDocumento: "DNI 08432190", representanteCargo: "Director de Escuela Profesional" },
+    { clave: "013", nombres: "Rodrigo Franco", apellidoPaterno: "Bustamante", apellidoMaterno: "Carrillo", idDepartamento: "DEP-003", idArea: "ARE-010", idSubArea: "SUB-001", horas: 350, estadoRevision: "Pendiente", institucion: "Universidad Peruana de Ciencias Aplicadas", carrera: "Comunicación y Producción Audiovisual", direccion: "Av. Benavides 2450, Miraflores, Lima", rucInstitucion: "20211617747", direccionInstitucion: "Prolongación Primavera 2390, Monterrico, Lima", representanteNombre: "Lic. Fernando Solano Díaz", representanteDocumento: "DNI 07382910", representanteCargo: "Director de Carrera Audiovisual" },
+    { clave: "014", nombres: "María Fernanda", apellidoPaterno: "Villanueva", apellidoMaterno: "Córdova", idDepartamento: "DEP-002", idArea: "ARE-005", horas: 340, estadoRevision: "Pendiente", docsAceptados: ["copia", "recibo", "firma"], institucion: "Universidad Científica del Sur", carrera: "Ingeniería de Sistemas Empresariales", direccion: "Av. Paseo de la República 5540, Miraflores, Lima", rucInstitucion: "20427386835", direccionInstitucion: "Carretera Panamericana Sur Km 19, Villa El Salvador, Lima", representanteNombre: "Ing. Gonzalo Cáceres Medina", representanteDocumento: "DNI 09283746", representanteCargo: "Director Académico de Ingeniería" },
+    { clave: "015", nombres: "Franco Javier", apellidoPaterno: "Tapia", apellidoMaterno: "Benítez", idDepartamento: "DEP-002", idArea: "ARE-004", horas: 350, estadoRevision: "Pendiente", docsAceptados: ["copia"], institucion: "Universidad de Piura", carrera: "Ingeniería Informática", direccion: "Calle Chinchón 890, San Isidro, Lima", rucInstitucion: "20136934869", direccionInstitucion: "Calle Mártir José Olaya 162, Miraflores, Lima", representanteNombre: "Dra. Mónica Saldaña Cruz", representanteDocumento: "DNI 10394857", representanteCargo: "Directora de Estudios" },
+    { clave: "016", nombres: "Andrea Nicole", apellidoPaterno: "Zevallos", apellidoMaterno: "Ramos", idDepartamento: "DEP-001", idArea: "ARE-001", horas: 330, estadoRevision: "Pendiente", observado: "foto", motivoObservacion: "La fotografía adjunta no cumple con el fondo blanco reglamentario ni vestimenta formal.", docsAceptados: ["copia", "recibo", "firma"], institucion: "Universidad de San Martín de Porres", carrera: "Gestión de Recursos Humanos", direccion: "Av. La Encalada 650, Surco, Lima", rucInstitucion: "20139940126", direccionInstitucion: "Jr. Las Calandrias 151, Santa Anita, Lima", representanteNombre: "Dr. Daniel Valdivia Ruiz", representanteDocumento: "DNI 08912345", representanteCargo: "Director de Escuela Profesional" }
   ];
 
   let huboCambios = false;
@@ -1056,15 +1068,29 @@ function cargarExpedientesDemostracion() {
     let e = existentes.find((x) => x.expedienteId === expedienteId || x.numeroDocumento === numeroDocumento);
     if (!e) {
       const docsObj = Object.fromEntries(
-        documents.map(([k, tit]) => [
-          k,
-          {
-            nombre: `${tit} · muestra formal`,
-            demo: true,
-            estado: (caso.aceptadoPrevio || caso.clave === "004") ? "Aceptado" : caso.observado === k ? "Observado" : "Pendiente",
-            motivo: caso.observado === k ? "La fotografía no tiene fondo blanco. Se solicita una nueva imagen." : ""
+        documents.map(([k, tit]) => {
+          let estado = "Pendiente";
+          let motivo = "";
+
+          if (caso.aceptadoPrevio || caso.todosAceptados || caso.clave === "004") {
+            estado = "Aceptado";
+          } else if (caso.observado === k) {
+            estado = "Observado";
+            motivo = caso.motivoObservacion || "Documento observado. Se solicita corrección y reenvío.";
+          } else if (Array.isArray(caso.docsAceptados) && caso.docsAceptados.includes(k)) {
+            estado = "Aceptado";
           }
-        ])
+
+          return [
+            k,
+            {
+              nombre: `${tit} · muestra formal`,
+              demo: true,
+              estado,
+              motivo
+            }
+          ];
+        })
       );
 
       const codProv = `${caso.nombres}_${caso.apellidoPaterno}.Prueba`;
@@ -1077,28 +1103,28 @@ function cargarExpedientesDemostracion() {
         nombres: caso.nombres,
         apellidoPaterno: caso.apellidoPaterno,
         apellidoMaterno: caso.apellidoMaterno,
-        tipoDocumento: "DNI",
+        tipoDocumento: caso.tipoDocumento || "DNI",
         numeroDocumento: numeroDocumento,
-        nacimiento: "2003-05-18",
-        nacionalidad: "Peruana",
-        direccion: "Calle Las Begonias 320, San Isidro, Lima",
-        correo: `expediente-${caso.clave}@example.test`,
-        telefono: "987654320",
+        nacimiento: caso.nacimiento || "2003-05-18",
+        nacionalidad: caso.nacionalidad || "Peruana",
+        direccion: caso.direccion || "Calle Las Begonias 320, San Isidro, Lima",
+        correo: caso.correo || `expediente-${caso.clave}@example.test`,
+        telefono: caso.telefono || ("9876543" + caso.clave.slice(-2)),
         tipoColaborador: "Practicante",
-        situacionPracticante: "Estudiante universitario",
-        institucionTipo: "Universidad",
-        institucion: "Universidad Nacional Mayor de San Marcos",
-        rucInstitucion: "20148092282",
-        direccionInstitucion: "Av. Carlos Germán Amézaga 375, Lima",
-        representanteNombre: "Dr. Walter Arana Mendoza",
-        representanteDocumento: "DNI 08432190",
-        representanteCargo: "Director de Escuela Profesional",
-        carrera: "Ingeniería de Sistemas",
+        situacionPracticante: caso.situacionPracticante || "Estudiante universitario",
+        institucionTipo: caso.institucionTipo || "Universidad",
+        institucion: caso.institucion || "Universidad Nacional Mayor de San Marcos",
+        rucInstitucion: caso.rucInstitucion || "20148092282",
+        direccionInstitucion: caso.direccionInstitucion || "Av. Carlos Germán Amézaga 375, Lima",
+        representanteNombre: caso.representanteNombre || "Dr. Walter Arana Mendoza",
+        representanteDocumento: caso.representanteDocumento || "DNI 08432190",
+        representanteCargo: caso.representanteCargo || "Director de Escuela Profesional",
+        carrera: caso.carrera || "Ingeniería de Sistemas",
         idDepartamento: caso.idDepartamento,
         idArea: caso.idArea,
-        idSubArea: null,
+        idSubArea: caso.idSubArea || null,
         idRol: "ROL-005",
-        inicioPrueba: new Date(fin.getTime() - 90 * 24 * 3600 * 1000).toISOString().slice(0, 10),
+        inicioPrueba: caso.inicioPrueba || new Date(fin.getTime() - 90 * 24 * 3600 * 1000).toISOString().slice(0, 10),
         finPrueba: finStr,
         fechaIngreso: fecha,
         horasConvenio: caso.horas,
@@ -1196,7 +1222,21 @@ function init() {
 
   cargarExpedientesDemostracion();
   registrarEventos();
-  changeTab("review");
+
+  // Soporte para abrir pestaña directamente desde hash (#active, #review, #reentry) o query string (?tab=active)
+  const validTabs = ["review", "active", "reentry"];
+  const hashTab = (location.hash ? location.hash.slice(1) : "").toLowerCase();
+  const queryTab = (new URLSearchParams(location.search).get("tab") || "").toLowerCase();
+  const initialTab = validTabs.includes(hashTab) ? hashTab : (validTabs.includes(queryTab) ? queryTab : "review");
+
+  changeTab(initialTab);
+
+  window.addEventListener("hashchange", () => {
+    const nextTab = (location.hash ? location.hash.slice(1) : "").toLowerCase();
+    if (validTabs.includes(nextTab)) {
+      changeTab(nextTab);
+    }
+  });
 }
 
 if (document.readyState === "loading") {
