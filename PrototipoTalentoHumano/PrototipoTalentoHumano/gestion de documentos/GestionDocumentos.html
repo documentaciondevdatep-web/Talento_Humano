@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Gestión de documentos | Talento Humano</title>
+  <link rel="stylesheet" href="GestionDocumentos.css">
+  <script src="GestionDocumentos.js" defer></script>
+</head>
+<body>
+  <main>
+    <header class="heading">
+      <div>
+        <p class="eyebrow">TALENTO HUMANO</p>
+        <h1>Gestión de documentos</h1>
+        <p>Registro, consulta, generación, previsualización y seguimiento de documentos de colaboradores próximos a culminar sus prácticas.</p>
+      </div>
+      <a class="back-link" href="../Dashboard/Dashboard.html#inicio" target="_top">← Volver al inicio</a>
+    </header>
+
+    <!-- Indicadores estadísticos -->
+    <section class="stats" aria-label="Indicadores generales">
+      <article>
+        <span>Total de colaboradores próximos a culminar</span>
+        <strong id="totalCollaboratorsCount">0</strong>
+      </article>
+      <article>
+        <span>Documentos pendientes de generación</span>
+        <strong id="pendingDocsCount">0</strong>
+      </article>
+      <article>
+        <span>Documentos generados</span>
+        <strong id="generatedDocsCount">0</strong>
+      </article>
+      <article>
+        <span>Colaboradores con todos sus documentos completados</span>
+        <strong id="completedCollaboratorsCount">0</strong>
+      </article>
+    </section>
+
+    <!-- Panel principal -->
+    <section class="panel" aria-label="Módulo de documentos">
+      <!-- Navegación por pestañas -->
+      <nav class="tabs" aria-label="Pestañas de documentos">
+        <button type="button" data-tab="collaborators" aria-pressed="true">Colaboradores próximos a culminar</button>
+        <button type="button" data-tab="history" aria-pressed="false">Historial de documentos</button>
+      </nav>
+
+      <!-- VISTA 1: COLABORADORES PRÓXIMOS A CULMINAR -->
+      <div id="collaboratorsView">
+        <div class="filters" id="collabFilters">
+          <label class="search-filter">
+            <span>Buscar colaborador</span>
+            <input id="searchInput" type="search" placeholder="Buscar por ID o nombre...">
+          </label>
+          <label>
+            <span>Área</span>
+            <select id="areaFilter">
+              <option value="">Todas las áreas</option>
+            </select>
+          </label>
+          <label>
+            <span>Estado documental</span>
+            <select id="statusFilter">
+              <option value="">Todos (En proceso y Pendiente)</option>
+              <option value="En proceso">En proceso</option>
+              <option value="Pendiente">Pendiente</option>
+            </select>
+          </label>
+          <label>
+            <span>Proximidad de culminación</span>
+            <select id="proximityFilter">
+              <option value="">Todos (máximo 5 días)</option>
+              <option value="5">Máximo 5 días restantes</option>
+              <option value="3">Máximo 3 días restantes</option>
+              <option value="1">1 día restante (Urgente)</option>
+            </select>
+          </label>
+          <button class="secondary" id="clearFilters" type="button">Limpiar filtros</button>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Colaborador</th>
+                <th>Área</th>
+                <th>Fecha de culminación</th>
+                <th>Días restantes</th>
+                <th>Estado documental</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="collaboratorRows"></tbody>
+          </table>
+          <p class="empty" id="emptyCollaborators" hidden>No se encontraron colaboradores con los filtros seleccionados.</p>
+        </div>
+        <footer class="table-footer">
+          <span id="collaboratorRecordCount">0 registros</span>
+        </footer>
+      </div>
+
+      <!-- VISTA 2: HISTORIAL DE DOCUMENTOS GENERADOS -->
+      <div id="historyView" hidden>
+        <div class="filters" id="historyFilters">
+          <label class="search-filter">
+            <span>Buscar en historial</span>
+            <input id="historySearchInput" type="search" placeholder="Buscar por ID o nombre...">
+          </label>
+          <label>
+            <span>Tipo de documento</span>
+            <select id="historyTypeFilter">
+              <option value="">Todos los tipos</option>
+            </select>
+          </label>
+          <label>
+            <span>Área</span>
+            <select id="historyAreaFilter">
+              <option value="">Todas las áreas</option>
+            </select>
+          </label>
+          <label>
+            <span>Fecha de generación</span>
+            <input id="historyDateFilter" type="date">
+          </label>
+          <button class="secondary" id="clearHistoryFilters" type="button">Limpiar filtros</button>
+        </div>
+
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Colaborador</th>
+                <th>Área</th>
+                <th>Documentos generados</th>
+                <th>Última fecha de emisión</th>
+                <th>Estado</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="historyRows"></tbody>
+          </table>
+          <p class="empty" id="emptyHistory" hidden>No se registraron documentos generados con los filtros seleccionados.</p>
+        </div>
+        <footer class="table-footer">
+          <span id="historyRecordCount">0 registros</span>
+        </footer>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL CONSULTAR COLABORADOR (DETALLE Y GESTIÓN DE DOCUMENTOS) -->
+  <dialog id="detailDialog">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow" id="detailEyebrow">CONSULTA DE COLABORADOR</p>
+        <h2 id="detailTitle">Detalle del colaborador</h2>
+      </div>
+      <button class="icon-button" id="closeDetail" type="button" aria-label="Cerrar modal">×</button>
+    </div>
+    <div id="detailBody"></div>
+  </dialog>
+
+  <!-- MODAL CONSULTA DE HISTORIAL (RESUMEN DE DOCUMENTOS GENERADOS) -->
+  <dialog id="historyDetailDialog">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow" id="historyDetailEyebrow">HISTORIAL DOCUMENTAL</p>
+        <h2 id="historyDetailTitle">Documentos generados</h2>
+      </div>
+      <button class="icon-button" id="closeHistoryDetail" type="button" aria-label="Cerrar consulta de historial">×</button>
+    </div>
+    <div id="historyDetailBody"></div>
+  </dialog>
+
+  <!-- MODAL PREVISUALIZACIÓN DE DOCUMENTO Y EDICIÓN -->
+  <dialog id="previewDialog">
+    <div class="dialog-header">
+      <div>
+        <p class="eyebrow" id="previewEyebrow">REPRESENTACIÓN PRELIMINAR · DEMOSTRACIÓN</p>
+        <h2 id="previewTitle">Previsualización de documento</h2>
+      </div>
+      <button class="icon-button" id="closePreview" type="button" aria-label="Cerrar previsualización">×</button>
+    </div>
+    <div id="previewBody"></div>
+  </dialog>
+</body>
+</html>
