@@ -46,17 +46,27 @@ const norm = s => String(s ?? '')
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
 
+function actualizarFechaDelDia() {
+  const el = document.querySelector('#fechaMonitoreoActual');
+  if (!el) return;
+  const hoy = new Date();
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  let texto = hoy.toLocaleDateString('es-ES', opciones);
+  texto = texto.charAt(0).toUpperCase() + texto.slice(1);
+  el.textContent = texto;
+}
+
 function obtenerListaColaboradores() {
   if (typeof window !== "undefined" && typeof window.obtenerColaboradoresActivos === "function") {
     try {
       const list = window.obtenerColaboradoresActivos();
-      if (Array.isArray(list) && list.length > 0) return list;
+      if (Array.isArray(list) && list.length >= 65) return list;
     } catch (err) {}
   }
   if (typeof window !== "undefined" && typeof window.obtenerColaboradores === "function") {
     try {
       const all = window.obtenerColaboradores();
-      if (Array.isArray(all) && all.length > 0) {
+      if (Array.isArray(all) && all.length >= 65) {
         const activos = all.filter(c => c.estado === 'Activo' || !c.estado);
         if (activos.length > 0) return activos;
       }
@@ -66,7 +76,7 @@ function obtenerListaColaboradores() {
     const raw = typeof localStorage !== "undefined" ? localStorage.getItem("th_colaboradores") : null;
     if (raw) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length >= 65) {
         const activos = parsed.filter(c => c.estado === 'Activo' || !c.estado);
         if (activos.length > 0) return activos;
       }
@@ -74,6 +84,11 @@ function obtenerListaColaboradores() {
   } catch (err) {}
 
   if (typeof window !== "undefined" && Array.isArray(window.colaboradores70Oficiales) && window.colaboradores70Oficiales.length > 0) {
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("th_colaboradores", JSON.stringify(window.colaboradores70Oficiales));
+      }
+    } catch (e) {}
     const activos = window.colaboradores70Oficiales.filter(c => c.estado === 'Activo' || !c.estado);
     if (activos.length > 0) return activos;
   }
@@ -753,6 +768,7 @@ window.addEventListener('storage', event => {
 
 function iniciarModulo() {
   try {
+    actualizarFechaDelDia();
     populateDepartments();
     render();
   } catch (err) {

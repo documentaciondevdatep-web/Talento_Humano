@@ -1300,7 +1300,8 @@ function obtenerColaboradoresGlobal() {
     var raw = typeof localStorage !== "undefined" ? localStorage.getItem("th_colaboradores") : null;
     if (raw) {
       var parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      // Validar que contenga el catálogo completo (al menos 65 colaboradores)
+      if (Array.isArray(parsed) && parsed.length >= 65) return parsed;
     }
   } catch(e) {}
   try {
