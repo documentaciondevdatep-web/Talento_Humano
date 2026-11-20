@@ -169,8 +169,8 @@ h1:focus, h2:focus { outline: none; }
   font-size: 19px;
 }
 
-/* Chip de usuario activo */
-.user-chip-btn {
+/* Chip de usuario activo (fijo) */
+.user-chip {
   display: flex;
   align-items: center;
   gap: 11px;
@@ -178,14 +178,7 @@ h1:focus, h2:focus { outline: none; }
   border: 1px solid var(--border);
   border-radius: 30px;
   background: #ffffff;
-  cursor: pointer;
-  transition: all .2s;
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03);
-}
-.user-chip-btn:hover {
-  border-color: #94a3b8;
-  background: #f8fafc;
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
 }
 .user-avatar {
   width: 36px;
@@ -751,156 +744,6 @@ h1:focus, h2:focus { outline: none; }
 .group-option:last-child { border-bottom: 0; }
 
 /* ==========================================================================
-   MODAL DE PERFIL / CAMBIO DE USUARIO
-   ========================================================================== */
-dialog#profileDialog {
-  border: 1px solid var(--border);
-  border-radius: 24px;
-  padding: 28px 32px;
-  width: min(640px, calc(100% - 32px));
-  max-height: 90vh;
-  box-shadow: 0 24px 60px rgba(10, 20, 50, 0.2);
-  background: #ffffff;
-}
-dialog#profileDialog::backdrop {
-  background: rgba(6, 6, 47, 0.6);
-  backdrop-filter: blur(4px);
-}
-
-.dialog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 16px;
-  margin-bottom: 20px;
-}
-.dialog-header h2 {
-  font-size: 21px;
-  margin: 0;
-  color: #0f172a;
-}
-.close-btn {
-  background: #f1f5f9;
-  border: 0;
-  font-size: 22px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  display: grid;
-  place-items: center;
-  color: #475569;
-}
-.close-btn:hover { background: #e2e8f0; color: #0f172a; }
-
-.dialog-description {
-  font-size: 13.5px;
-  color: #64748b;
-  line-height: 1.6;
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-.preset-users-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 26px;
-}
-
-.preset-user-card {
-  border: 1.5px solid var(--border);
-  border-radius: 14px;
-  padding: 14px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  background: #f8fafc;
-  text-align: left;
-  transition: all .18s;
-}
-.preset-user-card:hover {
-  background: #f0fdf4;
-  border-color: #86efac;
-}
-.preset-user-card.active {
-  background: #f0fdfa;
-  border-color: #0284c7;
-  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.12);
-}
-.preset-user-card .user-avatar {
-  width: 38px;
-  height: 38px;
-  font-size: 13px;
-}
-.preset-user-meta strong {
-  display: block;
-  font-size: 13px;
-  color: #0f172a;
-}
-.preset-user-meta small {
-  display: block;
-  font-size: 11px;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-.custom-user-form {
-  border-top: 1px solid var(--border);
-  padding-top: 20px;
-}
-.custom-user-form h3 {
-  font-size: 14.5px;
-  margin: 0 0 14px;
-  color: #0f172a;
-}
-.form-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  margin-bottom: 14px;
-}
-.form-row label {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 650;
-  color: #475569;
-}
-.form-row input {
-  padding: 9px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 13px;
-  background: #ffffff;
-  color: #0f172a;
-}
-.form-row input:focus {
-  border-color: #0284c7;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 18px;
-}
-.primary-btn {
-  background: var(--navy);
-  color: #ffffff;
-  border: 0;
-  padding: 11px 22px;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 650;
-  cursor: pointer;
-  transition: background .18s;
-}
-.primary-btn:hover { background: #1c1c59; }
-
-/* ==========================================================================
    RESPONSIVIDAD
    ========================================================================== */
 @media (max-width: 1100px) {
@@ -968,8 +811,5 @@ dialog#profileDialog::backdrop {
   }
   .workspace-toolbar button {
     display: block;
-  }
-  .preset-users-grid, .form-row {
-    grid-template-columns: 1fr;
   }
 }

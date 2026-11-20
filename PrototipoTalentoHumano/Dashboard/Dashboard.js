@@ -157,88 +157,22 @@ const groups = [
   }
 ];
 
-// Perfiles predefinidos de prueba (el primero es el nuevo colaborador ficticio predeterminado)
-const USUARIOS_PREDEFINIDOS = [
-  {
-    id: "usr-001",
-    nombres: "Mariana Lucía",
-    apellidos: "Paredes Silva",
-    nombreCompleto: "Mariana Lucía Paredes Silva",
-    rol: "LÍDER DE ÁREA",
-    departamento: "Talento Humano",
-    area: "Talento Humano",
-    correo: "mariana.paredes@devdatep.com",
-    avatarColor: "#0284c7"
-  },
-  {
-    id: "usr-002",
-    nombres: "Genesis Abigail",
-    apellidos: "Reyes Ñuflo",
-    nombreCompleto: "Genesis Abigail Reyes Ñuflo",
-    rol: "LÍDER DE RECLUTAMIENTO",
-    departamento: "Talento Humano",
-    area: "Reclutamiento",
-    correo: "genesis.reyes@devdatep.com",
-    avatarColor: "#ec4899"
-  },
-  {
-    id: "usr-003",
-    nombres: "Alex",
-    apellidos: "Ponce Salas",
-    nombreCompleto: "Alex Ponce Salas",
-    rol: "GERENCIA",
-    departamento: "Talento Humano",
-    area: "Talento Humano",
-    correo: "alex.ponce@devdatep.com",
-    avatarColor: "#059669"
-  },
-  {
-    id: "usr-004",
-    nombres: "Sam",
-    apellidos: "Vargas Guerra",
-    nombreCompleto: "Sam Vargas Guerra",
-    rol: "LÍDER",
-    departamento: "Desarrollo Web",
-    area: "Backend",
-    correo: "sam.vargas@devdatep.com",
-    avatarColor: "#7c3aed"
-  }
-];
-
-const USER_STORAGE_KEY = "th_usuario_activo";
+// Datos fijos del colaborador (Líder de Área en Talento Humano)
+const USUARIO_FIJO = {
+  nombres: "Mariana Lucía",
+  apellidos: "Paredes Silva",
+  nombreCompleto: "Mariana Lucía Paredes Silva",
+  rol: "LÍDER DE ÁREA",
+  departamento: "Talento Humano",
+  area: "Talento Humano",
+  correo: "mariana.paredes@devdatep.com",
+  avatarColor: "#0284c7"
+};
 
 function getInitials(nombres, apellidos) {
   const n = (nombres || "").trim().split(" ")[0] || "";
   const a = (apellidos || "").trim().split(" ")[0] || "";
   return ((n[0] || "") + (a[0] || "")).toUpperCase() || "TH";
-}
-
-function obtenerUsuarioActivo() {
-  try {
-    const raw = localStorage.getItem(USER_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // Si aún guardaba a 'Genesis', actualizar al nuevo nombre solicitado
-      if (parsed && parsed.nombreCompleto && !parsed.nombreCompleto.includes("Genesis")) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.warn("Error leyendo usuario activo:", e);
-  }
-  // Por defecto inicializamos con Mariana Lucía Paredes Silva
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(USUARIOS_PREDEFINIDOS[0]));
-  return USUARIOS_PREDEFINIDOS[0];
-}
-
-function guardarUsuarioActivo(usuario) {
-  try {
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(usuario));
-    actualizarUIUsuario(usuario);
-    window.dispatchEvent(new CustomEvent("usuarioActivoCambiado", { detail: usuario }));
-  } catch (e) {
-    console.warn("Error guardando usuario activo:", e);
-  }
 }
 
 function actualizarUIUsuario(user) {
@@ -441,105 +375,6 @@ function route() {
   }
 }
 
-// Modal de cambio de perfil / personalización
-function initProfileDialog() {
-  const dialog = document.querySelector("#profileDialog");
-  const openBtn = document.querySelector("#userProfileBtn");
-  const sidebarSwitchBtn = document.querySelector("#sidebarSwitchBtn");
-  const closeBtn = document.querySelector("#closeProfileBtn");
-  const presetsContainer = document.querySelector("#presetUsersGrid");
-  const btnGuardarPersonalizado = document.querySelector("#btnGuardarPersonalizado");
-
-  if (!dialog) return;
-
-  function renderPresets() {
-    if (!presetsContainer) return;
-    const current = obtenerUsuarioActivo();
-    presetsContainer.replaceChildren();
-
-    for (const u of USUARIOS_PREDEFINIDOS) {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "preset-user-card" + (current.id === u.id ? " active" : "");
-      card.innerHTML = `
-        <div class="user-avatar" style="background:${u.avatarColor};">${getInitials(u.nombres, u.apellidos)}</div>
-        <div class="preset-user-meta">
-          <strong>${u.nombreCompleto}</strong>
-          <small>${u.rol} · ${u.area}</small>
-        </div>
-      `;
-      card.addEventListener("click", () => {
-        guardarUsuarioActivo(u);
-        renderPresets();
-        dialog.close();
-      });
-      presetsContainer.append(card);
-    }
-  }
-
-  function openDialog() {
-    renderPresets();
-    const current = obtenerUsuarioActivo();
-    const inputNom = document.querySelector("#customNombres");
-    const inputApe = document.querySelector("#customApellidos");
-    const inputRol = document.querySelector("#customRol");
-    const inputArea = document.querySelector("#customArea");
-
-    if (inputNom) inputNom.value = current.nombres || "";
-    if (inputApe) inputApe.value = current.apellidos || "";
-    if (inputRol) inputRol.value = current.rol || "";
-    if (inputArea) inputArea.value = current.area || "";
-
-    dialog.showModal();
-  }
-
-  if (openBtn) openBtn.addEventListener("click", openDialog);
-  if (sidebarSwitchBtn) sidebarSwitchBtn.addEventListener("click", openDialog);
-  if (closeBtn) closeBtn.addEventListener("click", () => dialog.close());
-
-  dialog.addEventListener("click", (e) => {
-    if (e.target === dialog) dialog.close();
-  });
-
-  if (btnGuardarPersonalizado) {
-    btnGuardarPersonalizado.addEventListener("click", () => {
-      const nom = (document.querySelector("#customNombres")?.value || "").trim();
-      const ape = (document.querySelector("#customApellidos")?.value || "").trim();
-      const rol = (document.querySelector("#customRol")?.value || "").trim() || "Colaborador";
-      const area = (document.querySelector("#customArea")?.value || "").trim() || "Talento Humano";
-
-      if (!nom && !ape) {
-        alert("Por favor ingresa al menos un nombre para personalizar tu Dashboard.");
-        return;
-      }
-
-      const nombreCompleto = [nom, ape].filter(Boolean).join(" ");
-      const nuevoUsuario = {
-        id: "custom-" + Date.now(),
-        nombres: nom || nombreCompleto,
-        apellidos: ape,
-        nombreCompleto: nombreCompleto,
-        rol: rol.toUpperCase(),
-        departamento: "Talento Humano",
-        area: area,
-        correo: `${nom.toLowerCase().replace(/\s+/g, ".") || "usuario"}@devdatep.com`,
-        avatarColor: "#0284c7"
-      };
-
-      guardarUsuarioActivo(nuevoUsuario);
-      dialog.close();
-    });
-  }
-}
-
-// Escuchar cambios de almacenamiento entre pestañas
-window.addEventListener("storage", (e) => {
-  if (e.key === USER_STORAGE_KEY) {
-    const user = obtenerUsuarioActivo();
-    actualizarUIUsuario(user);
-  }
-});
-
 // Eventos de barra de navegación móvil
 const menuToggle = document.querySelector("#menuToggle");
 if (menuToggle) {
@@ -560,9 +395,10 @@ window.addEventListener("hashchange", route);
 
 // Inicialización
 function initDashboard() {
-  const usuario = obtenerUsuarioActivo();
-  actualizarUIUsuario(usuario);
-  initProfileDialog();
+  try {
+    localStorage.removeItem("th_usuario_activo");
+  } catch (e) {}
+  actualizarUIUsuario(USUARIO_FIJO);
   renderCards();
   route();
 }
