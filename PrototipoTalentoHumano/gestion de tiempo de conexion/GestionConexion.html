@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tiempo de conexión | Talento Humano</title>
-  <link rel="stylesheet" href="GestionConexion.css?v=2">
-  <script type="module" src="GestionConexion.js?v=2"></script>
+  <link rel="stylesheet" href="GestionConexion.css?v=20261120">
+  <script src="../shared/data/thDataGlobal.js?v=20261120"></script>
+  <script src="GestionConexion.js?v=20261120" defer></script>
 </head>
 <body>
   <main>
@@ -74,7 +75,7 @@
               <th>Colaborador</th>
               <th>Ubicación</th>
               <th>Racha de puntualidad</th>
-              <th>Tiempo conectado</th>
+              <th>Tiempo de conexión por día</th>
               <th>Dentro del rango</th>
               <th>Promedio diario</th>
               <th>Estado</th>
@@ -91,7 +92,7 @@
 
     <!-- Regla de negocio al pie -->
     <p class="footnote">
-      <strong>Métricas de conexión:</strong> La jornada base diaria es de 5 horas de lunes a viernes (meta de período: 85 horas mensuales). Se considera un desempeño <em>Excelente</em> a partir de 5 horas diarias registradas con marcación puntual dentro del rango horario acordado.
+      <strong>Métricas de conexión por día:</strong> La jornada base diaria es de 5 horas de lunes a viernes (meta diaria: 5h). Se supervisa el tiempo efectivo conectado por jornada y se considera un desempeño <em>Excelente</em> a partir de 5 horas diarias registradas con marcación puntual dentro del rango horario acordado.
     </p>
   </main>
 
@@ -103,12 +104,6 @@
           ← Volver a la lista general
         </button>
         <span class="dash-modal-badge">Vista individual del colaborador</span>
-      </div>
-      <div class="dash-modal-center">
-        <label class="dash-colab-picker-label">
-          <span>Consultar otro colaborador:</span>
-          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
-        </label>
       </div>
       <div class="dash-modal-right">
         <button type="button" data-close="modalDetalleConexion" class="dash-close-x" aria-label="Cerrar modal">×</button>

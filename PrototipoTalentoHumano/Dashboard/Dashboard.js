@@ -347,11 +347,9 @@ function route() {
     if (parentGroup) parentGroup.open = true;
 
     document.querySelector("#moduleTitle").textContent = module.name;
-    let url = "../" + module.path;
+    let url = "../" + module.path + "?v=20261120-file-compat-v5";
     if (module.id === "colaboradores" && targetTab) {
       url += "#" + targetTab;
-    } else if (module.id === "organigrama") {
-      url += "?v=20261117-vertical-2";
     }
     directLink.href = url;
     frame.title = module.name;
