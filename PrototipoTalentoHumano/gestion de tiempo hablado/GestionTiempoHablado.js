@@ -1,3 +1,4 @@
+(function() {
 "use strict";
 
 /**
@@ -764,3 +765,4 @@ if (document.readyState === "loading") {
 } else {
   iniciarModulo();
 }
+})();
