@@ -14,7 +14,7 @@
       <div>
         <p class="eyebrow">Talento Humano</p>
         <h1>Gestión de bajas</h1>
-        <p class="page-description">Consulta y administra los registros de bajas y blacklist.</p>
+        <p class="page-description">Consulta y administra los registros de bajas.</p>
       </div>
       <button class="button button-primary" id="newRecordButton" type="button">
         <span aria-hidden="true">+</span>
@@ -24,7 +24,7 @@
 
     <div class="records-card">
       <!-- Navegación por pestañas -->
-      <nav class="tabs-nav" role="tablist" aria-label="Secciones de Bajas y Blacklist">
+      <nav class="tabs-nav" role="tablist" aria-label="Secciones de Bajas">
         <button type="button" class="tab-button active" id="tabButtonBajas" role="tab" aria-selected="true" aria-controls="viewBajas" data-tab="bajas">
           <span class="tab-label">Bajas</span>
           <span class="tab-badge" id="badgeBajas">0</span>
@@ -59,10 +59,23 @@
             <span class="search-icon" aria-hidden="true"></span>
             <input id="searchInputBajas" type="search" placeholder="Buscar por ID o nombre" autocomplete="off">
           </label>
+          <label class="filter-field" for="areaFilterBajas">
+            <span class="visually-hidden">Filtrar por área</span>
+            <select id="areaFilterBajas">
+              <option value="">Todas las áreas</option>
+            </select>
+          </label>
           <label class="filter-field" for="reasonFilterBajas">
             <span class="visually-hidden">Filtrar por motivo de baja</span>
             <select id="reasonFilterBajas">
               <option value="">Todos los motivos de baja</option>
+            </select>
+          </label>
+          <label class="filter-field" for="dateOrderFilterBajas">
+            <span class="visually-hidden">Ordenar por fecha</span>
+            <select id="dateOrderFilterBajas">
+              <option value="recent">Fecha más reciente</option>
+              <option value="oldest">Fecha más antigua</option>
             </select>
           </label>
         </div>
@@ -118,10 +131,23 @@
             <span class="search-icon" aria-hidden="true"></span>
             <input id="searchInputBlacklist" type="search" placeholder="Buscar por ID o nombre" autocomplete="off">
           </label>
+          <label class="filter-field" for="areaFilterBlacklist">
+            <span class="visually-hidden">Filtrar por área</span>
+            <select id="areaFilterBlacklist">
+              <option value="">Todas las áreas</option>
+            </select>
+          </label>
           <label class="filter-field" for="reasonFilterBlacklist">
             <span class="visually-hidden">Filtrar por motivo</span>
             <select id="reasonFilterBlacklist">
               <option value="">Todos los motivos</option>
+            </select>
+          </label>
+          <label class="filter-field" for="dateOrderFilterBlacklist">
+            <span class="visually-hidden">Ordenar por fecha</span>
+            <select id="dateOrderFilterBlacklist">
+              <option value="recent">Fecha más reciente</option>
+              <option value="oldest">Fecha más antigua</option>
             </select>
           </label>
         </div>
@@ -135,6 +161,7 @@
               <col class="column-reason">
               <col class="column-infringement">
               <col class="column-level">
+              <col class="column-date">
               <col class="column-document">
               <col class="column-actions">
             </colgroup>
@@ -146,6 +173,7 @@
                 <th scope="col">MOTIVO</th>
                 <th scope="col">INFRACCIÓN</th>
                 <th scope="col">NIVEL</th>
+                <th scope="col">FECHA</th>
                 <th scope="col">DOCUMENTO FIRMADO</th>
                 <th scope="col" class="actions-heading">ACCIONES</th>
               </tr>
@@ -176,15 +204,14 @@
         <div class="field field-full">
           <label for="recordCategory">Tipo de registro</label>
           <select id="recordCategory" name="recordCategory">
-            <option value="baja">Baja de practicante (Culminación / Retiro regular)</option>
-            <option value="blacklist">Blacklist (Infracción o motivo disciplinario)</option>
+            <option value="baja" selected>Registrar nueva baja (Baja de practicante)</option>
           </select>
         </div>
 
         <!-- Búsqueda y Selección de Colaborador -->
         <div class="field field-full collaborator-search-field">
-          <label for="collaboratorSearch">Buscar practicante / colaborador</label>
-          <input id="collaboratorSearch" name="collaboratorSearch" type="search" role="combobox" aria-autocomplete="list" aria-controls="collaboratorSuggestions" aria-expanded="false" aria-describedby="collaboratorSearchMessage" placeholder="Escribe el nombre o parte del nombre" autocomplete="off">
+          <label for="collaboratorSearch">Buscar por nombre o ID</label>
+          <input id="collaboratorSearch" name="collaboratorSearch" type="search" role="combobox" aria-autocomplete="list" aria-controls="collaboratorSuggestions" aria-expanded="false" aria-describedby="collaboratorSearchMessage" placeholder="Buscar por nombre o ID" autocomplete="off">
           <div id="collaboratorSuggestions" class="employee-suggestions" role="listbox" hidden></div>
           <p id="collaboratorSearchMessage" class="lookup-message" aria-live="polite"></p>
         </div>
@@ -251,32 +278,16 @@
             </select>
           </div>
 
+          <div class="field">
+            <label for="blacklistDate">Fecha de infracción / registro</label>
+            <input id="blacklistDate" name="blacklistDate" type="date">
+            <p class="field-hint">Fecha en que ocurrió o se registró la falta.</p>
+          </div>
+
           <div class="field field-full">
             <label for="infringement">Infracción específica</label>
             <select id="infringement" name="infringement" class="infringement-select" size="1">
-              <option value="">Seleccionar infracción</option>
-              <option value="AUSENCIA DINAMICAS">AUSENCIA DINAMICAS</option>
-              <option value="FALTA INJUSTIFICADA">FALTA INJUSTIFICADA</option>
-              <option value="TARDANZA">TARDANZA</option>
-              <option value="DESCONEXIÓN SIN PERMISO (CRUCE DE HORARIO)">DESCONEXIÓN SIN PERMISO (CRUCE DE HORARIO)</option>
-              <option value="INACTIVIDAD (TIEMPO HABLADO)">INACTIVIDAD (TIEMPO HABLADO)</option>
-              <option value="ABANDONO DE TRABAJO">ABANDONO DE TRABAJO</option>
-              <option value="DISCRIMINACIÓN">DISCRIMINACIÓN</option>
-              <option value="ACOSO LABORAL (COMPROBADO)">ACOSO LABORAL (COMPROBADO)</option>
-              <option value="ACOSO SEXUAL (COMPROBADO)">ACOSO SEXUAL (COMPROBADO)</option>
-              <option value="FALTA DE RESPETO (INSULTOS, GRITOS Y SIMILARES)">FALTA DE RESPETO (INSULTOS, GRITOS Y SIMILARES)</option>
-              <option value="DIVULGAR INFORMACIÓN CONFIDENCIAL QUE PUEDA PERJUDICAR A LA EMPRESA.">DIVULGAR INFORMACIÓN CONFIDENCIAL QUE PUEDA PERJUDICAR A LA EMPRESA.</option>
-              <option value="ELABORACIÓN O MANEJO DE DOCUMENTOS IMPORTANTES DE LA EMPRESA DESDE UN CORREO PERSONAL">ELABORACIÓN O MANEJO DE DOCUMENTOS IMPORTANTES DE LA EMPRESA DESDE UN CORREO PERSONAL</option>
-              <option value="USO INCORRECTO DE INFORMACIÓN DE LOS INTEGRANTES DE LA EMPRESA">USO INCORRECTO DE INFORMACIÓN DE LOS INTEGRANTES DE LA EMPRESA</option>
-              <option value="TRABAJAR BAJO INFLUENCIA DE ALCOHOL O DROGAS">TRABAJAR BAJO INFLUENCIA DE ALCOHOL O DROGAS</option>
-              <option value="PERTURBAR EL AMBIENTE LABORAL">PERTURBAR EL AMBIENTE LABORAL</option>
-              <option value="ACUMULACIÓN DE FALTAS (3 MEMOS)">ACUMULACIÓN DE FALTAS (3 MEMOS)</option>
-              <option value="DESOBEDECER INSTRUCCIONES EN EL TRABAJO.">DESOBEDECER INSTRUCCIONES EN EL TRABAJO.</option>
-              <option value="NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO">NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO</option>
-              <option value="POSPONER CONSTANTEMENTE LA MISMA ACTIVIDAD">POSPONER CONSTANTEMENTE LA MISMA ACTIVIDAD</option>
-              <option value="CUMPLIMIENTO DE LOS KPIS">CUMPLIMIENTO DE LOS KPIS</option>
-              <option value="REALIZAR ACTIVIDADES EXTRALABORALES SIN PERMISO">REALIZAR ACTIVIDADES EXTRALABORALES SIN PERMISO</option>
-              <option value="BAJO DESEMPEÑO (EVALUACIÓN DE LÍDERES)">BAJO DESEMPEÑO (EVALUACIÓN DE LÍDERES)</option>
+              <option value="">Selecciona primero un motivo de infracción</option>
             </select>
             <p class="field-hint">Selecciona la falta cometida que justifica el ingreso a lista negra.</p>
           </div>
@@ -305,7 +316,7 @@
 
       <div class="dialog-actions">
         <button class="button button-secondary" id="cancelFormButton" type="button">Cancelar</button>
-        <button class="button button-primary" type="submit">Guardar registro</button>
+        <button class="button button-primary" id="submitRecordButton" type="submit">Guardar registro</button>
       </div>
     </form>
   </dialog>

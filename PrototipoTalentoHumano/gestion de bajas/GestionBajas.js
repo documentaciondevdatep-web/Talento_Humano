@@ -2,7 +2,25 @@ import { obtenerColaboradores, obtenerNombreArea, obtenerNombreDepartamento } fr
 
 const STORAGE_KEY = "talentoHumanoBajasDemo";
 const STORAGE_VERSION_KEY = STORAGE_KEY + "Version";
-const STORAGE_VERSION = "5";
+const STORAGE_VERSION = "9";
+
+// Áreas oficiales según la estructura organizacional (Organigrama / catalogos.js)
+const OFFICIAL_AREAS = [
+  "Talento Humano",
+  "Desarrollo Web",
+  "Comercial",
+  "Reclutamiento",
+  "Capacitación",
+  "Clima y Cultura",
+  "Backend",
+  "Frontend",
+  "Base de Datos",
+  "Documentación",
+  "Diseño Web",
+  "Desarrollo Rápido de Aplicaciones",
+  "Diseño Gráfico",
+  "Marketing y Ventas"
+];
 
 const BAJA_MOTIVES = [
   "CULMINACIÓN DE PRÁCTICAS",
@@ -19,48 +37,69 @@ const BLACKLIST_MOTIVES = [
   "DESEMPEÑO"
 ];
 
+// Infracciones organizadas estrictamente por categoría
+const INFRACCIONES_POR_MOTIVO = {
+  "ASISTENCIA": [
+    "AUSENCIA DINÁMICAS",
+    "FALTA INJUSTIFICADA",
+    "TARDANZA",
+    "DESCONEXIÓN SIN PERMISO (CRUCE DE HORARIO)",
+    "ABANDONO DE TRABAJO",
+    "ACUMULACIÓN DE FALTAS (3 MEMOS)"
+  ],
+  "COMPORTAMIENTO": [
+    "DISCRIMINACIÓN",
+    "ACOSO LABORAL (COMPROBADO)",
+    "ACOSO SEXUAL (COMPROBADO)",
+    "FALTA DE RESPETO (INSULTOS, GRITOS Y SIMILARES)",
+    "DIVULGAR INFORMACIÓN CONFIDENCIAL QUE PUEDA PERJUDICAR A LA EMPRESA.",
+    "ELABORACIÓN O MANEJO DE DOCUMENTOS IMPORTANTES DE LA EMPRESA DESDE UN CORREO PERSONAL",
+    "USO INCORRECTO DE INFORMACIÓN DE LOS INTEGRANTES DE LA EMPRESA",
+    "TRABAJAR BAJO INFLUENCIA DE ALCOHOL O DROGAS",
+    "PERTURBAR EL AMBIENTE LABORAL",
+    "DESOBEDECER INSTRUCCIONES EN EL TRABAJO.",
+    "REALIZAR ACTIVIDADES EXTRALABORALES SIN PERMISO"
+  ],
+  "DESEMPEÑO": [
+    "INACTIVIDAD (TIEMPO HABLADO)",
+    "NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO",
+    "POSPONER CONSTANTEMENTE LA MISMA ACTIVIDAD",
+    "CUMPLIMIENTO DE LOS KPIS",
+    "BAJO DESEMPEÑO (EVALUACIÓN DE LÍDERES)"
+  ]
+};
+
 const INFRACTIONS = [
-  "AUSENCIA DINAMICAS",
-  "FALTA INJUSTIFICADA",
-  "TARDANZA",
-  "DESCONEXIÓN SIN PERMISO (CRUCE DE HORARIO)",
-  "INACTIVIDAD (TIEMPO HABLADO)",
-  "ABANDONO DE TRABAJO",
-  "DISCRIMINACIÓN",
-  "ACOSO LABORAL (COMPROBADO)",
-  "ACOSO SEXUAL (COMPROBADO)",
-  "FALTA DE RESPETO (INSULTOS, GRITOS Y SIMILARES)",
-  "DIVULGAR INFORMACIÓN CONFIDENCIAL QUE PUEDA PERJUDICAR A LA EMPRESA.",
-  "ELABORACIÓN O MANEJO DE DOCUMENTOS IMPORTANTES DE LA EMPRESA DESDE UN CORREO PERSONAL",
-  "USO INCORRECTO DE INFORMACIÓN DE LOS INTEGRANTES DE LA EMPRESA",
-  "TRABAJAR BAJO INFLUENCIA DE ALCOHOL O DROGAS",
-  "PERTURBAR EL AMBIENTE LABORAL",
-  "ACUMULACIÓN DE FALTAS (3 MEMOS)",
-  "DESOBEDECER INSTRUCCIONES EN EL TRABAJO.",
-  "NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO",
-  "POSPONER CONSTANTEMENTE LA MISMA ACTIVIDAD",
-  "CUMPLIMIENTO DE LOS KPIS",
-  "REALIZAR ACTIVIDADES EXTRALABORALES SIN PERMISO",
-  "BAJO DESEMPEÑO (EVALUACIÓN DE LÍDERES)"
+  ...INFRACCIONES_POR_MOTIVO["ASISTENCIA"],
+  ...INFRACCIONES_POR_MOTIVO["COMPORTAMIENTO"],
+  ...INFRACCIONES_POR_MOTIVO["DESEMPEÑO"],
+  "AUSENCIA DINAMICAS"
 ];
 
 const LEVELS = ["GRAVE", "MUY GRAVE"];
 
+// Colaboradores de demostración asignados a áreas oficiales
 const collaborators = {
   "1004": { name: "Rosmery Estefany Tenorio Nunja", area: "Marketing y Ventas" },
-  "982": { name: "Alexis Javier Blas Mendoza", area: "DESARROLLO WEB" },
+  "982": { name: "Alexis Javier Blas Mendoza", area: "Frontend" },
   "983": { name: "Yeremi Ponce", area: "Backend" },
   "1006": { name: "Alexander Raul Cisneros Jara", area: "Backend" },
-  "1020": { name: "Renato Sebastian Rubber Zegarra Lopez", area: "Backend" },
+  "1020": { name: "Renato Sebastian Rubber Zegarra Lopez", area: "Documentación" },
   "963": { name: "Leonardo Gabriel Perez La Rosa", area: "Desarrollo Rápido de Aplicaciones" },
   "1040": { name: "Rodrigo Franceso Corilla Cornejo", area: "Backend" },
-  "1013": { name: "Lenning Andree Zacarias Lopez", area: "Backend" },
+  "1013": { name: "Lenning Andree Zacarias Lopez", area: "Base de Datos" },
   "1021": { name: "Jhoel Anderson Gavidia Calderon", area: "Backend" },
-  "1015": { name: "Camila Fernanda Huamán Ríos", area: "Diseño UX/UI" },
-  "1028": { name: "Juan Carlos Quispe Silva", area: "Desarrollo Web" },
+  "1015": { name: "Camila Fernanda Huamán Ríos", area: "Diseño Web" },
+  "1028": { name: "Juan Carlos Quispe Silva", area: "Base de Datos" },
   "1035": { name: "Valeria Sofía Morales Castro", area: "Marketing y Ventas" },
   "1042": { name: "Christian Daniel Vega Reyes", area: "Backend" },
-  "1050": { name: "Andrea Nicole Mendoza Peña", area: "Talento Humano" }
+  "1050": { name: "Andrea Nicole Mendoza Peña", area: "Reclutamiento" },
+  "1051": { name: "Carlos Eduardo Salazar Torres", area: "Capacitación" },
+  "1052": { name: "Mariana Lucía Ramos Pinedo", area: "Clima y Cultura" },
+  "1055": { name: "Gabriel Alonso Flores Gómez", area: "Diseño Gráfico" },
+  "1060": { name: "Valeria Denisse Alarcón Vega", area: "Talento Humano" },
+  "1061": { name: "Mateo Sebastián Guerrero Silva", area: "Desarrollo Web" },
+  "1062": { name: "Fiorella Patricia Rivas Medina", area: "Comercial" }
 };
 
 // Carga opcional de colaboradores del sistema compartido
@@ -93,7 +132,7 @@ const sampleBajasRecords = [
     bajaReason: "CULMINACIÓN DE PRÁCTICAS",
     exitDate: "2026-11-15",
     documentName: "Constancia_Practicas_1015.pdf",
-    observation: "Culminó exitosamente las 480 horas reglamentarias del convenio de prácticas."
+    observation: "Culminó exitosamente las 480 horas reglamentarias del convenio de prácticas en Diseño Web."
   },
   {
     key: "demo-baja-1028",
@@ -104,7 +143,7 @@ const sampleBajasRecords = [
     bajaReason: "CULMINACIÓN DE PRÁCTICAS",
     exitDate: "2026-11-10",
     documentName: "Acta_Entrega_1028.pdf",
-    observation: "Periodo cumplido a satisfacción. Evaluaciones de desempeño aprobadas con felicitación."
+    observation: "Periodo cumplido a satisfacción en Base de Datos. Evaluaciones aprobadas con felicitación."
   },
   {
     key: "demo-baja-1035",
@@ -115,7 +154,7 @@ const sampleBajasRecords = [
     bajaReason: "RENUNCIA VOLUNTARIA",
     exitDate: "2026-11-02",
     documentName: "Carta_Renuncia_1035.pdf",
-    observation: "Retiro voluntario formalizado por cruce de horarios con clases presenciales universitarias."
+    observation: "Retiro voluntario formalizado en Marketing y Ventas por cruce de horarios universitarios."
   },
   {
     key: "demo-baja-1042",
@@ -126,7 +165,7 @@ const sampleBajasRecords = [
     bajaReason: "FIN DE CONVENIO",
     exitDate: "2026-10-28",
     documentName: "Informe_Final_1042.pdf",
-    observation: "Culminación de plazo pactado en el convenio formativo interinstitucional."
+    observation: "Culminación de plazo pactado en el convenio formativo en Backend."
   },
   {
     key: "demo-baja-1050",
@@ -137,7 +176,51 @@ const sampleBajasRecords = [
     bajaReason: "CULMINACIÓN DE PRÁCTICAS",
     exitDate: "2026-10-20",
     documentName: "Constancia_Practicas_1050.pdf",
-    observation: "Periodo de prácticas preprofesionales completado con entrega satisfactoria de cargo."
+    observation: "Periodo de prácticas preprofesionales en Reclutamiento completado con entrega de cargo."
+  },
+  {
+    key: "demo-baja-1051",
+    category: "baja",
+    id: "1051",
+    collaborator: collaborators["1051"].name,
+    area: collaborators["1051"].area,
+    bajaReason: "CULMINACIÓN DE PRÁCTICAS",
+    exitDate: "2026-10-15",
+    documentName: "Constancia_Practicas_1051.pdf",
+    observation: "Prácticas culminadas en el área de Capacitación con evaluaciones sobresalientes."
+  },
+  {
+    key: "demo-baja-1052",
+    category: "baja",
+    id: "1052",
+    collaborator: collaborators["1052"].name,
+    area: collaborators["1052"].area,
+    bajaReason: "FIN DE CONVENIO",
+    exitDate: "2026-10-05",
+    documentName: "Acta_Fin_Convenio_1052.pdf",
+    observation: "Finalización de convenio formativo en Clima y Cultura por término de plazo pactado."
+  },
+  {
+    key: "demo-baja-1060",
+    category: "baja",
+    id: "1060",
+    collaborator: collaborators["1060"].name,
+    area: collaborators["1060"].area,
+    bajaReason: "CULMINACIÓN DE PRÁCTICAS",
+    exitDate: "2026-11-18",
+    documentName: "Constancia_Practicas_1060.pdf",
+    observation: "Culminación de prácticas preprofesionales en el área de Talento Humano."
+  },
+  {
+    key: "demo-baja-1062",
+    category: "baja",
+    id: "1062",
+    collaborator: collaborators["1062"].name,
+    area: collaborators["1062"].area,
+    bajaReason: "FIN DE CONVENIO",
+    exitDate: "2026-11-12",
+    documentName: "Acta_Fin_Convenio_1062.pdf",
+    observation: "Término formal del convenio de prácticas en el área Comercial."
   }
 ];
 
@@ -153,8 +236,9 @@ const sampleBlacklistRecords = [
     customReason: "",
     infringement: "ABANDONO DE TRABAJO",
     level: "GRAVE",
+    date: "2026-11-16",
     documentName: "",
-    observation: ""
+    observation: "Abandono injustificado de funciones en Marketing y Ventas."
   },
   {
     key: "demo-982",
@@ -166,8 +250,9 @@ const sampleBlacklistRecords = [
     customReason: "",
     infringement: "ABANDONO DE TRABAJO",
     level: "GRAVE",
+    date: "2026-11-14",
     documentName: "",
-    observation: ""
+    observation: "Inasistencia consecutiva sin justificación en Frontend."
   },
   {
     key: "demo-983",
@@ -175,12 +260,13 @@ const sampleBlacklistRecords = [
     id: "983",
     collaborator: collaborators["983"].name,
     area: collaborators["983"].area,
-    reason: "ASISTENCIA",
+    reason: "COMPORTAMIENTO",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
+    infringement: "FALTA DE RESPETO (INSULTOS, GRITOS Y SIMILARES)",
     level: "GRAVE",
+    date: "2026-11-09",
     documentName: "",
-    observation: ""
+    observation: "Incidente reiterado de comunicación indebida en el equipo de Backend."
   },
   {
     key: "demo-1006",
@@ -188,12 +274,13 @@ const sampleBlacklistRecords = [
     id: "1006",
     collaborator: collaborators["1006"].name,
     area: collaborators["1006"].area,
-    reason: "ASISTENCIA",
+    reason: "DESEMPEÑO",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
+    infringement: "NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO",
     level: "GRAVE",
+    date: "2026-10-30",
     documentName: "",
-    observation: ""
+    observation: "Incumplimiento reiterado en las entregas de Backend."
   },
   {
     key: "demo-1020",
@@ -203,10 +290,11 @@ const sampleBlacklistRecords = [
     area: collaborators["1020"].area,
     reason: "ASISTENCIA",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
+    infringement: "FALTA INJUSTIFICADA",
     level: "GRAVE",
+    date: "2026-10-25",
     documentName: "",
-    observation: ""
+    observation: "Ausencias reiteradas sin aviso en el área de Documentación."
   },
   {
     key: "demo-963",
@@ -216,49 +304,39 @@ const sampleBlacklistRecords = [
     area: collaborators["963"].area,
     reason: "ASISTENCIA",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
+    infringement: "DESCONEXIÓN SIN PERMISO (CRUCE DE HORARIO)",
     level: "GRAVE",
+    date: "2026-10-18",
     documentName: "",
-    observation: ""
+    observation: "Desconexiones sin permiso en Desarrollo Rápido de Aplicaciones."
   },
   {
-    key: "demo-1040",
+    key: "demo-1055",
     category: "blacklist",
-    id: "1040",
-    collaborator: collaborators["1040"].name,
-    area: collaborators["1040"].area,
-    reason: "ASISTENCIA",
+    id: "1055",
+    collaborator: collaborators["1055"].name,
+    area: collaborators["1055"].area,
+    reason: "COMPORTAMIENTO",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
-    level: "GRAVE",
+    infringement: "PERTURBAR EL AMBIENTE LABORAL",
+    level: "MUY GRAVE",
+    date: "2026-10-10",
     documentName: "",
-    observation: ""
+    observation: "Falta muy grave por generar discordia en Diseño Gráfico."
   },
   {
-    key: "demo-1013",
+    key: "demo-1061",
     category: "blacklist",
-    id: "1013",
-    collaborator: collaborators["1013"].name,
-    area: collaborators["1013"].area,
-    reason: "ASISTENCIA",
+    id: "1061",
+    collaborator: collaborators["1061"].name,
+    area: collaborators["1061"].area,
+    reason: "DESEMPEÑO",
     customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
+    infringement: "NO PRESENTAR LOS AVANCES ACORDADOS A TIEMPO",
     level: "GRAVE",
+    date: "2026-11-19",
     documentName: "",
-    observation: ""
-  },
-  {
-    key: "demo-1021",
-    category: "blacklist",
-    id: "1021",
-    collaborator: collaborators["1021"].name,
-    area: collaborators["1021"].area,
-    reason: "ASISTENCIA",
-    customReason: "",
-    infringement: "ABANDONO DE TRABAJO",
-    level: "GRAVE",
-    documentName: "",
-    observation: ""
+    observation: "Incumplimiento reiterado en las entregas del sprint en Desarrollo Web."
   }
 ];
 
@@ -276,13 +354,17 @@ const newRecordButtonText = document.getElementById("newRecordButtonText");
 
 // Tabla Bajas
 const searchInputBajas = document.getElementById("searchInputBajas");
+const areaFilterBajas = document.getElementById("areaFilterBajas");
 const reasonFilterBajas = document.getElementById("reasonFilterBajas");
+const dateOrderFilterBajas = document.getElementById("dateOrderFilterBajas");
 const recordsCountBajas = document.getElementById("recordsCountBajas");
 const recordsTableBodyBajas = document.getElementById("recordsTableBodyBajas");
 
 // Tabla Blacklist
 const searchInputBlacklist = document.getElementById("searchInputBlacklist");
+const areaFilterBlacklist = document.getElementById("areaFilterBlacklist");
 const reasonFilterBlacklist = document.getElementById("reasonFilterBlacklist");
+const dateOrderFilterBlacklist = document.getElementById("dateOrderFilterBlacklist");
 const recordsCountBlacklist = document.getElementById("recordsCountBlacklist");
 const recordsTableBodyBlacklist = document.getElementById("recordsTableBodyBlacklist");
 
@@ -309,6 +391,7 @@ const blacklistFieldsGroup = document.getElementById("blacklistFieldsGroup");
 const reasonSelect = document.getElementById("reason");
 const infringementSelect = document.getElementById("infringement");
 const levelSelect = document.getElementById("level");
+const blacklistDateInput = document.getElementById("blacklistDate");
 
 // Campos comunes
 const signedDocumentInput = document.getElementById("signedDocument");
@@ -401,6 +484,7 @@ function normalizeStoredRecord(record) {
       normalized.legacyLevel = normalized.legacyLevel || normalized.level;
       normalized.level = "";
     }
+    normalized.date = normalized.date || "2026-11-01";
   }
 
   return normalized;
@@ -475,6 +559,7 @@ function setActiveTab(tab) {
   viewBlacklist.hidden = isBajas;
 
   newRecordButtonText.textContent = isBajas ? "Registrar nueva baja" : "Registrar en Blacklist";
+  updateFormCategoryUI(isBajas ? "baja" : "blacklist");
 }
 
 tabButtonBajas.addEventListener("click", function () {
@@ -487,6 +572,29 @@ tabButtonBlacklist.addEventListener("click", function () {
 
 // Renderizado de Filtros de Selección
 function renderFiltersOptions() {
+  // Filtros de Área (Bajas y Blacklist)
+  if (areaFilterBajas) {
+    const currentAreaBajas = areaFilterBajas.value;
+    areaFilterBajas.innerHTML = '<option value="">Todas las áreas</option>' +
+      OFFICIAL_AREAS.map(function (a) {
+        return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + "</option>";
+      }).join("");
+    if (OFFICIAL_AREAS.includes(currentAreaBajas)) {
+      areaFilterBajas.value = currentAreaBajas;
+    }
+  }
+
+  if (areaFilterBlacklist) {
+    const currentAreaBlacklist = areaFilterBlacklist.value;
+    areaFilterBlacklist.innerHTML = '<option value="">Todas las áreas</option>' +
+      OFFICIAL_AREAS.map(function (a) {
+        return '<option value="' + escapeHtml(a) + '">' + escapeHtml(a) + "</option>";
+      }).join("");
+    if (OFFICIAL_AREAS.includes(currentAreaBlacklist)) {
+      areaFilterBlacklist.value = currentAreaBlacklist;
+    }
+  }
+
   // Filtro de Bajas
   const currentBajaValue = reasonFilterBajas.value;
   reasonFilterBajas.innerHTML = '<option value="">Todos los motivos de baja</option>' +
@@ -517,19 +625,33 @@ function renderBajasTable() {
 
   const query = searchInputBajas.value.trim().toLocaleLowerCase("es");
   const selectedReason = reasonFilterBajas.value;
+  const selectedArea = areaFilterBajas ? areaFilterBajas.value : "";
+  const dateOrder = dateOrderFilterBajas ? dateOrderFilterBajas.value : "recent";
 
   const filtered = allBajas.filter(function (record) {
     const matchesQuery = !query
       || record.id.toLocaleLowerCase("es").includes(query)
-      || record.collaborator.toLocaleLowerCase("es").includes(query);
+      || record.collaborator.toLocaleLowerCase("es").includes(query)
+      || (record.area && record.area.toLocaleLowerCase("es").includes(query));
     const matchesReason = !selectedReason || record.bajaReason === selectedReason;
-    return matchesQuery && matchesReason;
+    const matchesArea = !selectedArea || record.area === selectedArea;
+    return matchesQuery && matchesReason && matchesArea;
+  });
+
+  // Ordenar por fecha más reciente o más antigua
+  filtered.sort(function (a, b) {
+    const dateA = a.exitDate || "";
+    const dateB = b.exitDate || "";
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    return dateOrder === "oldest" ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
   });
 
   recordsCountBajas.textContent = filtered.length + (filtered.length === 1 ? " registro" : " registros");
 
   if (filtered.length === 0) {
-    const hasFilters = Boolean(query || selectedReason);
+    const hasFilters = Boolean(query || selectedReason || selectedArea);
     recordsTableBodyBajas.innerHTML = '<tr><td class="empty-row" colspan="7">' +
       (hasFilters ? "No hay registros de bajas que coincidan con los filtros aplicados." : "Aún no hay practicantes registrados con baja. Haz clic en 'Registrar nueva baja' para agregar uno.") +
       "</td></tr>";
@@ -569,20 +691,34 @@ function renderBlacklistTable() {
 
   const query = searchInputBlacklist.value.trim().toLocaleLowerCase("es");
   const selectedReason = reasonFilterBlacklist.value;
+  const selectedArea = areaFilterBlacklist ? areaFilterBlacklist.value : "";
+  const dateOrder = dateOrderFilterBlacklist ? dateOrderFilterBlacklist.value : "recent";
 
   const filtered = allBlacklist.filter(function (record) {
     const matchesQuery = !query
       || record.id.toLocaleLowerCase("es").includes(query)
-      || record.collaborator.toLocaleLowerCase("es").includes(query);
+      || record.collaborator.toLocaleLowerCase("es").includes(query)
+      || (record.area && record.area.toLocaleLowerCase("es").includes(query));
     const matchesReason = !selectedReason || record.reason === selectedReason;
-    return matchesQuery && matchesReason;
+    const matchesArea = !selectedArea || record.area === selectedArea;
+    return matchesQuery && matchesReason && matchesArea;
+  });
+
+  // Ordenar por fecha más reciente o más antigua
+  filtered.sort(function (a, b) {
+    const dateA = a.date || "";
+    const dateB = b.date || "";
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    return dateOrder === "oldest" ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
   });
 
   recordsCountBlacklist.textContent = filtered.length + (filtered.length === 1 ? " registro" : " registros");
 
   if (filtered.length === 0) {
     const hasFilters = Boolean(query || selectedReason);
-    recordsTableBodyBlacklist.innerHTML = '<tr><td class="empty-row" colspan="8">' +
+    recordsTableBodyBlacklist.innerHTML = '<tr><td class="empty-row" colspan="9">' +
       (hasFilters ? "No hay registros en Blacklist que coincidan con la búsqueda." : "Aún no hay colaboradores en lista negra. Puedes registrar uno con el botón superior.") +
       "</td></tr>";
     return;
@@ -601,6 +737,7 @@ function renderBlacklistTable() {
       + "<td>" + (levelDisplay
         ? '<span class="level-badge' + (isMuyGrave ? ' muy-grave' : '') + '">' + escapeHtml(levelDisplay) + "</span>"
         : "—") + "</td>"
+      + "<td>" + escapeHtml(formatDateDisplay(record.date)) + "</td>"
       + "<td>" + (record.documentName
         ? '<span class="document-name" title="' + escapeHtml(record.documentName) + '">' + escapeHtml(record.documentName) + "</span>"
         : '<span class="empty-document">—</span>') + "</td>"
@@ -641,13 +778,15 @@ function searchCollaborators(query) {
   }
 
   const matches = Object.keys(collaborators).filter(function (id) {
-    return collaborators[id].name.toLocaleLowerCase("es").includes(normalizedQuery);
+    const colab = collaborators[id];
+    return id.toLocaleLowerCase("es").includes(normalizedQuery) ||
+           colab.name.toLocaleLowerCase("es").includes(normalizedQuery);
   });
 
   if (matches.length === 0) {
     collaboratorSuggestions.innerHTML = "";
     setSuggestionsVisible(false);
-    setCollaboratorSearchMessage("No se encontraron colaboradores con ese nombre.", "error");
+    setCollaboratorSearchMessage("No se encontraron colaboradores con ese nombre o ID.", "error");
     return;
   }
 
@@ -696,10 +835,65 @@ function updateFormCategoryUI(category) {
   bajaFieldsGroup.hidden = !isBaja;
   blacklistFieldsGroup.hidden = isBaja;
 
+  // En la pestaña de Bajas solo está la opción de baja; en Blacklist solo la de blacklist
+  if (recordCategorySelect) {
+    if (isBaja) {
+      recordCategorySelect.innerHTML = '<option value="baja" selected>Registrar nueva baja (Baja de practicante)</option>';
+      recordCategorySelect.value = "baja";
+    } else {
+      recordCategorySelect.innerHTML = '<option value="blacklist" selected>Registrar en Blacklist (Infracción disciplinaria)</option>';
+      recordCategorySelect.value = "blacklist";
+    }
+  }
+
   if (editingKey) {
     formDialogTitle.textContent = isBaja ? "Editar baja de practicante" : "Editar colaborador en Blacklist";
   } else {
     formDialogTitle.textContent = isBaja ? "Registrar nueva baja" : "Registrar en Blacklist";
+  }
+
+  const submitBtn = document.getElementById("submitRecordButton");
+  if (submitBtn) {
+    submitBtn.textContent = isBaja ? "Guardar baja" : "Guardar en Blacklist";
+  }
+
+  const searchLabel = document.querySelector("label[for='collaboratorSearch']");
+  if (searchLabel) {
+    searchLabel.textContent = "Buscar por nombre o ID";
+  }
+  if (collaboratorSearchInput) {
+    collaboratorSearchInput.placeholder = "Buscar por nombre o ID";
+  }
+}
+
+// Actualización dinámica de opciones de Infracción según Motivo seleccionado
+function updateInfringementOptions(reason, selectedValue) {
+  if (!infringementSelect) return;
+
+  const options = INFRACCIONES_POR_MOTIVO[reason] || [];
+
+  if (options.length === 0) {
+    infringementSelect.innerHTML = '<option value="">Primero selecciona un motivo de infracción</option>';
+    infringementSelect.value = "";
+    return;
+  }
+
+  let html = '<option value="">Seleccionar infracción</option>';
+  options.forEach(function (inf) {
+    html += '<option value="' + escapeHtml(inf) + '">' + escapeHtml(inf) + '</option>';
+  });
+  infringementSelect.innerHTML = html;
+
+  if (selectedValue) {
+    if (options.includes(selectedValue)) {
+      infringementSelect.value = selectedValue;
+    } else if (selectedValue === "AUSENCIA DINAMICAS" && options.includes("AUSENCIA DINÁMICAS")) {
+      infringementSelect.value = "AUSENCIA DINÁMICAS";
+    } else {
+      infringementSelect.value = "";
+    }
+  } else {
+    infringementSelect.value = "";
   }
 }
 
@@ -715,15 +909,17 @@ function resetForm() {
   legacyRecordNotice.textContent = "";
   setCollaboratorSearchMessage("", "");
 
-  // Por defecto ajusta a la pestaña activa
-  recordCategorySelect.value = currentTab;
-  updateFormCategoryUI(currentTab);
+  // Por defecto ajusta a la categoría de la pestaña activa (baja o blacklist)
+  const category = currentTab === "bajas" ? "baja" : "blacklist";
+  updateFormCategoryUI(category);
+  updateInfringementOptions("", "");
+  if (blacklistDateInput) blacklistDateInput.value = "";
 }
 
 function openCreateDialog() {
   resetForm();
-  recordCategorySelect.value = currentTab;
-  updateFormCategoryUI(currentTab);
+  const category = currentTab === "bajas" ? "baja" : "blacklist";
+  updateFormCategoryUI(category);
   formDialog.showModal();
   collaboratorSearchInput.focus();
 }
@@ -740,8 +936,8 @@ function openEditDialog(key) {
   resetForm();
   editingKey = record.key;
   retainedDocumentName = record.documentName || "";
-  recordCategorySelect.value = record.category || "blacklist";
-  updateFormCategoryUI(recordCategorySelect.value);
+  const category = record.category || (currentTab === "bajas" ? "baja" : "blacklist");
+  updateFormCategoryUI(category);
 
   if (!selectCollaborator(record.id)) {
     collaboratorSearchInput.value = record.collaborator;
@@ -754,10 +950,13 @@ function openEditDialog(key) {
   if (record.category === "baja") {
     bajaReasonSelect.value = BAJA_MOTIVES.includes(record.bajaReason) ? record.bajaReason : "";
     exitDateInput.value = record.exitDate || "";
+    if (blacklistDateInput) blacklistDateInput.value = "";
+    updateInfringementOptions("", "");
   } else {
     reasonSelect.value = BLACKLIST_MOTIVES.includes(record.reason) ? record.reason : "";
-    infringementSelect.value = INFRACTIONS.includes(record.infringement) ? record.infringement : "";
+    updateInfringementOptions(reasonSelect.value, record.infringement || record.legacyInfringement || "");
     levelSelect.value = LEVELS.includes(record.level) ? record.level : "";
+    if (blacklistDateInput) blacklistDateInput.value = record.date || "";
 
     const legacyValues = [
       record.legacyReason && "Motivo anterior: " + record.legacyReason,
@@ -808,6 +1007,7 @@ function openDetailsDialog(key) {
     fields.push(["Motivo", record.reason || record.legacyReason || "—"]);
     fields.push(["Infracción", record.infringement || record.legacyInfringement || "—"]);
     fields.push(["Nivel", record.level || record.legacyLevel || "—"]);
+    fields.push(["Fecha de infracción / registro", formatDateDisplay(record.date)]);
     if (record.legacyReason) {
       fields.push(["Motivo anterior", record.legacyReason]);
     }
@@ -861,12 +1061,27 @@ recordCategorySelect.addEventListener("change", function () {
   updateFormCategoryUI(recordCategorySelect.value);
 });
 
+if (reasonSelect) {
+  reasonSelect.addEventListener("change", function () {
+    updateInfringementOptions(reasonSelect.value, "");
+  });
+}
+
 collaboratorSearchInput.addEventListener("input", function () {
   selectedCollaboratorId = null;
   employeeNameInput.value = "";
   employeeIdInput.value = "";
   employeeAreaInput.value = "";
   searchCollaborators(collaboratorSearchInput.value);
+});
+
+collaboratorSearchInput.addEventListener("change", function () {
+  if (!selectedCollaboratorId) {
+    const query = collaboratorSearchInput.value.trim();
+    if (query && collaborators[query]) {
+      selectCollaborator(query);
+    }
+  }
 });
 
 collaboratorSearchInput.addEventListener("keydown", function (event) {
@@ -903,10 +1118,14 @@ document.getElementById("removeDocumentButton").addEventListener("click", functi
 
 // Filtros y búsquedas por pestaña
 searchInputBajas.addEventListener("input", renderBajasTable);
+if (areaFilterBajas) areaFilterBajas.addEventListener("change", renderBajasTable);
 reasonFilterBajas.addEventListener("change", renderBajasTable);
+if (dateOrderFilterBajas) dateOrderFilterBajas.addEventListener("change", renderBajasTable);
 
 searchInputBlacklist.addEventListener("input", renderBlacklistTable);
+if (areaFilterBlacklist) areaFilterBlacklist.addEventListener("change", renderBlacklistTable);
 reasonFilterBlacklist.addEventListener("change", renderBlacklistTable);
+if (dateOrderFilterBlacklist) dateOrderFilterBlacklist.addEventListener("change", renderBlacklistTable);
 
 // Acciones en las tablas
 recordsTableBodyBajas.addEventListener("click", function (event) {
@@ -987,6 +1206,7 @@ recordForm.addEventListener("submit", function (event) {
       legacyInfringement: existingRecord ? existingRecord.legacyInfringement || "" : "",
       level: levelSelect.value,
       legacyLevel: existingRecord ? existingRecord.legacyLevel || "" : "",
+      date: (blacklistDateInput && blacklistDateInput.value) || (existingRecord ? existingRecord.date : new Date().toISOString().slice(0, 10)),
       documentName: selectedFile || "",
       observation: observationInput.value.trim()
     };
@@ -1012,3 +1232,4 @@ detailsDialog.addEventListener("close", function () {
 loadRecords();
 renderRecords();
 setActiveTab("bajas");
+updateInfringementOptions("", "");

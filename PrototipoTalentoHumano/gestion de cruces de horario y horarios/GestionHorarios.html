@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f4f6fb" />
     <title>Gestión de Cruces y Horarios</title>
-    <link rel="stylesheet" href="GestionHorarios.css?v=2" />
-    <script src="GestionHorarios.js?v=2" defer></script>
+    <link rel="stylesheet" href="GestionHorarios.css" />
+    <script src="GestionHorarios.js" defer></script>
   </head>
   <body>
     <main class="page-shell">
@@ -25,9 +25,21 @@
       </header>
 
       <section class="records-card" aria-labelledby="recordsHeading">
+        <!-- Navegación por pestañas: Pendientes e Historial -->
+        <nav class="tabs-nav" role="tablist" aria-label="Secciones de Cruces de Horario">
+          <button type="button" class="tab-button active" id="tabButtonPending" role="tab" aria-selected="true" data-tab="pending">
+            <span class="tab-label">Pendientes</span>
+            <span class="tab-badge" id="badgePending">0</span>
+          </button>
+          <button type="button" class="tab-button" id="tabButtonHistory" role="tab" aria-selected="false" data-tab="history">
+            <span class="tab-label">Historial</span>
+            <span class="tab-badge" id="badgeHistory">0</span>
+          </button>
+        </nav>
+
         <div class="section-heading">
           <div>
-            <h2 id="recordsHeading">Cruces registrados</h2>
+            <h2 id="recordsHeading">Cruces pendientes</h2>
             <p id="recordsCount" class="muted-text">0 registros</p>
           </div>
         </div>
@@ -45,9 +57,9 @@
           </label>
 
           <label class="filter-field" for="departmentFilter">
-            <span class="visually-hidden">Filtrar por departamento</span>
+            <span class="visually-hidden">Filtrar por área</span>
             <select id="departmentFilter">
-              <option value="">Todos los departamentos</option>
+              <option value="">Todas las áreas</option>
             </select>
           </label>
 
@@ -58,10 +70,12 @@
             </select>
           </label>
 
-          <label class="filter-field" for="statusFilter">
+          <label class="filter-field" for="historyStatusFilter" id="historyStatusFilterLabel" style="display: none;">
             <span class="visually-hidden">Filtrar por estado</span>
-            <select id="statusFilter">
+            <select id="historyStatusFilter">
               <option value="">Todos los estados</option>
+              <option value="approved">Aprobado</option>
+              <option value="rejected">Rechazado</option>
             </select>
           </label>
         </div>
@@ -71,27 +85,25 @@
             <colgroup>
               <col class="column-id" />
               <col class="column-name" />
+              <col class="column-area" />
               <col class="column-day" />
               <col class="column-entry" />
               <col class="column-exit" />
               <col class="column-hours" />
-              <col class="column-from" />
-              <col class="column-to" />
-              <col class="column-status" />
+              <col class="column-status" id="colStatus" style="display: none;" />
               <col class="column-actions" />
             </colgroup>
             <thead>
               <tr>
                 <th scope="col">ID</th>
                 <th scope="col">NOMBRE COMPLETO</th>
+                <th scope="col">ÁREA</th>
                 <th scope="col">DÍA</th>
                 <th scope="col">HORA DE INGRESO</th>
                 <th scope="col">HORA DE SALIDA</th>
                 <th scope="col">HORAS QUE DEBEN</th>
-                <th scope="col">DESDE</th>
-                <th scope="col">HASTA</th>
-                <th scope="col">ESTADO</th>
-                <th scope="col" class="actions-heading">ACCIONES</th>
+                <th scope="col" id="thStatusCol" style="display: none;">RESOLUCIÓN</th>
+                <th scope="col" class="actions-heading">ACCIÓN</th>
               </tr>
             </thead>
             <tbody id="recordsTableBody"></tbody>
@@ -102,40 +114,149 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
+    <!-- DIALOG CONSULTA Y VALIDACIÓN -->
     <dialog id="detailsDialog" class="dialog" aria-labelledby="detailsDialogTitle">
       <div class="dialog-content">
         <div class="dialog-header">
           <div>
-            <p class="eyebrow">Consulta y validación</p>
+            <p class="eyebrow">CONSULTA Y VALIDACIÓN</p>
             <h2 id="detailsDialogTitle">Detalle del cruce</h2>
           </div>
           <button class="icon-button" id="closeDetailsButton" type="button" aria-label="Cerrar detalle">×</button>
         </div>
 
         <div class="detail-layout">
+          <!-- COLUMNA IZQUIERDA: Campos solicitados y Observación -->
           <section class="detail-panel">
-            <dl id="recordDetails" class="details-grid"></dl>
+            <div id="recordDetails" class="details-grid"></div>
+
+            <div class="observation-box">
+              <label for="recordObservationInput" class="observation-label">OBSERVACIÓN</label>
+              <textarea
+                id="recordObservationInput"
+                class="observation-textarea"
+                rows="3"
+                placeholder="Registrar o editar observación..."
+              ></textarea>
+              <div class="observation-actions" id="observationActions">
+                <button type="button" id="saveObservationButton" class="small-button primary">
+                  Guardar observación
+                </button>
+              </div>
+            </div>
+
+            <div class="dialog-actions-left" id="dialogActionsLeft">
+              <button class="button button-secondary" id="closeDetailsAction" type="button">Cerrar</button>
+            </div>
           </section>
 
-          <aside class="evidence-panel">
+          <!-- COLUMNA DERECHA: Horario Semanal y Evidencia Universitaria -->
+          <aside class="schedule-evidence-panel">
             <div class="evidence-header">
               <h3>Evidencia del horario</h3>
-              <span id="evidenceStatus" class="evidence-status">Sin evidencia</span>
+              <span id="evidenceStatus" class="evidence-status">EVIDENCIA DISPONIBLE</span>
             </div>
-            <div id="evidencePreview" class="evidence-preview evidence-placeholder" aria-live="polite">
-              <div class="placeholder-icon" aria-hidden="true">🗂️</div>
-              <p id="evidenceText">No se adjuntó evidencia para este registro.</p>
+
+            <!-- Visualización semanal del horario de lunes a viernes (7:00 am a 1:00 pm) -->
+            <div class="weekly-schedule-card">
+              <div class="schedule-toolbar">
+                <div class="schedule-toolbar-left">
+                  <div class="schedule-days-pill" id="scheduleDaysPill">
+                    <span class="status-indicator-dot"></span>
+                    <span id="selectedDaysSummaryText">0 / 2 días seleccionados</span>
+                  </div>
+                  <span class="schedule-help-tag">7:00 am - 1:00 pm · Máx. 2 días</span>
+                </div>
+                <div class="schedule-toolbar-right">
+                  <button type="button" id="editScheduleBtn" class="small-button secondary edit-schedule-btn">
+                    <span aria-hidden="true">✏️</span> Modificar
+                  </button>
+                </div>
+              </div>
+
+              <div class="schedule-grid-wrap">
+                <table class="schedule-grid-table readonly-mode" id="scheduleGridTable">
+                  <thead>
+                    <tr>
+                      <th class="time-header">Hora</th>
+                      <th>Lun</th>
+                      <th>Mar</th>
+                      <th>Mié</th>
+                      <th>Jue</th>
+                      <th>Vie</th>
+                    </tr>
+                  </thead>
+                  <tbody id="scheduleGridBody">
+                    <!-- Filas de horas de 07:00 a 13:00 generadas dinámicamente -->
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="schedule-hours-summary">
+                <span class="summary-title">Horas de cruce:</span>
+                <span id="scheduleHoursRangeText" class="summary-text">Sin bloques seleccionados</span>
+              </div>
+
+              <div id="scheduleEditNotice" class="schedule-edit-notice" style="display: none;">
+                <span class="notice-icon">✏️</span>
+                <span>Modo edición activo: Haz clic en los cuadraditos para marcar o desmarcar horas (máx. 2 días). Al finalizar pulsa <strong>Guardar horario</strong>.</span>
+              </div>
+
+              <p class="schedule-footnote">
+                Se conserva la evidencia documentada por el colaborador para revisión de Talento Humano.
+              </p>
             </div>
-            <p id="evidenceMeta" class="evidence-meta"></p>
+
+            <!-- Sección de evidencia universitaria adjunta -->
+            <div class="university-evidence-box">
+              <div class="evidence-card-header">
+                <h4>Evidencia adjunta del horario universitario</h4>
+                <div class="evidence-header-actions">
+                  <button type="button" id="addEvidenceBtn" class="small-button secondary add-evidence-btn" style="display: none;" title="Adjuntar documento o imagen">
+                    <span aria-hidden="true">➕</span> Adjuntar archivo
+                  </button>
+                  <button type="button" id="removeEvidenceBtn" class="small-button secondary remove-evidence-btn" style="display: none;" title="Quitar archivo adjunto">
+                    <span aria-hidden="true">🗑️</span> Quitar
+                  </button>
+                  <input type="file" id="evidenceFileInput" accept="image/*,.pdf" style="display: none;" />
+                </div>
+              </div>
+
+              <div id="evidencePreview" class="evidence-preview" aria-live="polite">
+                <!-- Imagen, Tarjeta PDF o mensaje «Sin evidencia disponible» -->
+              </div>
+            </div>
+
+            <!-- Botones de evaluación: Rechazar y Aprobar -->
+            <div class="dialog-actions-right" id="dialogActionsRight">
+              <button class="button button-warning" id="revertPendingButton" type="button" style="display: none;">
+                <span aria-hidden="true">↩</span> Devolver a Pendiente
+              </button>
+              <button class="button button-danger" id="rejectButton" type="button">
+                <span aria-hidden="true">✕</span> Rechazar
+              </button>
+              <button class="button button-success" id="approveButton" type="button">
+                <span aria-hidden="true">✓</span> Aprobar
+              </button>
+            </div>
           </aside>
         </div>
+      </div>
+    </dialog>
 
-        <div class="dialog-actions">
-          <button class="button button-secondary" id="closeDetailsAction" type="button">Cerrar</button>
-          <div class="inline-actions">
-            <button class="button button-warning" id="pendingReviewButton" type="button">Pendiente</button>
-            <button class="button button-primary" id="validateButton" type="button">Aceptar / Validar cruce</button>
+    <!-- MODAL LIGHTBOX PARA PREVISUALIZAR EVIDENCIA EN TAMAÑO COMPLETO -->
+    <dialog id="evidenceLightboxDialog" class="dialog evidence-lightbox-dialog" aria-labelledby="lightboxTitle">
+      <div class="dialog-content lightbox-content">
+        <div class="dialog-header">
+          <div>
+            <p class="eyebrow">Documento probatorio</p>
+            <h3 id="lightboxTitle">Evidencia del Horario Académico Universitario</h3>
           </div>
+          <button class="icon-button" id="closeLightboxButton" type="button" aria-label="Cerrar vista previa">×</button>
+        </div>
+        <div id="lightboxEvidenceContainer" class="lightbox-body"></div>
+        <div class="dialog-actions" style="justify-content: flex-end; margin-top: 14px;">
+          <button class="button button-secondary" id="closeLightboxAction" type="button">Cerrar vista previa</button>
         </div>
       </div>
     </dialog>
