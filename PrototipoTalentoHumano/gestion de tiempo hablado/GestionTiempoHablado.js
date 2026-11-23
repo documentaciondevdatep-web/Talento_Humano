@@ -46,14 +46,48 @@ const norm = s => String(s ?? '')
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
 
-function actualizarFechaDelDia() {
+let currentSelectedDate = '';
+
+function formatearFechaEspanol(dateObj) {
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  let texto = dateObj.toLocaleDateString('es-ES', opciones);
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function actualizarFechaDelDia(dateVal) {
   const el = document.querySelector('#fechaMonitoreoActual');
   if (!el) return;
+  let dateObj;
+  if (typeof dateVal === 'string' && dateVal.includes('-')) {
+    const [y, m, d] = dateVal.split('-').map(Number);
+    dateObj = new Date(y, m - 1, d);
+  } else if (dateVal instanceof Date) {
+    dateObj = dateVal;
+  } else {
+    dateObj = new Date();
+  }
+  el.textContent = formatearFechaEspanol(dateObj);
+}
+
+function inicializarSelectorFecha() {
+  const input = document.querySelector('#headerDatePicker');
   const hoy = new Date();
-  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-  let texto = hoy.toLocaleDateString('es-ES', opciones);
-  texto = texto.charAt(0).toUpperCase() + texto.slice(1);
-  el.textContent = texto;
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd = String(hoy.getDate()).padStart(2, '0');
+  currentSelectedDate = `${yyyy}-${mm}-${dd}`;
+  
+  if (input) {
+    input.value = currentSelectedDate;
+    input.addEventListener('change', (e) => {
+      if (e.target.value) {
+        currentSelectedDate = e.target.value;
+        actualizarFechaDelDia(currentSelectedDate);
+        try { render(); } catch (err) { notice(err.message, true); }
+      }
+    });
+  }
+  actualizarFechaDelDia(currentSelectedDate);
 }
 
 function obtenerListaColaboradores() {
@@ -125,10 +159,13 @@ function hashCode(str) {
 }
 
 // Cálculo de métricas de voz por colaborador
-function calcularMetricasVoz(colaborador) {
+function calcularMetricasVoz(colaborador, dateStr) {
   const code = String(colaborador.codigoColaborador || '1000');
   const num = parseInt(code, 10) || 1000;
-  const hash = Math.abs(hashCode(colaborador.idColaborador || code));
+  const fechaSeed = dateStr || currentSelectedDate || '2026-11-23';
+  const hash = Math.abs(hashCode((colaborador.idColaborador || code) + '_' + fechaSeed));
+  const dateHash = Math.abs(hashCode(fechaSeed));
+  const dateDelta = ((dateHash % 7) - 3) * 0.05;
 
   // Metas base diarias de Talento Humano
   const metaDiariaHablado = 3.0; // 3 horas de voz por jornada
@@ -147,30 +184,30 @@ function calcularMetricasVoz(colaborador) {
 
   if (code === '1101') { // Alex Rios Luna
     conexionesHoras = 72;
-    conexionesCanalDiario = 5.2;
+    conexionesCanalDiario = Number(Math.max(4.2, 5.2 + dateDelta).toFixed(1));
     dentroRangoPct = 100;
     tiempoHabladoHoras = 28;
-    habladoDiarioHoras = 3.54;
+    habladoDiarioHoras = Number(Math.max(2.0, 3.54 + dateDelta).toFixed(2));
     rankingPos = 4;
     canalFrecuente = 'Desarrollo';
   } else if (code === '1102') { // Sam Vega Sol
     conexionesHoras = 68;
-    conexionesCanalDiario = 5.0;
+    conexionesCanalDiario = Number(Math.max(4.0, 5.0 + dateDelta).toFixed(1));
     dentroRangoPct = 98;
     tiempoHabladoHoras = 25;
-    habladoDiarioHoras = 3.16;
+    habladoDiarioHoras = Number(Math.max(1.8, 3.16 + dateDelta).toFixed(2));
     rankingPos = 7;
     canalFrecuente = 'Capacitación';
   } else if (code === '1104' || code === '1026') { // Dani Cruz / Luis
     conexionesHoras = 48;
-    conexionesCanalDiario = 4.2;
+    conexionesCanalDiario = Number(Math.max(3.5, 4.2 + dateDelta).toFixed(1));
     dentroRangoPct = 85;
     tiempoHabladoHoras = 11;
-    habladoDiarioHoras = 1.80;
+    habladoDiarioHoras = Number(Math.max(1.0, 1.80 + dateDelta).toFixed(2));
     rankingPos = 34;
     canalFrecuente = 'General';
   } else {
-    // Variación según código
+    // Variación según código y fecha seleccionada
     conexionesHoras = 50 + (hash % 25);
     conexionesCanalDiario = Number((4.5 + (hash % 10) / 10).toFixed(1));
     dentroRangoPct = 90 + (hash % 11);
@@ -312,10 +349,10 @@ function renderGeneralKPIs(colaboradores) {
   let sumaHoras = 0;
 
   colaboradores.forEach(c => {
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     if (m.nivel === 'OPTIMO') countOptimo++;
     if (m.nivel === 'BAJO') countBajo++;
-    sumaHoras += Number(m.promedioHabladoHoras);
+    sumaHoras += Number(m.habladoDiarioHoras);
   });
 
   const prom = colaboradores.length > 0 ? (sumaHoras / colaboradores.length).toFixed(1) : '1.8';
@@ -338,13 +375,13 @@ function render() {
   const filtered = colaboradores.filter(c => {
     const matchQuery = norm(`${name(c)} ${c.codigoColaborador ?? ''} ${c.numeroDocumento ?? ''}`).includes(query);
     const matchDep = !dep || c.idDepartamento === dep;
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     const matchNivel = !nivel || m.nivel === nivel;
     return matchQuery && matchDep && matchNivel;
   });
 
   tbody.innerHTML = filtered.map(c => {
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     const idVis = getVisibleIdentifier(c);
 
     return `
@@ -359,25 +396,12 @@ function render() {
         </td>
         <td>
           <div class="voice-progress-container">
-            <strong>${m.conexionesCanalDiario}h / ${m.metaDiariaCanal}h</strong>
-            <div class="voice-progress-bg">
-              <div class="voice-progress-fill" style="width: ${Math.min(100, m.conexionesCanalDiarioPct)}%"></div>
-            </div>
-            <small>${m.conexionesCanalDiarioPct}% jornada diaria</small>
-          </div>
-        </td>
-        <td>
-          <div class="voice-progress-container">
             <strong style="font-size:14px;color:var(--navy)">${m.habladoDiarioHoras}h / ${m.metaDiariaHablado}h</strong>
             <div class="voice-progress-bg">
               <div class="voice-progress-fill" style="width: ${Math.min(100, m.habladoDiarioPct)}%"></div>
             </div>
             <small>${m.habladoDiarioPct}% de meta diaria (3h)</small>
           </div>
-        </td>
-        <td>
-          <strong>${m.promedioHabladoHoras}h / día</strong>
-          <small>promedio por jornada</small>
         </td>
         <td>
           <span class="badge ${m.badgeCls}">
@@ -411,7 +435,7 @@ function abrirModalDetalle(idColaborador) {
   const person = colabs.find(c => c.idColaborador === idColaborador);
   if (!person) throw new Error('Colaborador no encontrado.');
 
-  const m = calcularMetricasVoz(person);
+  const m = calcularMetricasVoz(person, currentSelectedDate);
   const idVis = getVisibleIdentifier(person);
   const registrosDiarios = generarRegistrosDiariosVoz(person);
   const movimientos = generarMovimientosCanal(currentSelectedFecha);
@@ -768,7 +792,7 @@ window.addEventListener('storage', event => {
 
 function iniciarModulo() {
   try {
-    actualizarFechaDelDia();
+    inicializarSelectorFecha();
     populateDepartments();
     render();
   } catch (err) {

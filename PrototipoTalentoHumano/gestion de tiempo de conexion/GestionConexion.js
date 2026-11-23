@@ -46,14 +46,48 @@ const norm = s => String(s ?? '')
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
 
-function actualizarFechaDelDia() {
+let currentSelectedDate = '';
+
+function formatearFechaEspanol(dateObj) {
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  let texto = dateObj.toLocaleDateString('es-ES', opciones);
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function actualizarFechaDelDia(dateVal) {
   const el = document.querySelector('#fechaMonitoreoActual');
   if (!el) return;
+  let dateObj;
+  if (typeof dateVal === 'string' && dateVal.includes('-')) {
+    const [y, m, d] = dateVal.split('-').map(Number);
+    dateObj = new Date(y, m - 1, d);
+  } else if (dateVal instanceof Date) {
+    dateObj = dateVal;
+  } else {
+    dateObj = new Date();
+  }
+  el.textContent = formatearFechaEspanol(dateObj);
+}
+
+function inicializarSelectorFecha() {
+  const input = document.querySelector('#headerDatePicker');
   const hoy = new Date();
-  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-  let texto = hoy.toLocaleDateString('es-ES', opciones);
-  texto = texto.charAt(0).toUpperCase() + texto.slice(1);
-  el.textContent = texto;
+  const yyyy = hoy.getFullYear();
+  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
+  const dd = String(hoy.getDate()).padStart(2, '0');
+  currentSelectedDate = `${yyyy}-${mm}-${dd}`;
+  
+  if (input) {
+    input.value = currentSelectedDate;
+    input.addEventListener('change', (e) => {
+      if (e.target.value) {
+        currentSelectedDate = e.target.value;
+        actualizarFechaDelDia(currentSelectedDate);
+        try { render(); } catch (err) { notice(err.message, true); }
+      }
+    });
+  }
+  actualizarFechaDelDia(currentSelectedDate);
 }
 
 function obtenerListaColaboradores() {
@@ -125,9 +159,11 @@ function hashCode(str) {
 }
 
 // Cálculo de métricas de conexión por colaborador
-function calcularMetricasConexion(colaborador) {
+function calcularMetricasConexion(colaborador, dateStr) {
   const code = String(colaborador.codigoColaborador || '1000');
-  const hash = Math.abs(hashCode(colaborador.idColaborador || code));
+  const fechaSeed = dateStr || currentSelectedDate || '2026-11-23';
+  const hash = Math.abs(hashCode((colaborador.idColaborador || code) + '_' + fechaSeed));
+  const dateHash = Math.abs(hashCode(fechaSeed));
 
   // Convenio base: meta de horas y días
   const metaHoras = colaborador.fichaTalento?.periodos?.at(-1)?.meta ?? 420;
@@ -144,22 +180,30 @@ function calcularMetricasConexion(colaborador) {
   let estadoLabel = 'Excelente (≥ 5h)';
   let badgeCls = 'green';
 
+  const dateDelta = ((dateHash % 7) - 3) * 0.04;
+
   if (code === '1101') { // Alex Rios
     tiempoConectadoHoras = 74.50;
-    tiempoDiarioHoras = 5.44;
-    tiempoDiarioFmt = '05:26:15';
+    tiempoDiarioHoras = Number(Math.max(4.8, 5.44 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 15;
     dentroRangoPct = 100;
   } else if (code === '1102') { // Sam Vega
     tiempoConectadoHoras = 68.10;
-    tiempoDiarioHoras = 5.26;
-    tiempoDiarioFmt = '05:15:34';
+    tiempoDiarioHoras = Number(Math.max(4.7, 5.26 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 14;
     dentroRangoPct = 99;
   } else if (code === '1104' || code === '1026') { // Dani / Luis
     tiempoConectadoHoras = 46.20;
-    tiempoDiarioHoras = 4.60;
-    tiempoDiarioFmt = '04:36:00';
+    tiempoDiarioHoras = Number(Math.max(3.8, 4.60 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 4;
     dentroRangoPct = 88;
     estado = 'NORMAL';
@@ -167,18 +211,24 @@ function calcularMetricasConexion(colaborador) {
     badgeCls = 'yellow';
   } else {
     tiempoConectadoHoras = Number((55 + (hash % 20) + (hash % 100) / 100).toFixed(2));
-    tiempoDiarioHoras = Number((4.90 + (hash % 12) / 10).toFixed(2));
-    tiempoDiarioFmt = `05:${String(10 + (hash % 40)).padStart(2, '0')}:20`;
+    tiempoDiarioHoras = Number((4.90 + ((hash % 15) - 3) / 10).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     dentroRangoPct = 92 + (hash % 9);
     rachaDias = 5 + (hash % 10);
     if (tiempoDiarioHoras >= 5.00) {
       estado = 'EXCELENTE';
       estadoLabel = 'Excelente (≥ 5h)';
       badgeCls = 'green';
-    } else {
+    } else if (tiempoDiarioHoras >= 4.50) {
       estado = 'NORMAL';
       estadoLabel = 'Normal (4.5h - 5h)';
       badgeCls = 'yellow';
+    } else {
+      estado = 'BAJO';
+      estadoLabel = 'Bajo (< 4.5h)';
+      badgeCls = 'red';
     }
   }
 
@@ -459,14 +509,6 @@ function render() {
             </div>
             <small>${m.avanceDiarioPct}% de meta diaria (${m.tiempoDiarioFmt})</small>
           </div>
-        </td>
-        <td>
-          <strong style="color:var(--green);font-size:14px">${m.dentroRangoPct}%</strong>
-          <small>en horario establecido</small>
-        </td>
-        <td>
-          <strong>${m.promedioDiario} h / día</strong>
-          <small>promedio por jornada</small>
         </td>
         <td>
           <span class="badge ${m.badgeCls}">
@@ -763,7 +805,7 @@ window.addEventListener('storage', event => {
 
 function iniciarModulo() {
   try {
-    actualizarFechaDelDia();
+    inicializarSelectorFecha();
     populateDepartments();
     render();
   } catch (err) {

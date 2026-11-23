@@ -17,13 +17,15 @@
         <p>Control de tiempo conectado a la plataforma, cumplimiento de jornada diaria y seguimiento de racha de puntualidad.</p>
       </div>
       <div class="header-actions">
-        <div class="header-date-badge" aria-label="Fecha de conexión">
+        <label class="header-date-badge" for="headerDatePicker" title="Haz clic para seleccionar otra fecha">
           <span class="header-date-icon" aria-hidden="true">📅</span>
           <div class="header-date-info">
             <span class="header-date-label">Fecha del día</span>
             <strong id="fechaMonitoreoActual" class="header-date-text">--</strong>
           </div>
-        </div>
+          <span class="date-picker-arrow" aria-hidden="true">▾</span>
+          <input type="date" id="headerDatePicker" class="header-date-hidden-input" aria-label="Elegir fecha de visualización">
+        </label>
         <span class="source-badge">Monitoreo de conexión</span>
       </div>
     </header>
@@ -82,11 +84,9 @@
           <thead>
             <tr>
               <th>Colaborador</th>
-              <th>Ubicación</th>
+              <th>Área</th>
               <th>Racha de puntualidad</th>
               <th>Tiempo de conexión por día</th>
-              <th>Dentro del rango</th>
-              <th>Promedio diario</th>
               <th>Estado</th>
               <th>Acción</th>
             </tr>
