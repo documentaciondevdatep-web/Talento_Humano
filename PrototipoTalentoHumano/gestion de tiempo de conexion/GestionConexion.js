@@ -46,7 +46,15 @@ const norm = s => String(s ?? '')
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
 
-let currentSelectedDate = '';
+let currentSelectedDate = '2026-11-23';
+let dpViewYear = 2026;
+let dpViewMonth = 10; // 0-indexed: 10 = Noviembre
+const MAX_DATE_STR = '2026-11-23';
+
+const NOMBRES_MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
 
 function formatearFechaEspanol(dateObj) {
   const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
@@ -64,30 +72,174 @@ function actualizarFechaDelDia(dateVal) {
   } else if (dateVal instanceof Date) {
     dateObj = dateVal;
   } else {
-    dateObj = new Date();
+    dateObj = new Date(2026, 10, 23);
   }
   el.textContent = formatearFechaEspanol(dateObj);
 }
 
+function renderizarGridDatePicker() {
+  const monthTitle = document.querySelector('#dpMonthTitle');
+  const grid = document.querySelector('#dpDaysGrid');
+  const btnNext = document.querySelector('#dpNextMonth');
+  if (!grid || !monthTitle) return;
+
+  monthTitle.textContent = `${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}`;
+
+  if (btnNext) {
+    btnNext.disabled = (dpViewYear > 2026) || (dpViewYear === 2026 && dpViewMonth >= 10);
+  }
+
+  const firstDayIndex = new Date(dpViewYear, dpViewMonth, 1).getDay();
+  const totalDays = new Date(dpViewYear, dpViewMonth + 1, 0).getDate();
+
+  let html = '';
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    html += '<span class="dp-day empty"></span>';
+  }
+
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${dpViewYear}-${String(dpViewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayOfWeek = (firstDayIndex + d - 1) % 7;
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const isFuture = dateStr > MAX_DATE_STR;
+    const isSelected = dateStr === currentSelectedDate;
+    const isToday = dateStr === MAX_DATE_STR;
+
+    if (isWeekend) {
+      html += `<button type="button" class="dp-day weekend disabled" disabled title="Día no laborable (${dayOfWeek === 0 ? 'Domingo' : 'Sábado'})">${d}</button>`;
+    } else if (isFuture) {
+      html += `<button type="button" class="dp-day future disabled" disabled title="Fecha posterior a la actual no disponible">${d}</button>`;
+    } else {
+      const cls = ['dp-day', isSelected ? 'selected' : '', isToday ? 'today' : ''].filter(Boolean).join(' ');
+      html += `<button type="button" class="${cls}" data-dp-date="${dateStr}" title="Seleccionar ${d} de ${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}">${d}</button>`;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function cerrarDatePicker() {
+  const dd = document.querySelector('#datePickerDropdown');
+  const btn = document.querySelector('#btnToggleDatePicker');
+  if (dd) dd.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
 function inicializarSelectorFecha() {
-  const input = document.querySelector('#headerDatePicker');
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-  const dd = String(hoy.getDate()).padStart(2, '0');
-  currentSelectedDate = `${yyyy}-${mm}-${dd}`;
-  
-  if (input) {
-    input.value = currentSelectedDate;
-    input.addEventListener('change', (e) => {
-      if (e.target.value) {
-        currentSelectedDate = e.target.value;
+  const btnToggle = document.querySelector('#btnToggleDatePicker');
+  const dd = document.querySelector('#datePickerDropdown');
+  const btnPrev = document.querySelector('#dpPrevMonth');
+  const btnNext = document.querySelector('#dpNextMonth');
+  const btnToday = document.querySelector('#dpBtnToday');
+  const btnClose = document.querySelector('#dpBtnClose');
+  const grid = document.querySelector('#dpDaysGrid');
+
+  currentSelectedDate = MAX_DATE_STR;
+  dpViewYear = 2026;
+  dpViewMonth = 10;
+  actualizarFechaDelDia(currentSelectedDate);
+
+  if (btnToggle && dd) {
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = dd.hidden;
+      if (isHidden) {
+        if (currentSelectedDate && currentSelectedDate.includes('-')) {
+          const [y, m] = currentSelectedDate.split('-').map(Number);
+          dpViewYear = y;
+          dpViewMonth = m - 1;
+        }
+        renderizarGridDatePicker();
+        dd.hidden = false;
+        btnToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dd.hidden && !dd.contains(e.target) && !btnToggle.contains(e.target)) {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !dd.hidden) {
+        cerrarDatePicker();
+      }
+    });
+  }
+
+  if (btnPrev) {
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dpViewMonth--;
+      if (dpViewMonth < 0) {
+        dpViewMonth = 11;
+        dpViewYear--;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dpViewYear > 2026 || (dpViewYear === 2026 && dpViewMonth >= 10)) return;
+      dpViewMonth++;
+      if (dpViewMonth > 11) {
+        dpViewMonth = 0;
+        dpViewYear++;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnToday) {
+    btnToday.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentSelectedDate = MAX_DATE_STR;
+      dpViewYear = 2026;
+      dpViewMonth = 10;
+      actualizarFechaDelDia(currentSelectedDate);
+      cerrarDatePicker();
+      try { render(); } catch (err) { notice(err.message, true); }
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cerrarDatePicker();
+    });
+  }
+
+  if (grid) {
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-dp-date]');
+      if (btn && btn.dataset.dpDate) {
+        e.stopPropagation();
+        currentSelectedDate = btn.dataset.dpDate;
         actualizarFechaDelDia(currentSelectedDate);
+        cerrarDatePicker();
         try { render(); } catch (err) { notice(err.message, true); }
       }
     });
   }
-  actualizarFechaDelDia(currentSelectedDate);
+
+  // Si la URL solicita abrir el calendario por defecto (ej. pruebas visuales)
+  try {
+    if (window.location.search.includes('openCalendar') || window.location.hash.includes('openCalendar')) {
+      setTimeout(() => {
+        if (dd && btnToggle) {
+          renderizarGridDatePicker();
+          dd.hidden = false;
+          btnToggle.setAttribute('aria-expanded', 'true');
+        }
+      }, 150);
+    }
+  } catch (err) {}
 }
 
 function obtenerListaColaboradores() {

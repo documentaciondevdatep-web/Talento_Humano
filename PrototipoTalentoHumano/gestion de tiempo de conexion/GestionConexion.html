@@ -17,15 +17,42 @@
         <p>Control de tiempo conectado a la plataforma, cumplimiento de jornada diaria y seguimiento de racha de puntualidad.</p>
       </div>
       <div class="header-actions">
-        <label class="header-date-badge" for="headerDatePicker" title="Haz clic para seleccionar otra fecha">
-          <span class="header-date-icon" aria-hidden="true">📅</span>
-          <div class="header-date-info">
-            <span class="header-date-label">Fecha del día</span>
-            <strong id="fechaMonitoreoActual" class="header-date-text">--</strong>
+        <div class="header-date-picker-wrap">
+          <button type="button" class="header-date-badge" id="btnToggleDatePicker" title="Haz clic para seleccionar otra fecha" aria-haspopup="dialog" aria-expanded="false">
+            <span class="header-date-icon" aria-hidden="true">📅</span>
+            <div class="header-date-info">
+              <span class="header-date-label">Fecha del día</span>
+              <strong id="fechaMonitoreoActual" class="header-date-text">--</strong>
+            </div>
+            <span class="date-picker-arrow" aria-hidden="true">▾</span>
+          </button>
+
+          <!-- Dropdown calendario interactivo con fines de semana y fechas futuras deshabilitadas -->
+          <div id="datePickerDropdown" class="date-picker-dropdown" hidden role="dialog" aria-label="Selector de fecha">
+            <div class="dp-header">
+              <button type="button" class="dp-nav-btn" id="dpPrevMonth" title="Mes anterior">‹</button>
+              <strong class="dp-month-title" id="dpMonthTitle">Noviembre de 2026</strong>
+              <button type="button" class="dp-nav-btn" id="dpNextMonth" title="Mes siguiente">›</button>
+            </div>
+            <div class="dp-weekdays">
+              <span class="dp-weekday weekend" title="Domingo (No laborable)">DO</span>
+              <span class="dp-weekday">LU</span>
+              <span class="dp-weekday">MA</span>
+              <span class="dp-weekday">MI</span>
+              <span class="dp-weekday">JU</span>
+              <span class="dp-weekday">VI</span>
+              <span class="dp-weekday weekend" title="Sábado (No laborable)">SA</span>
+            </div>
+            <div class="dp-days-grid" id="dpDaysGrid"></div>
+            <div class="dp-footer">
+              <span class="dp-legend-hint"><span class="dp-dot-weekend"></span> Sábados y domingos no laborables</span>
+              <div class="dp-footer-actions">
+                <button type="button" class="dp-btn-today" id="dpBtnToday">Hoy</button>
+                <button type="button" class="dp-btn-close" id="dpBtnClose">Cerrar</button>
+              </div>
+            </div>
           </div>
-          <span class="date-picker-arrow" aria-hidden="true">▾</span>
-          <input type="date" id="headerDatePicker" class="header-date-hidden-input" aria-label="Elegir fecha de visualización">
-        </label>
+        </div>
         <span class="source-badge">Monitoreo de conexión</span>
       </div>
     </header>
