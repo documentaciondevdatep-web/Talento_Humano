@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tiempo hablado | Talento Humano</title>
-  <link rel="stylesheet" href="GestionTiempoHablado.css?v=2">
-  <script type="module" src="GestionTiempoHablado.js?v=2"></script>
+  <link rel="stylesheet" href="GestionTiempoHablado.css?v=20261120">
+  <script src="../shared/data/thDataGlobal.js?v=20261120"></script>
+  <script src="GestionTiempoHablado.js?v=20261120" defer></script>
 </head>
 <body>
   <main>
@@ -73,8 +74,8 @@
             <tr>
               <th>Colaborador</th>
               <th>Ubicación</th>
-              <th>Conexiones a canal</th>
-              <th>Tiempo total hablado</th>
+              <th>Conexión en canales por día</th>
+              <th>Tiempo hablado por día</th>
               <th>Promedio diario</th>
               <th>Nivel de voz</th>
               <th>Canal frecuente</th>
@@ -91,7 +92,7 @@
 
     <!-- Regla de negocio al pie -->
     <p class="footnote">
-      <strong>Métricas de tiempo hablado:</strong> Se registran las horas de permanencia en canales de voz de trabajo (meta base: 50 h mensuales) y el tiempo efectivo con micrófono abierto (meta base: 36 h mensuales, 3 h diarias). Un porcentaje acumulado $\ge 70\%$ es considerado óptimo; entre $40\%$ y $70\%$ moderado; y menor al $40\%$ bajo con requerimiento de seguimiento en clima y participación activa.
+      <strong>Métricas de tiempo hablado por día:</strong> Se supervisa la permanencia diaria en canales de voz de trabajo (jornada base: 5 h) y el tiempo efectivo con micrófono abierto por día (meta diaria: 3 h por jornada). Un porcentaje diario $\ge 70\%$ es considerado óptimo; entre $40\%$ y $70\%$ moderado; y menor al $40\%$ bajo con requerimiento de seguimiento en clima y participación activa.
     </p>
   </main>
 
@@ -103,12 +104,6 @@
           ← Volver a la lista general
         </button>
         <span class="dash-modal-badge">Vista individual del colaborador</span>
-      </div>
-      <div class="dash-modal-center">
-        <label class="dash-colab-picker-label">
-          <span>Consultar otro colaborador:</span>
-          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
-        </label>
       </div>
       <div class="dash-modal-right">
         <button type="button" data-close="modalDetalleHablado" class="dash-close-x" aria-label="Cerrar modal">×</button>

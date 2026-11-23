@@ -1,8 +1,31 @@
-import {
-  obtenerColaboradores,
-  obtenerColaboradoresActivos
-} from '../shared/js/colaboradoresStorage.js';
-import { departamentos, areas } from '../shared/data/catalogos.js';
+"use strict";
+
+/**
+ * ==========================================================================
+ * DEVDATEP CONSULTING - GESTIÓN DE TIEMPO DE CONEXIÓN
+ * Compatible con protocolo file:// y entornos web estándar sin dependencias de módulos externos.
+ * ==========================================================================
+ */
+
+const departamentos = (typeof window !== "undefined" && window.departamentos) || [
+  { idDepartamento: "DEP-001", nombre: "Talento Humano" },
+  { idDepartamento: "DEP-002", nombre: "Desarrollo Web" },
+  { idDepartamento: "DEP-003", nombre: "Comercial" }
+];
+
+const areas = (typeof window !== "undefined" && window.areas) || [
+  { idArea: "ARE-001", nombre: "Reclutamiento", idDepartamento: "DEP-001" },
+  { idArea: "ARE-002", nombre: "Capacitación", idDepartamento: "DEP-001" },
+  { idArea: "ARE-003", nombre: "Clima y Cultura", idDepartamento: "DEP-001" },
+  { idArea: "ARE-004", nombre: "Backend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-005", nombre: "Frontend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-006", nombre: "Base de Datos", idDepartamento: "DEP-002" },
+  { idArea: "ARE-007", nombre: "Documentación", idDepartamento: "DEP-002" },
+  { idArea: "ARE-008", nombre: "Diseño Web", idDepartamento: "DEP-002" },
+  { idArea: "ARE-009", nombre: "Desarrollo Rápido de Aplicaciones", idDepartamento: "DEP-002" },
+  { idArea: "ARE-010", nombre: "Diseño Gráfico", idDepartamento: "DEP-003" },
+  { idArea: "ARE-012", nombre: "Marketing y Ventas", idDepartamento: "DEP-003" }
+];
 
 const $ = s => document.querySelector(s);
 
@@ -21,6 +44,45 @@ const norm = s => String(s ?? '')
 
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
+
+function obtenerListaColaboradores() {
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradoresActivos === "function") {
+    try {
+      const list = window.obtenerColaboradoresActivos();
+      if (Array.isArray(list) && list.length > 0) return list;
+    } catch (err) {}
+  }
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradores === "function") {
+    try {
+      const all = window.obtenerColaboradores();
+      if (Array.isArray(all) && all.length > 0) {
+        const activos = all.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    } catch (err) {}
+  }
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("th_colaboradores") : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        const activos = parsed.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    }
+  } catch (err) {}
+
+  if (typeof window !== "undefined" && Array.isArray(window.colaboradores70Oficiales) && window.colaboradores70Oficiales.length > 0) {
+    const activos = window.colaboradores70Oficiales.filter(c => c.estado === 'Activo' || !c.estado);
+    if (activos.length > 0) return activos;
+  }
+
+  const iniciales = (typeof window !== "undefined" && window.colaboradoresIniciales) || [];
+  const demo = (typeof window !== "undefined" && window.colaboradoresDemostracion) || [];
+  const todos = [...iniciales, ...demo];
+  const activos = todos.filter(c => c.estado === 'Activo' || !c.estado);
+  return activos.length > 0 ? activos : todos;
+}
 
 function getVisibleIdentifier(person) {
   const firstName = String(person.nombres ?? '').trim().split(/\s+/)[0] ?? '';
@@ -54,9 +116,12 @@ function calcularMetricasConexion(colaborador) {
   // Convenio base: meta de horas y días
   const metaHoras = colaborador.fichaTalento?.periodos?.at(-1)?.meta ?? 420;
   const diasConvenio = Math.ceil(metaHoras / 5); // ej. 84 días para 420h
+  const metaDiaria = 5.00; // Meta base diaria de 5 horas
 
   let tiempoConectadoHoras = 63.24;
   let tiempoMetaMes = 85;
+  let tiempoDiarioHoras = 5.24;
+  let tiempoDiarioFmt = '05:14:10';
   let dentroRangoPct = 100;
   let rachaDias = 13;
   let estado = 'EXCELENTE';
@@ -65,14 +130,20 @@ function calcularMetricasConexion(colaborador) {
 
   if (code === '1101') { // Alex Rios
     tiempoConectadoHoras = 74.50;
+    tiempoDiarioHoras = 5.44;
+    tiempoDiarioFmt = '05:26:15';
     rachaDias = 15;
     dentroRangoPct = 100;
   } else if (code === '1102') { // Sam Vega
     tiempoConectadoHoras = 68.10;
+    tiempoDiarioHoras = 5.26;
+    tiempoDiarioFmt = '05:15:34';
     rachaDias = 14;
     dentroRangoPct = 99;
   } else if (code === '1104' || code === '1026') { // Dani / Luis
     tiempoConectadoHoras = 46.20;
+    tiempoDiarioHoras = 4.60;
+    tiempoDiarioFmt = '04:36:00';
     rachaDias = 4;
     dentroRangoPct = 88;
     estado = 'NORMAL';
@@ -80,9 +151,11 @@ function calcularMetricasConexion(colaborador) {
     badgeCls = 'yellow';
   } else {
     tiempoConectadoHoras = Number((55 + (hash % 20) + (hash % 100) / 100).toFixed(2));
+    tiempoDiarioHoras = Number((4.90 + (hash % 12) / 10).toFixed(2));
+    tiempoDiarioFmt = `05:${String(10 + (hash % 40)).padStart(2, '0')}:20`;
     dentroRangoPct = 92 + (hash % 9);
     rachaDias = 5 + (hash % 10);
-    if (tiempoConectadoHoras >= 55) {
+    if (tiempoDiarioHoras >= 5.00) {
       estado = 'EXCELENTE';
       estadoLabel = 'Excelente (≥ 5h)';
       badgeCls = 'green';
@@ -94,6 +167,7 @@ function calcularMetricasConexion(colaborador) {
   }
 
   const avancePct = ((tiempoConectadoHoras / tiempoMetaMes) * 100).toFixed(2);
+  const avanceDiarioPct = ((tiempoDiarioHoras / metaDiaria) * 100).toFixed(1);
   const promedioDiario = (tiempoConectadoHoras / 12).toFixed(2);
 
   // Días completados vs pendientes para el convenio
@@ -104,6 +178,10 @@ function calcularMetricasConexion(colaborador) {
     tiempoConectadoHoras,
     tiempoMetaMes,
     avancePct,
+    tiempoDiarioHoras,
+    tiempoDiarioFmt,
+    metaDiaria,
+    avanceDiarioPct,
     dentroRangoPct,
     rachaDias,
     promedioDiario,
@@ -301,16 +379,6 @@ function populateDepartments() {
   $('#department').innerHTML = opts;
 }
 
-function populateDashColabDropdown(selectedId) {
-  const select = $('#dashColabSelect');
-  if (!select) return;
-  const activos = obtenerColaboradoresActivos();
-  select.innerHTML = activos.map(p => {
-    const idVis = getVisibleIdentifier(p);
-    return `<option value="${escape(p.idColaborador)}"${p.idColaborador === selectedId ? ' selected' : ''}>${escape(name(p))} (${escape(idVis)})</option>`;
-  }).join('');
-}
-
 function renderGeneralKPIs(colaboradores) {
   let countExcelente = 0;
   let sumaHoras = 0;
@@ -330,7 +398,7 @@ function renderGeneralKPIs(colaboradores) {
 }
 
 function render() {
-  const colaboradores = obtenerColaboradoresActivos();
+  const colaboradores = obtenerListaColaboradores();
   renderGeneralKPIs(colaboradores);
 
   const query = norm($('#search').value);
@@ -369,11 +437,11 @@ function render() {
         </td>
         <td>
           <div class="conn-progress-container">
-            <strong>${m.tiempoConectadoHoras} h / ${m.tiempoMetaMes}h</strong>
+            <strong>${m.tiempoDiarioHoras} h / ${m.metaDiaria}h</strong>
             <div class="conn-progress-bg">
-              <div class="conn-progress-fill" style="width: ${Math.min(100, m.avancePct)}%"></div>
+              <div class="conn-progress-fill" style="width: ${Math.min(100, m.avanceDiarioPct)}%"></div>
             </div>
-            <small>${m.avancePct}% de meta mensual</small>
+            <small>${m.avanceDiarioPct}% de meta diaria (${m.tiempoDiarioFmt})</small>
           </div>
         </td>
         <td>
@@ -381,7 +449,7 @@ function render() {
           <small>en horario establecido</small>
         </td>
         <td>
-          <strong>${m.promedioDiario} h</strong>
+          <strong>${m.promedioDiario} h / día</strong>
           <small>promedio por jornada</small>
         </td>
         <td>
@@ -406,11 +474,9 @@ function abrirModalDetalle(idColaborador, page = 1) {
   currentSelectedColabId = idColaborador;
   currentConnPage = page;
 
-  const colabs = obtenerColaboradores();
+  const colabs = obtenerListaColaboradores();
   const person = colabs.find(c => c.idColaborador === idColaborador);
   if (!person) throw new Error('Colaborador no encontrado.');
-
-  populateDashColabDropdown(idColaborador);
 
   const m = calcularMetricasConexion(person);
   const idVis = getVisibleIdentifier(person);
@@ -475,25 +541,25 @@ function abrirModalDetalle(idColaborador, page = 1) {
         </div>
       </div>
 
-      <!-- 2. Tiempo de conexión -->
+      <!-- 2. Tiempo de conexión por día -->
       <div class="conn-kpi-card">
         <div class="conn-kpi-top">
           <div class="conn-kpi-icon-wrap">
             <div class="conn-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="conn-kpi-title">Tiempo de conexión</span>
+            <span class="conn-kpi-title">Tiempo de conexión por día</span>
           </div>
-          <button type="button" class="conn-kpi-info-btn" title="Horas acumuladas conectadas">ⓘ</button>
+          <button type="button" class="conn-kpi-info-btn" title="Horas conectadas registradas por jornada">ⓘ</button>
         </div>
         <div class="conn-kpi-val-row">
           <div class="conn-kpi-main-val">
-            ${m.tiempoConectadoHoras} h <span class="sub-val">/${m.tiempoMetaMes}h</span>
+            ${m.tiempoDiarioHoras} h <span class="sub-val">/${m.metaDiaria}h</span>
           </div>
-          <div class="conn-kpi-pct">${m.avancePct}%</div>
+          <div class="conn-kpi-pct">${m.avanceDiarioPct}%</div>
         </div>
         <div class="conn-compare-pill green">
-          +${m.avancePct}% respecto a ayer
+          +${m.avanceDiarioPct}% de meta diaria (${m.tiempoDiarioFmt})
         </div>
       </div>
 
@@ -518,24 +584,24 @@ function abrirModalDetalle(idColaborador, page = 1) {
         </div>
       </div>
 
-      <!-- 4. Prom. conexión -->
+      <!-- 4. Promedio diario -->
       <div class="conn-kpi-card">
         <div class="conn-kpi-top">
           <div class="conn-kpi-icon-wrap">
             <div class="conn-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="conn-kpi-title">Prom. conexión</span>
+            <span class="conn-kpi-title">Promedio diario</span>
           </div>
-          <button type="button" class="conn-kpi-info-btn" title="Promedio de conexión">ⓘ</button>
+          <button type="button" class="conn-kpi-info-btn" title="Promedio de conexión por jornada">ⓘ</button>
         </div>
         <div class="conn-kpi-val-row">
           <div class="conn-kpi-main-val">
-            ${m.tiempoConectadoHoras} h
+            ${m.promedioDiario} h / día
           </div>
         </div>
-        <div class="conn-compare-pill red">
-          -0.00% respecto a ayer
+        <div class="conn-compare-pill green">
+          Jornada base: 5h
         </div>
       </div>
     </section>
@@ -664,13 +730,6 @@ document.addEventListener('click', event => {
   }
 });
 
-document.addEventListener('change', event => {
-  if (event.target.id === 'dashColabSelect') {
-    if (event.target.value) abrirModalDetalle(event.target.value, 1);
-    return;
-  }
-});
-
 ['#search', '#department', '#estadoConexionFilter'].forEach(selector => {
   const el = $(selector);
   if (el) {
@@ -686,9 +745,17 @@ window.addEventListener('storage', event => {
   }
 });
 
-try {
-  populateDepartments();
-  render();
-} catch (err) {
-  notice(err.message, true);
+function iniciarModulo() {
+  try {
+    populateDepartments();
+    render();
+  } catch (err) {
+    notice(err.message, true);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", iniciarModulo);
+} else {
+  iniciarModulo();
 }

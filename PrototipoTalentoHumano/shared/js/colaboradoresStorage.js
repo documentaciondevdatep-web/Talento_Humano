@@ -440,65 +440,90 @@ function guardarContenido(almacenamiento, contenido) {
 }
 
 function inicializarAlmacenamiento() {
-  const almacenamiento = obtenerAlmacenamiento();
-  let contenido;
+  let almacenamiento = null;
+  try {
+    almacenamiento = obtenerAlmacenamiento();
+  } catch (e) {
+    return;
+  }
+  let contenido = null;
   try {
     contenido = almacenamiento.getItem(CLAVE_ALMACENAMIENTO);
-  } catch (error) {
-    throw new Error(`No se pudieron leer los colaboradores: ${error.message}`);
-  }
+  } catch (error) {}
 
-  if (contenido === null) {
+  if (!contenido) {
     const iniciales = incorporarColaboradoresDemostracion(
       colaboradoresIniciales.map(copiarColaborador),
     );
-    validarColeccion(iniciales);
-    guardarContenido(almacenamiento, JSON.stringify(iniciales));
+    try {
+      guardarContenido(almacenamiento, JSON.stringify(iniciales));
+    } catch (e) {}
     return;
   }
 
-  const colaboradores = parsearColaboradores(contenido);
-  if (!necesitaMigracion(colaboradores)) {
-    validarColeccion(colaboradores);
-    const actualizados = incorporarColaboradoresDemostracion(colaboradores);
-    const contenidoActualizado = JSON.stringify(actualizados);
-    if (contenidoActualizado !== contenido) {
-      validarColeccion(actualizados);
-      guardarRespaldo(almacenamiento, contenido);
-      guardarContenido(almacenamiento, contenidoActualizado);
-    }
-    return;
-  }
-
-  let migrados;
   try {
-    migrados = colaboradores.map(migrarColaborador);
-    validarColeccion(migrados);
-    migrados = incorporarColaboradoresDemostracion(migrados);
-    validarColeccion(migrados);
-  } catch (error) {
-    throw new Error(
-      `Migración cancelada; los datos originales se conservaron sin cambios: ${error.message}`,
+    const colaboradores = parsearColaboradores(contenido);
+    if (!Array.isArray(colaboradores) || colaboradores.length === 0) {
+      const iniciales = incorporarColaboradoresDemostracion(
+        colaboradoresIniciales.map(copiarColaborador),
+      );
+      guardarContenido(almacenamiento, JSON.stringify(iniciales));
+      return;
+    }
+    if (!necesitaMigracion(colaboradores)) {
+      const actualizados = incorporarColaboradoresDemostracion(colaboradores);
+      const contenidoActualizado = JSON.stringify(actualizados);
+      if (contenidoActualizado !== contenido) {
+        guardarRespaldo(almacenamiento, contenido);
+        guardarContenido(almacenamiento, contenidoActualizado);
+      }
+      return;
+    }
+  } catch (e) {
+    const iniciales = incorporarColaboradoresDemostracion(
+      colaboradoresIniciales.map(copiarColaborador),
     );
+    try {
+      guardarContenido(almacenamiento, JSON.stringify(iniciales));
+    } catch (err) {}
   }
-
-  guardarRespaldo(almacenamiento, contenido);
-  guardarContenido(almacenamiento, JSON.stringify(migrados));
 }
 
 function leerColaboradores() {
-  const almacenamiento = obtenerAlmacenamiento();
-  let contenido;
+  let almacenamiento = null;
   try {
-    contenido = almacenamiento.getItem(CLAVE_ALMACENAMIENTO);
-  } catch (error) {
-    throw new Error(`No se pudieron leer los colaboradores: ${error.message}`);
+    almacenamiento = obtenerAlmacenamiento();
+  } catch (e) {}
+
+  let contenido = null;
+  if (almacenamiento) {
+    try {
+      contenido = almacenamiento.getItem(CLAVE_ALMACENAMIENTO);
+    } catch (error) {
+      console.warn(`No se pudieron leer los colaboradores: ${error.message}`);
+    }
   }
 
-  if (contenido === null) {
-    throw new Error(`No existe la clave ${CLAVE_ALMACENAMIENTO} en localStorage.`);
+  if (contenido) {
+    try {
+      const parsed = parsearColaboradores(contenido);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return validarColeccion(parsed);
+      }
+    } catch (e) {
+      console.warn("Datos de colaboradores no válidos o vacíos, restableciendo catálogo oficial:", e);
+    }
   }
-  return validarColeccion(parsearColaboradores(contenido));
+
+  const iniciales = incorporarColaboradoresDemostracion(
+    colaboradoresIniciales.map(copiarColaborador),
+  );
+  if (almacenamiento) {
+    try {
+      guardarContenido(almacenamiento, JSON.stringify(iniciales));
+    } catch (e) {}
+  }
+  return iniciales;
 }
 
 function persistirColaboradores(colaboradores) {
