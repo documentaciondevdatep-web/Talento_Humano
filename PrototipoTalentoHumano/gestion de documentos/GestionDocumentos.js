@@ -6,7 +6,6 @@
 const RECORDS_KEY = "gestionDocumentos_registros";
 const HISTORY_KEY = "gestionDocumentos_historial";
 const VERSION_KEY = "gestionDocumentos_version";
-<<<<<<< HEAD
 const CURRENT_VERSION = "v6_official_areas_and_edit_pending";
 
 // Áreas oficiales del sistema
@@ -26,9 +25,6 @@ const OFFICIAL_AREAS = [
   "Reclutamiento",
   "Talento Humano"
 ];
-=======
-const CURRENT_VERSION = "v4_history_grouped_and_edit";
->>>>>>> origin/main
 
 // Cinco tipos de documentos requeridos
 const DOCUMENT_TYPES = [
@@ -81,11 +77,7 @@ const demoCollaborators = [
   {
     id: "971",
     name: "Nayeli Pérez",
-<<<<<<< HEAD
     area: "Talento Humano",
-=======
-    area: "Administración",
->>>>>>> origin/main
     startDate: formatPastOffsetDate(6),
     endDate: formatOffsetDate(2), // 2 días restantes (En proceso)
     observations: "Sin memorándums ni sanciones en su expediente. Cumplimiento del 98% en asistencia y puntualidad. Desempeño favorable en soporte administrativo.",
@@ -156,7 +148,6 @@ const demoCollaborators = [
       "Carta de aceptación": { status: "Generado", date: formatOffsetDate(-9), customNote: "" },
       "Constancia de prácticas preprofesionales": { status: "Pendiente", date: null, customNote: "" }
     }
-<<<<<<< HEAD
   },
   {
     id: "1106",
@@ -187,8 +178,6 @@ const demoCollaborators = [
       "Carta de aceptación": { status: "Generado", date: formatOffsetDate(-25), customNote: "" },
       "Constancia de prácticas preprofesionales": { status: "Generado", date: formatOffsetDate(-3), customNote: "" }
     }
-=======
->>>>>>> origin/main
   }
 ];
 
@@ -296,7 +285,6 @@ function daysPill(days) {
 }
 
 /**
-<<<<<<< HEAD
  * Carga opciones dinámicas de filtros con las áreas oficiales
  */
 function populateFilters() {
@@ -328,33 +316,6 @@ function populateFilters() {
       `<option value="${escapeHtml(area)}" ${area === currentHistoryArea ? "selected" : ""}>${escapeHtml(area)}</option>`
     ).join("");
   }
-=======
- * Carga opciones dinámicas de filtros
- */
-function populateFilters() {
-  const collabs = getCollaborators();
-  const areas = [...new Set(collabs.map((c) => c.area).filter(Boolean))].sort();
-
-  // Filtros de colaboradores
-  const areaSelect = $("#areaFilter");
-  const currentArea = areaSelect.value;
-  areaSelect.innerHTML = '<option value="">Todas las áreas</option>' + areas.map((area) =>
-    `<option value="${escapeHtml(area)}" ${area === currentArea ? "selected" : ""}>${escapeHtml(area)}</option>`
-  ).join("");
-
-  // Filtros de historial
-  const historyTypeSelect = $("#historyTypeFilter");
-  const currentHistoryType = historyTypeSelect.value;
-  historyTypeSelect.innerHTML = '<option value="">Todos los tipos</option>' + DOCUMENT_TYPES.map((type) =>
-    `<option value="${escapeHtml(type)}" ${type === currentHistoryType ? "selected" : ""}>${escapeHtml(type)}</option>`
-  ).join("");
-
-  const historyAreaSelect = $("#historyAreaFilter");
-  const currentHistoryArea = historyAreaSelect.value;
-  historyAreaSelect.innerHTML = '<option value="">Todas las áreas</option>' + areas.map((area) =>
-    `<option value="${escapeHtml(area)}" ${area === currentHistoryArea ? "selected" : ""}>${escapeHtml(area)}</option>`
-  ).join("");
->>>>>>> origin/main
 }
 
 /**
@@ -423,21 +384,13 @@ function getFilteredCollaborators() {
 }
 
 /**
-<<<<<<< HEAD
  * Obtiene los colaboradores con estado "Completo" para la pestaña Historial
  * REGLA: En historial de documentos solo dejar los que están en estado completo
-=======
- * Obtiene los colaboradores que tienen al menos un documento generado para la pestaña Historial
->>>>>>> origin/main
  */
 function getCollaboratorsWithGeneratedDocs() {
   const collabs = getCollaborators();
   return collabs.filter((collab) => {
-<<<<<<< HEAD
     return getDocumentalStatus(collab) === "Completo";
-=======
-    return Object.values(collab.documents || {}).some((doc) => doc.status === "Generado");
->>>>>>> origin/main
   });
 }
 
@@ -549,11 +502,7 @@ function renderHistoryTable() {
   if (collabs.length === 0) {
     tbody.innerHTML = "";
     $("#emptyHistory").hidden = false;
-<<<<<<< HEAD
     $("#historyRecordCount").textContent = "0 colaboradores con expediente completo";
-=======
-    $("#historyRecordCount").textContent = "0 colaboradores con documentos generados";
->>>>>>> origin/main
     return;
   }
 
@@ -562,11 +511,6 @@ function renderHistoryTable() {
     const status = getDocumentalStatus(collab);
     const generatedDocs = Object.entries(collab.documents || {})
       .filter(([_, doc]) => doc.status === "Generado");
-<<<<<<< HEAD
-=======
-    const count = generatedDocs.length;
-    const namesList = generatedDocs.map(([type]) => escapeHtml(type)).join(", ");
->>>>>>> origin/main
 
     const latestDate = generatedDocs
       .map(([_, d]) => d.date)
@@ -579,13 +523,6 @@ function renderHistoryTable() {
         <td><strong>${escapeHtml(collab.id)}</strong></td>
         <td>${escapeHtml(collab.name)}</td>
         <td>${escapeHtml(collab.area)}</td>
-<<<<<<< HEAD
-=======
-        <td>
-          <span class="doc-count-badge">${count} de 5 generados</span>
-          <div style="font-size:11px;color:var(--muted);margin-top:4px;max-width:320px;line-height:1.4;">${namesList}</div>
-        </td>
->>>>>>> origin/main
         <td>${escapeHtml(latestDate)}</td>
         <td>${statusBadge(status)}</td>
         <td>
@@ -597,11 +534,7 @@ function renderHistoryTable() {
     `;
   }).join("");
 
-<<<<<<< HEAD
   $("#historyRecordCount").textContent = `${collabs.length} ${collabs.length === 1 ? "colaborador con expediente completo" : "colaboradores con expediente completo"}`;
-=======
-  $("#historyRecordCount").textContent = `${collabs.length} ${collabs.length === 1 ? "colaborador con documentos" : "colaboradores con documentos"}`;
->>>>>>> origin/main
 }
 
 /**
@@ -1060,21 +993,14 @@ function renderEditForm(collabId, docType) {
   $("#previewEyebrow").textContent = "MODIFICACIÓN DE DATOS Y PARÁMETROS";
   $("#previewTitle").textContent = `Editar: ${docType}`;
 
-<<<<<<< HEAD
   const availableAreas = Array.from(new Set(OFFICIAL_AREAS.concat(collab.area ? [collab.area] : []))).sort((a, b) => a.localeCompare(b, "es", { sensitivity: "base" }));
 
-=======
->>>>>>> origin/main
   const previewBody = $("#previewBody");
   previewBody.innerHTML = `
     <div class="edit-form-container">
       <div class="edit-form-header">
         <h4>Formulario de modificación de datos</h4>
-<<<<<<< HEAD
         <p>Edite las fechas, área, antecedentes u observaciones del documento. Al guardar cambios, el documento quedará en estado <strong>Pendiente</strong> para volver a generarlo.</p>
-=======
-        <p>Edite las fechas, área, antecedentes u observaciones del documento. Al guardar, las modificaciones se registrarán de inmediato en el expediente del colaborador.</p>
->>>>>>> origin/main
       </div>
 
       <div id="editFormAlert" class="alert-box" hidden></div>
@@ -1087,13 +1013,9 @@ function renderEditForm(collabId, docType) {
 
         <div class="form-group">
           <label for="editArea">Área asignada</label>
-<<<<<<< HEAD
           <select id="editArea" required style="width:100%;height:38px;padding:6px 10px;border:1px solid var(--line);border-radius:6px;font-family:inherit;font-size:13px;background:#fff;">
             ${availableAreas.map((a) => `<option value="${escapeHtml(a)}" ${a === collab.area ? "selected" : ""}>${escapeHtml(a)}</option>`).join("")}
           </select>
-=======
-          <input type="text" id="editArea" value="${escapeHtml(collab.area)}" required>
->>>>>>> origin/main
         </div>
 
         <div class="form-group">
@@ -1165,21 +1087,12 @@ function saveDocumentModifications(collabId, docType) {
   collab.endDate = endDate;
   collab.observations = observations;
 
-<<<<<<< HEAD
   // Al guardar cambios, el documento pasa a estado "Pendiente" para volver a generarlo
   collab.documents[docType] = {
     status: "Pendiente",
     date: null,
     customNote: customNote
   };
-=======
-  if (!collab.documents[docType]) {
-    collab.documents[docType] = { status: "Pendiente", date: docDate, customNote };
-  } else {
-    collab.documents[docType].date = docDate;
-    collab.documents[docType].customNote = customNote;
-  }
->>>>>>> origin/main
 
   collabs[index] = collab;
   saveCollaborators(collabs);
@@ -1190,19 +1103,11 @@ function saveDocumentModifications(collabId, docType) {
 
   // Si el modal de detalle del colaborador está abierto en segundo plano, refrescarlo
   if ($("#detailDialog").open && selectedCollaboratorId === collabId) {
-<<<<<<< HEAD
     renderDetailContent(collab, `Modificaciones guardadas. El documento "${docType}" ha quedado en estado Pendiente para volver a generarlo.`, "info");
   }
 
   // Volver a la previsualización mostrando el mensaje de éxito y la opción para volver a generarlo
   openDocumentPreview(collabId, docType, `¡Cambios guardados! El documento ha quedado en estado Pendiente para volver a generarlo.`);
-=======
-    renderDetailContent(collab, "Datos modificados y actualizados en el expediente.", "success");
-  }
-
-  // Volver a la previsualización mostrando el mensaje de éxito
-  openDocumentPreview(collabId, docType, "¡Modificaciones guardadas y aplicadas exitosamente!");
->>>>>>> origin/main
 }
 
 /**
