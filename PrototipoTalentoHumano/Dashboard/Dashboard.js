@@ -90,9 +90,9 @@ const modules = [
   },
   {
     id: "bajas",
-    name: "Bajas (Blacklist)",
+    name: "Bajas",
     description: "Registro de desvinculaciones y evaluación de antecedentes.",
-    path: "gestion de bajas (blacklist)/GestionBajas.html",
+    path: "gestion de bajas/GestionBajas.html",
     group: "cierre",
     icon: "⊖"
   },

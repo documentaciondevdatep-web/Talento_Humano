@@ -832,7 +832,7 @@ function abrirRecordDetalle(idColaborador, page = 1) {
     bannerHTML = `
       <div class="alert-banner red" style="margin-bottom:14px">
         <strong>⚠️ ATENCIÓN: CAUSAL DE BAJA POR 3 FALTAS ACUMULADAS</strong>
-        <span>Este practicante ha superado el límite disciplinario permitido (${record.faltasTotales} faltas acumuladas). Procede registrar su desvinculación en el módulo de Bajas (Blacklist).</span>
+        <span>Este practicante ha superado el límite disciplinario permitido (${record.faltasTotales} faltas acumuladas). Procede registrar su desvinculación en el módulo de Bajas.</span>
       </div>
     `;
   } else if (record.faltasTotales === 2) {
