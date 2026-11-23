@@ -61,6 +61,288 @@ h3 { font-size: 16px; margin: 24px 0 14px; }
   line-height: 1.6;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.header-date-picker-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.header-date-badge {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #ffffff;
+  border: 1px solid #dbe6f0;
+  border-radius: 20px;
+  box-shadow: 0 2px 6px rgba(8, 8, 50, 0.04);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+  user-select: none;
+  font: inherit;
+  text-align: left;
+}
+
+.header-date-badge:hover {
+  border-color: #2563eb;
+  background: #f8faff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+}
+
+.header-date-icon {
+  font-size: 15px;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+}
+
+.header-date-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.header-date-label {
+  font-size: 9.5px;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: #64748b;
+  line-height: 1.1;
+}
+
+.header-date-text {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  line-height: 1.25;
+}
+
+.date-picker-arrow {
+  font-size: 11px;
+  color: #64748b;
+  margin-left: 2px;
+  display: flex;
+  align-items: center;
+}
+
+/* Dropdown de calendario flotante interactivo */
+.date-picker-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 1000;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #dbe6f0;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(8, 8, 50, 0.16), 0 2px 8px rgba(8, 8, 50, 0.06);
+  padding: 16px;
+  user-select: none;
+  animation: dpFadeIn 0.15s ease-out;
+}
+
+@keyframes dpFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.dp-month-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #080832;
+  text-transform: capitalize;
+}
+
+.dp-nav-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 16px;
+  color: #334155;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: all 0.15s;
+}
+
+.dp-nav-btn:hover:not(:disabled) {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.dp-nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.dp-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.dp-weekday {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 4px 0;
+}
+
+.dp-weekday.weekend {
+  color: #ef4444;
+}
+
+.dp-days-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dp-day {
+  aspect-ratio: 1;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #080832;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  margin: auto;
+}
+
+.dp-day:hover:not(.disabled) {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.dp-day.selected {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  font-weight: 750 !important;
+  border-color: #2563eb !important;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+.dp-day.today:not(.selected) {
+  border-color: #2563eb;
+  color: #2563eb;
+  font-weight: 750;
+}
+
+/* Fines de semana deshabilitados */
+.dp-day.weekend.disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+  opacity: 0.5;
+  text-decoration: line-through;
+  pointer-events: none;
+}
+
+/* Fechas futuras deshabilitadas */
+.dp-day.future.disabled {
+  background: transparent;
+  color: #cbd5e1;
+  cursor: not-allowed;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.dp-day.empty {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.dp-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dp-legend-hint {
+  font-size: 10.5px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dp-dot-weekend {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  display: inline-block;
+}
+
+.dp-footer-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.dp-btn-today, .dp-btn-close {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  font-weight: 650;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #dbe6f0;
+  background: #ffffff;
+  color: #334155;
+  transition: all 0.15s;
+}
+
+.dp-btn-today {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.dp-btn-today:hover {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.dp-btn-close:hover {
+  background: #f1f5f9;
+}
+
 .source-badge {
   padding: 10px 14px;
   background: #eaf7fa;

@@ -1,8 +1,32 @@
-import {
-  obtenerColaboradores,
-  obtenerColaboradoresActivos
-} from '../shared/js/colaboradoresStorage.js';
-import { departamentos, areas } from '../shared/data/catalogos.js';
+(function() {
+"use strict";
+
+/**
+ * ==========================================================================
+ * DEVDATEP CONSULTING - GESTIÓN DE TIEMPO HABLADO
+ * Compatible con protocolo file:// y entornos web estándar sin dependencias de módulos externos.
+ * ==========================================================================
+ */
+
+const departamentos = (typeof window !== "undefined" && window.departamentos) || [
+  { idDepartamento: "DEP-001", nombre: "Talento Humano" },
+  { idDepartamento: "DEP-002", nombre: "Desarrollo Web" },
+  { idDepartamento: "DEP-003", nombre: "Comercial" }
+];
+
+const areas = (typeof window !== "undefined" && window.areas) || [
+  { idArea: "ARE-001", nombre: "Reclutamiento", idDepartamento: "DEP-001" },
+  { idArea: "ARE-002", nombre: "Capacitación", idDepartamento: "DEP-001" },
+  { idArea: "ARE-003", nombre: "Clima y Cultura", idDepartamento: "DEP-001" },
+  { idArea: "ARE-004", nombre: "Backend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-005", nombre: "Frontend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-006", nombre: "Base de Datos", idDepartamento: "DEP-002" },
+  { idArea: "ARE-007", nombre: "Documentación", idDepartamento: "DEP-002" },
+  { idArea: "ARE-008", nombre: "Diseño Web", idDepartamento: "DEP-002" },
+  { idArea: "ARE-009", nombre: "Desarrollo Rápido de Aplicaciones", idDepartamento: "DEP-002" },
+  { idArea: "ARE-010", nombre: "Diseño Gráfico", idDepartamento: "DEP-003" },
+  { idArea: "ARE-012", nombre: "Marketing y Ventas", idDepartamento: "DEP-003" }
+];
 
 const $ = s => document.querySelector(s);
 
@@ -21,6 +45,246 @@ const norm = s => String(s ?? '')
 
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
+
+let currentSelectedDate = '2026-11-23';
+let dpViewYear = 2026;
+let dpViewMonth = 10; // 0-indexed: 10 = Noviembre
+const MAX_DATE_STR = '2026-11-23';
+
+const NOMBRES_MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+function formatearFechaEspanol(dateObj) {
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  let texto = dateObj.toLocaleDateString('es-ES', opciones);
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function actualizarFechaDelDia(dateVal) {
+  const el = document.querySelector('#fechaMonitoreoActual');
+  if (!el) return;
+  let dateObj;
+  if (typeof dateVal === 'string' && dateVal.includes('-')) {
+    const [y, m, d] = dateVal.split('-').map(Number);
+    dateObj = new Date(y, m - 1, d);
+  } else if (dateVal instanceof Date) {
+    dateObj = dateVal;
+  } else {
+    dateObj = new Date(2026, 10, 23);
+  }
+  el.textContent = formatearFechaEspanol(dateObj);
+}
+
+function renderizarGridDatePicker() {
+  const monthTitle = document.querySelector('#dpMonthTitle');
+  const grid = document.querySelector('#dpDaysGrid');
+  const btnNext = document.querySelector('#dpNextMonth');
+  if (!grid || !monthTitle) return;
+
+  monthTitle.textContent = `${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}`;
+
+  if (btnNext) {
+    btnNext.disabled = (dpViewYear > 2026) || (dpViewYear === 2026 && dpViewMonth >= 10);
+  }
+
+  const firstDayIndex = new Date(dpViewYear, dpViewMonth, 1).getDay();
+  const totalDays = new Date(dpViewYear, dpViewMonth + 1, 0).getDate();
+
+  let html = '';
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    html += '<span class="dp-day empty"></span>';
+  }
+
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${dpViewYear}-${String(dpViewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayOfWeek = (firstDayIndex + d - 1) % 7;
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const isFuture = dateStr > MAX_DATE_STR;
+    const isSelected = dateStr === currentSelectedDate;
+    const isToday = dateStr === MAX_DATE_STR;
+
+    if (isWeekend) {
+      html += `<button type="button" class="dp-day weekend disabled" disabled title="Día no laborable (${dayOfWeek === 0 ? 'Domingo' : 'Sábado'})">${d}</button>`;
+    } else if (isFuture) {
+      html += `<button type="button" class="dp-day future disabled" disabled title="Fecha posterior a la actual no disponible">${d}</button>`;
+    } else {
+      const cls = ['dp-day', isSelected ? 'selected' : '', isToday ? 'today' : ''].filter(Boolean).join(' ');
+      html += `<button type="button" class="${cls}" data-dp-date="${dateStr}" title="Seleccionar ${d} de ${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}">${d}</button>`;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function cerrarDatePicker() {
+  const dd = document.querySelector('#datePickerDropdown');
+  const btn = document.querySelector('#btnToggleDatePicker');
+  if (dd) dd.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function inicializarSelectorFecha() {
+  const btnToggle = document.querySelector('#btnToggleDatePicker');
+  const dd = document.querySelector('#datePickerDropdown');
+  const btnPrev = document.querySelector('#dpPrevMonth');
+  const btnNext = document.querySelector('#dpNextMonth');
+  const btnToday = document.querySelector('#dpBtnToday');
+  const btnClose = document.querySelector('#dpBtnClose');
+  const grid = document.querySelector('#dpDaysGrid');
+
+  currentSelectedDate = MAX_DATE_STR;
+  dpViewYear = 2026;
+  dpViewMonth = 10;
+  actualizarFechaDelDia(currentSelectedDate);
+
+  if (btnToggle && dd) {
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = dd.hidden;
+      if (isHidden) {
+        if (currentSelectedDate && currentSelectedDate.includes('-')) {
+          const [y, m] = currentSelectedDate.split('-').map(Number);
+          dpViewYear = y;
+          dpViewMonth = m - 1;
+        }
+        renderizarGridDatePicker();
+        dd.hidden = false;
+        btnToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dd.hidden && !dd.contains(e.target) && !btnToggle.contains(e.target)) {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !dd.hidden) {
+        cerrarDatePicker();
+      }
+    });
+  }
+
+  if (btnPrev) {
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dpViewMonth--;
+      if (dpViewMonth < 0) {
+        dpViewMonth = 11;
+        dpViewYear--;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dpViewYear > 2026 || (dpViewYear === 2026 && dpViewMonth >= 10)) return;
+      dpViewMonth++;
+      if (dpViewMonth > 11) {
+        dpViewMonth = 0;
+        dpViewYear++;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnToday) {
+    btnToday.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentSelectedDate = MAX_DATE_STR;
+      dpViewYear = 2026;
+      dpViewMonth = 10;
+      actualizarFechaDelDia(currentSelectedDate);
+      cerrarDatePicker();
+      try { render(); } catch (err) { notice(err.message, true); }
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cerrarDatePicker();
+    });
+  }
+
+  if (grid) {
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-dp-date]');
+      if (btn && btn.dataset.dpDate) {
+        e.stopPropagation();
+        currentSelectedDate = btn.dataset.dpDate;
+        actualizarFechaDelDia(currentSelectedDate);
+        cerrarDatePicker();
+        try { render(); } catch (err) { notice(err.message, true); }
+      }
+    });
+  }
+
+  // Si la URL solicita abrir el calendario por defecto (ej. pruebas visuales)
+  try {
+    if (window.location.search.includes('openCalendar') || window.location.hash.includes('openCalendar')) {
+      setTimeout(() => {
+        if (dd && btnToggle) {
+          renderizarGridDatePicker();
+          dd.hidden = false;
+          btnToggle.setAttribute('aria-expanded', 'true');
+        }
+      }, 150);
+    }
+  } catch (err) {}
+}
+
+function obtenerListaColaboradores() {
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradoresActivos === "function") {
+    try {
+      const list = window.obtenerColaboradoresActivos();
+      if (Array.isArray(list) && list.length >= 65) return list;
+    } catch (err) {}
+  }
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradores === "function") {
+    try {
+      const all = window.obtenerColaboradores();
+      if (Array.isArray(all) && all.length >= 65) {
+        const activos = all.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    } catch (err) {}
+  }
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("th_colaboradores") : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length >= 65) {
+        const activos = parsed.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    }
+  } catch (err) {}
+
+  if (typeof window !== "undefined" && Array.isArray(window.colaboradores70Oficiales) && window.colaboradores70Oficiales.length > 0) {
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("th_colaboradores", JSON.stringify(window.colaboradores70Oficiales));
+      }
+    } catch (e) {}
+    const activos = window.colaboradores70Oficiales.filter(c => c.estado === 'Activo' || !c.estado);
+    if (activos.length > 0) return activos;
+  }
+
+  const iniciales = (typeof window !== "undefined" && window.colaboradoresIniciales) || [];
+  const demo = (typeof window !== "undefined" && window.colaboradoresDemostracion) || [];
+  const todos = [...iniciales, ...demo];
+  const activos = todos.filter(c => c.estado === 'Activo' || !c.estado);
+  return activos.length > 0 ? activos : todos;
+}
 
 function getVisibleIdentifier(person) {
   const firstName = String(person.nombres ?? '').trim().split(/\s+/)[0] ?? '';
@@ -47,49 +311,68 @@ function hashCode(str) {
 }
 
 // Cálculo de métricas de voz por colaborador
-function calcularMetricasVoz(colaborador) {
+function calcularMetricasVoz(colaborador, dateStr) {
   const code = String(colaborador.codigoColaborador || '1000');
   const num = parseInt(code, 10) || 1000;
-  const hash = Math.abs(hashCode(colaborador.idColaborador || code));
+  const fechaSeed = dateStr || currentSelectedDate || '2026-11-23';
+  const hash = Math.abs(hashCode((colaborador.idColaborador || code) + '_' + fechaSeed));
+  const dateHash = Math.abs(hashCode(fechaSeed));
+  const dateDelta = ((dateHash % 7) - 3) * 0.05;
+
+  // Metas base diarias de Talento Humano
+  const metaDiariaHablado = 3.0; // 3 horas de voz por jornada
+  const metaDiariaCanal = 5.0;   // 5 horas de permanencia por jornada
 
   // Datos base calibrados con los screenshots
   let conexionesHoras = 63;
   let conexionesMeta = 50;
+  let conexionesCanalDiario = 5.0;
   let dentroRangoPct = 100;
   let tiempoHabladoHoras = 16;
   let tiempoHabladoMeta = 36;
+  let habladoDiarioHoras = 2.40;
   let canalFrecuente = 'Documentación';
   let rankingPos = 17;
 
   if (code === '1101') { // Alex Rios Luna
     conexionesHoras = 72;
+    conexionesCanalDiario = Number(Math.max(4.2, 5.2 + dateDelta).toFixed(1));
     dentroRangoPct = 100;
     tiempoHabladoHoras = 28;
+    habladoDiarioHoras = Number(Math.max(2.0, 3.54 + dateDelta).toFixed(2));
     rankingPos = 4;
     canalFrecuente = 'Desarrollo';
   } else if (code === '1102') { // Sam Vega Sol
     conexionesHoras = 68;
+    conexionesCanalDiario = Number(Math.max(4.0, 5.0 + dateDelta).toFixed(1));
     dentroRangoPct = 98;
     tiempoHabladoHoras = 25;
+    habladoDiarioHoras = Number(Math.max(1.8, 3.16 + dateDelta).toFixed(2));
     rankingPos = 7;
     canalFrecuente = 'Capacitación';
   } else if (code === '1104' || code === '1026') { // Dani Cruz / Luis
     conexionesHoras = 48;
+    conexionesCanalDiario = Number(Math.max(3.5, 4.2 + dateDelta).toFixed(1));
     dentroRangoPct = 85;
     tiempoHabladoHoras = 11;
+    habladoDiarioHoras = Number(Math.max(1.0, 1.80 + dateDelta).toFixed(2));
     rankingPos = 34;
     canalFrecuente = 'General';
   } else {
-    // Variación según código
+    // Variación según código y fecha seleccionada
     conexionesHoras = 50 + (hash % 25);
+    conexionesCanalDiario = Number((4.5 + (hash % 10) / 10).toFixed(1));
     dentroRangoPct = 90 + (hash % 11);
     tiempoHabladoHoras = 12 + (hash % 24);
+    habladoDiarioHoras = Number((1.6 + (hash % 22) / 10).toFixed(2));
     rankingPos = (hash % 35) + 1;
     canalFrecuente = (hash % 2 === 0) ? 'Documentación' : 'General';
   }
 
   const conexionesPct = ((conexionesHoras / conexionesMeta) * 100).toFixed(1);
+  const conexionesCanalDiarioPct = ((conexionesCanalDiario / metaDiariaCanal) * 100).toFixed(1);
   const tiempoHabladoPct = ((tiempoHabladoHoras / tiempoHabladoMeta) * 100).toFixed(1);
+  const habladoDiarioPct = ((habladoDiarioHoras / metaDiariaHablado) * 100).toFixed(1);
   const promedioHabladoHoras = (tiempoHabladoHoras / 12).toFixed(1);
   const promedioHabladoMeta = 3;
 
@@ -97,11 +380,11 @@ function calcularMetricasVoz(colaborador) {
   let badgeCls = 'red';
   let nivelLabel = 'Bajo (-40%)';
 
-  if (Number(tiempoHabladoPct) >= 70) {
+  if (Number(habladoDiarioPct) >= 70) {
     nivel = 'OPTIMO';
     badgeCls = 'green';
     nivelLabel = 'Óptimo (+70%)';
-  } else if (Number(tiempoHabladoPct) >= 40) {
+  } else if (Number(habladoDiarioPct) >= 40) {
     nivel = 'MODERADO';
     badgeCls = 'yellow';
     nivelLabel = 'Moderado (40% - 70%)';
@@ -111,10 +394,16 @@ function calcularMetricasVoz(colaborador) {
     conexionesHoras,
     conexionesMeta,
     conexionesPct,
+    conexionesCanalDiario,
+    conexionesCanalDiarioPct,
+    metaDiariaCanal,
     dentroRangoPct,
     tiempoHabladoHoras,
     tiempoHabladoMeta,
     tiempoHabladoPct,
+    habladoDiarioHoras,
+    metaDiariaHablado,
+    habladoDiarioPct,
     promedioHabladoHoras,
     promedioHabladoMeta,
     canalFrecuente,
@@ -206,26 +495,16 @@ function populateDepartments() {
   $('#department').innerHTML = opts;
 }
 
-function populateDashColabDropdown(selectedId) {
-  const select = $('#dashColabSelect');
-  if (!select) return;
-  const activos = obtenerColaboradoresActivos();
-  select.innerHTML = activos.map(p => {
-    const idVis = getVisibleIdentifier(p);
-    return `<option value="${escape(p.idColaborador)}"${p.idColaborador === selectedId ? ' selected' : ''}>${escape(name(p))} (${escape(idVis)})</option>`;
-  }).join('');
-}
-
 function renderGeneralKPIs(colaboradores) {
   let countOptimo = 0;
   let countBajo = 0;
   let sumaHoras = 0;
 
   colaboradores.forEach(c => {
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     if (m.nivel === 'OPTIMO') countOptimo++;
     if (m.nivel === 'BAJO') countBajo++;
-    sumaHoras += Number(m.promedioHabladoHoras);
+    sumaHoras += Number(m.habladoDiarioHoras);
   });
 
   const prom = colaboradores.length > 0 ? (sumaHoras / colaboradores.length).toFixed(1) : '1.8';
@@ -237,7 +516,7 @@ function renderGeneralKPIs(colaboradores) {
 }
 
 function render() {
-  const colaboradores = obtenerColaboradoresActivos();
+  const colaboradores = obtenerListaColaboradores();
   renderGeneralKPIs(colaboradores);
 
   const query = norm($('#search').value);
@@ -248,13 +527,13 @@ function render() {
   const filtered = colaboradores.filter(c => {
     const matchQuery = norm(`${name(c)} ${c.codigoColaborador ?? ''} ${c.numeroDocumento ?? ''}`).includes(query);
     const matchDep = !dep || c.idDepartamento === dep;
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     const matchNivel = !nivel || m.nivel === nivel;
     return matchQuery && matchDep && matchNivel;
   });
 
   tbody.innerHTML = filtered.map(c => {
-    const m = calcularMetricasVoz(c);
+    const m = calcularMetricasVoz(c, currentSelectedDate);
     const idVis = getVisibleIdentifier(c);
 
     return `
@@ -269,20 +548,12 @@ function render() {
         </td>
         <td>
           <div class="voice-progress-container">
-            <strong>${m.conexionesHoras}h / ${m.conexionesMeta}h</strong>
+            <strong style="font-size:14px;color:var(--navy)">${m.habladoDiarioHoras}h / ${m.metaDiariaHablado}h</strong>
             <div class="voice-progress-bg">
-              <div class="voice-progress-fill" style="width: ${Math.min(100, m.conexionesPct)}%"></div>
+              <div class="voice-progress-fill" style="width: ${Math.min(100, m.habladoDiarioPct)}%"></div>
             </div>
-            <small>${m.conexionesPct}% de meta (${m.dentroRangoPct}% en rango)</small>
+            <small>${m.habladoDiarioPct}% de meta diaria (3h)</small>
           </div>
-        </td>
-        <td>
-          <strong style="font-size:14px;color:var(--navy)">${m.tiempoHabladoHoras}h / ${m.tiempoHabladoMeta}h</strong>
-          <small>${m.tiempoHabladoPct}% hablado mensual</small>
-        </td>
-        <td>
-          <strong>${m.promedioHabladoHoras}h / ${m.promedioHabladoMeta}h</strong>
-          <small>promedio por jornada</small>
         </td>
         <td>
           <span class="badge ${m.badgeCls}">
@@ -312,13 +583,11 @@ function abrirModalDetalle(idColaborador) {
   currentCanalFilter = '';
   currentSelectedFecha = null;
 
-  const colabs = obtenerColaboradores();
+  const colabs = obtenerListaColaboradores();
   const person = colabs.find(c => c.idColaborador === idColaborador);
   if (!person) throw new Error('Colaborador no encontrado.');
 
-  populateDashColabDropdown(idColaborador);
-
-  const m = calcularMetricasVoz(person);
+  const m = calcularMetricasVoz(person, currentSelectedDate);
   const idVis = getVisibleIdentifier(person);
   const registrosDiarios = generarRegistrosDiariosVoz(person);
   const movimientos = generarMovimientosCanal(currentSelectedFecha);
@@ -375,25 +644,25 @@ function abrirModalDetalle(idColaborador) {
 
     <!-- Fila de 4 Tarjetas KPIs de Tiempo Hablado -->
     <section class="voice-kpi-grid" aria-label="Métricas de tiempo hablado">
-      <!-- 1. Conexiones totales -->
+      <!-- 1. Conexión a canal por día -->
       <div class="voice-kpi-card">
         <div class="voice-kpi-top">
           <div class="voice-kpi-icon-wrap">
             <div class="voice-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>
             </div>
-            <span class="voice-kpi-title">Conexiones totales</span>
+            <span class="voice-kpi-title">Conexión a canal por día</span>
           </div>
-          <button type="button" class="voice-kpi-info-btn" title="Horas acumuladas en canal de voz">ⓘ</button>
+          <button type="button" class="voice-kpi-info-btn" title="Horas de permanencia en canal por jornada">ⓘ</button>
         </div>
         <div class="voice-kpi-val-row">
           <div class="voice-kpi-main-val">
-            ${m.conexionesHoras}h <span class="sub-val">/${m.conexionesMeta}h</span>
+            ${m.conexionesCanalDiario}h <span class="sub-val">/${m.metaDiariaCanal}h</span>
           </div>
-          <div class="voice-kpi-pct">${m.conexionesPct}%</div>
+          <div class="voice-kpi-pct">${m.conexionesCanalDiarioPct}%</div>
         </div>
         <div class="voice-compare-pill green">
-          0% respecto a ayer
+          Jornada diaria: 5h
         </div>
       </div>
 
@@ -418,46 +687,46 @@ function abrirModalDetalle(idColaborador) {
         </div>
       </div>
 
-      <!-- 3. Tiempo total Hablado -->
+      <!-- 3. Tiempo Hablado por día -->
       <div class="voice-kpi-card">
         <div class="voice-kpi-top">
           <div class="voice-kpi-icon-wrap">
             <div class="voice-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>
             </div>
-            <span class="voice-kpi-title">Tiempo total Hablado</span>
+            <span class="voice-kpi-title">Tiempo Hablado por día</span>
           </div>
-          <button type="button" class="voice-kpi-info-btn" title="Horas con micrófono abierto activo">ⓘ</button>
+          <button type="button" class="voice-kpi-info-btn" title="Horas con micrófono abierto activo por jornada">ⓘ</button>
         </div>
         <div class="voice-kpi-val-row">
           <div class="voice-kpi-main-val">
-            ${m.tiempoHabladoHoras}h <span class="sub-val">/${m.tiempoHabladoMeta}h</span>
+            ${m.habladoDiarioHoras}h <span class="sub-val">/${m.metaDiariaHablado}h</span>
           </div>
-          <div class="voice-kpi-pct">${m.tiempoHabladoPct}%</div>
+          <div class="voice-kpi-pct">${m.habladoDiarioPct}%</div>
         </div>
-        <div class="voice-compare-pill red">
-          -14% respecto a ayer
+        <div class="voice-compare-pill green">
+          +${m.habladoDiarioPct}% de meta diaria (3h)
         </div>
       </div>
 
-      <!-- 4. Promedio Hablado -->
+      <!-- 4. Promedio diario Hablado -->
       <div class="voice-kpi-card">
         <div class="voice-kpi-top">
           <div class="voice-kpi-icon-wrap">
             <div class="voice-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="M16 11l2 2 4-4"/></svg>
             </div>
-            <span class="voice-kpi-title">Promedio Hablado</span>
+            <span class="voice-kpi-title">Promedio diario Hablado</span>
           </div>
           <button type="button" class="voice-kpi-info-btn" title="Promedio de horas habladas por día">ⓘ</button>
         </div>
         <div class="voice-kpi-val-row">
           <div class="voice-kpi-main-val">
-            ${m.promedioHabladoHoras}h <span class="sub-val">/${m.promedioHabladoMeta}h</span>
+            ${m.promedioHabladoHoras}h <span class="sub-val">/ 3h</span>
           </div>
         </div>
-        <div class="voice-compare-pill red">
-          -14% respecto a ayer
+        <div class="voice-compare-pill green">
+          Meta base: 3h / jornada
         </div>
       </div>
     </section>
@@ -651,11 +920,6 @@ document.addEventListener('click', event => {
 });
 
 document.addEventListener('change', event => {
-  if (event.target.id === 'dashColabSelect') {
-    if (event.target.value) abrirModalDetalle(event.target.value);
-    return;
-  }
-
   if (event.target.id === 'canalFilterSelect') {
     currentCanalFilter = event.target.value;
     actualizarMovimientosModal();
@@ -678,9 +942,19 @@ window.addEventListener('storage', event => {
   }
 });
 
-try {
-  populateDepartments();
-  render();
-} catch (err) {
-  notice(err.message, true);
+function iniciarModulo() {
+  try {
+    inicializarSelectorFecha();
+    populateDepartments();
+    render();
+  } catch (err) {
+    notice(err.message, true);
+  }
 }
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", iniciarModulo);
+} else {
+  iniciarModulo();
+}
+})();

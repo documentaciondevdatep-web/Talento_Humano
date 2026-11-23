@@ -1,8 +1,32 @@
-import {
-  obtenerColaboradores,
-  obtenerColaboradoresActivos
-} from '../shared/js/colaboradoresStorage.js';
-import { departamentos, areas } from '../shared/data/catalogos.js';
+(function() {
+"use strict";
+
+/**
+ * ==========================================================================
+ * DEVDATEP CONSULTING - GESTIÓN DE TIEMPO DE CONEXIÓN
+ * Compatible con protocolo file:// y entornos web estándar sin dependencias de módulos externos.
+ * ==========================================================================
+ */
+
+const departamentos = (typeof window !== "undefined" && window.departamentos) || [
+  { idDepartamento: "DEP-001", nombre: "Talento Humano" },
+  { idDepartamento: "DEP-002", nombre: "Desarrollo Web" },
+  { idDepartamento: "DEP-003", nombre: "Comercial" }
+];
+
+const areas = (typeof window !== "undefined" && window.areas) || [
+  { idArea: "ARE-001", nombre: "Reclutamiento", idDepartamento: "DEP-001" },
+  { idArea: "ARE-002", nombre: "Capacitación", idDepartamento: "DEP-001" },
+  { idArea: "ARE-003", nombre: "Clima y Cultura", idDepartamento: "DEP-001" },
+  { idArea: "ARE-004", nombre: "Backend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-005", nombre: "Frontend", idDepartamento: "DEP-002" },
+  { idArea: "ARE-006", nombre: "Base de Datos", idDepartamento: "DEP-002" },
+  { idArea: "ARE-007", nombre: "Documentación", idDepartamento: "DEP-002" },
+  { idArea: "ARE-008", nombre: "Diseño Web", idDepartamento: "DEP-002" },
+  { idArea: "ARE-009", nombre: "Desarrollo Rápido de Aplicaciones", idDepartamento: "DEP-002" },
+  { idArea: "ARE-010", nombre: "Diseño Gráfico", idDepartamento: "DEP-003" },
+  { idArea: "ARE-012", nombre: "Marketing y Ventas", idDepartamento: "DEP-003" }
+];
 
 const $ = s => document.querySelector(s);
 
@@ -21,6 +45,246 @@ const norm = s => String(s ?? '')
 
 const label = (list, id, key) => list.find(x => x[key] === id)?.nombre ?? '—';
 const name = p => [p.nombres, p.apellidoPaterno, p.apellidoMaterno].filter(Boolean).join(' ');
+
+let currentSelectedDate = '2026-11-23';
+let dpViewYear = 2026;
+let dpViewMonth = 10; // 0-indexed: 10 = Noviembre
+const MAX_DATE_STR = '2026-11-23';
+
+const NOMBRES_MESES = [
+  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+];
+
+function formatearFechaEspanol(dateObj) {
+  const opciones = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+  let texto = dateObj.toLocaleDateString('es-ES', opciones);
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function actualizarFechaDelDia(dateVal) {
+  const el = document.querySelector('#fechaMonitoreoActual');
+  if (!el) return;
+  let dateObj;
+  if (typeof dateVal === 'string' && dateVal.includes('-')) {
+    const [y, m, d] = dateVal.split('-').map(Number);
+    dateObj = new Date(y, m - 1, d);
+  } else if (dateVal instanceof Date) {
+    dateObj = dateVal;
+  } else {
+    dateObj = new Date(2026, 10, 23);
+  }
+  el.textContent = formatearFechaEspanol(dateObj);
+}
+
+function renderizarGridDatePicker() {
+  const monthTitle = document.querySelector('#dpMonthTitle');
+  const grid = document.querySelector('#dpDaysGrid');
+  const btnNext = document.querySelector('#dpNextMonth');
+  if (!grid || !monthTitle) return;
+
+  monthTitle.textContent = `${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}`;
+
+  if (btnNext) {
+    btnNext.disabled = (dpViewYear > 2026) || (dpViewYear === 2026 && dpViewMonth >= 10);
+  }
+
+  const firstDayIndex = new Date(dpViewYear, dpViewMonth, 1).getDay();
+  const totalDays = new Date(dpViewYear, dpViewMonth + 1, 0).getDate();
+
+  let html = '';
+
+  for (let i = 0; i < firstDayIndex; i++) {
+    html += '<span class="dp-day empty"></span>';
+  }
+
+  for (let d = 1; d <= totalDays; d++) {
+    const dateStr = `${dpViewYear}-${String(dpViewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayOfWeek = (firstDayIndex + d - 1) % 7;
+    const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+    const isFuture = dateStr > MAX_DATE_STR;
+    const isSelected = dateStr === currentSelectedDate;
+    const isToday = dateStr === MAX_DATE_STR;
+
+    if (isWeekend) {
+      html += `<button type="button" class="dp-day weekend disabled" disabled title="Día no laborable (${dayOfWeek === 0 ? 'Domingo' : 'Sábado'})">${d}</button>`;
+    } else if (isFuture) {
+      html += `<button type="button" class="dp-day future disabled" disabled title="Fecha posterior a la actual no disponible">${d}</button>`;
+    } else {
+      const cls = ['dp-day', isSelected ? 'selected' : '', isToday ? 'today' : ''].filter(Boolean).join(' ');
+      html += `<button type="button" class="${cls}" data-dp-date="${dateStr}" title="Seleccionar ${d} de ${NOMBRES_MESES[dpViewMonth]} de ${dpViewYear}">${d}</button>`;
+    }
+  }
+
+  grid.innerHTML = html;
+}
+
+function cerrarDatePicker() {
+  const dd = document.querySelector('#datePickerDropdown');
+  const btn = document.querySelector('#btnToggleDatePicker');
+  if (dd) dd.hidden = true;
+  if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function inicializarSelectorFecha() {
+  const btnToggle = document.querySelector('#btnToggleDatePicker');
+  const dd = document.querySelector('#datePickerDropdown');
+  const btnPrev = document.querySelector('#dpPrevMonth');
+  const btnNext = document.querySelector('#dpNextMonth');
+  const btnToday = document.querySelector('#dpBtnToday');
+  const btnClose = document.querySelector('#dpBtnClose');
+  const grid = document.querySelector('#dpDaysGrid');
+
+  currentSelectedDate = MAX_DATE_STR;
+  dpViewYear = 2026;
+  dpViewMonth = 10;
+  actualizarFechaDelDia(currentSelectedDate);
+
+  if (btnToggle && dd) {
+    btnToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = dd.hidden;
+      if (isHidden) {
+        if (currentSelectedDate && currentSelectedDate.includes('-')) {
+          const [y, m] = currentSelectedDate.split('-').map(Number);
+          dpViewYear = y;
+          dpViewMonth = m - 1;
+        }
+        renderizarGridDatePicker();
+        dd.hidden = false;
+        btnToggle.setAttribute('aria-expanded', 'true');
+      } else {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!dd.hidden && !dd.contains(e.target) && !btnToggle.contains(e.target)) {
+        cerrarDatePicker();
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !dd.hidden) {
+        cerrarDatePicker();
+      }
+    });
+  }
+
+  if (btnPrev) {
+    btnPrev.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dpViewMonth--;
+      if (dpViewMonth < 0) {
+        dpViewMonth = 11;
+        dpViewYear--;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnNext) {
+    btnNext.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (dpViewYear > 2026 || (dpViewYear === 2026 && dpViewMonth >= 10)) return;
+      dpViewMonth++;
+      if (dpViewMonth > 11) {
+        dpViewMonth = 0;
+        dpViewYear++;
+      }
+      renderizarGridDatePicker();
+    });
+  }
+
+  if (btnToday) {
+    btnToday.addEventListener('click', (e) => {
+      e.stopPropagation();
+      currentSelectedDate = MAX_DATE_STR;
+      dpViewYear = 2026;
+      dpViewMonth = 10;
+      actualizarFechaDelDia(currentSelectedDate);
+      cerrarDatePicker();
+      try { render(); } catch (err) { notice(err.message, true); }
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      cerrarDatePicker();
+    });
+  }
+
+  if (grid) {
+    grid.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-dp-date]');
+      if (btn && btn.dataset.dpDate) {
+        e.stopPropagation();
+        currentSelectedDate = btn.dataset.dpDate;
+        actualizarFechaDelDia(currentSelectedDate);
+        cerrarDatePicker();
+        try { render(); } catch (err) { notice(err.message, true); }
+      }
+    });
+  }
+
+  // Si la URL solicita abrir el calendario por defecto (ej. pruebas visuales)
+  try {
+    if (window.location.search.includes('openCalendar') || window.location.hash.includes('openCalendar')) {
+      setTimeout(() => {
+        if (dd && btnToggle) {
+          renderizarGridDatePicker();
+          dd.hidden = false;
+          btnToggle.setAttribute('aria-expanded', 'true');
+        }
+      }, 150);
+    }
+  } catch (err) {}
+}
+
+function obtenerListaColaboradores() {
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradoresActivos === "function") {
+    try {
+      const list = window.obtenerColaboradoresActivos();
+      if (Array.isArray(list) && list.length >= 65) return list;
+    } catch (err) {}
+  }
+  if (typeof window !== "undefined" && typeof window.obtenerColaboradores === "function") {
+    try {
+      const all = window.obtenerColaboradores();
+      if (Array.isArray(all) && all.length >= 65) {
+        const activos = all.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    } catch (err) {}
+  }
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem("th_colaboradores") : null;
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed) && parsed.length >= 65) {
+        const activos = parsed.filter(c => c.estado === 'Activo' || !c.estado);
+        if (activos.length > 0) return activos;
+      }
+    }
+  } catch (err) {}
+
+  if (typeof window !== "undefined" && Array.isArray(window.colaboradores70Oficiales) && window.colaboradores70Oficiales.length > 0) {
+    try {
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("th_colaboradores", JSON.stringify(window.colaboradores70Oficiales));
+      }
+    } catch (e) {}
+    const activos = window.colaboradores70Oficiales.filter(c => c.estado === 'Activo' || !c.estado);
+    if (activos.length > 0) return activos;
+  }
+
+  const iniciales = (typeof window !== "undefined" && window.colaboradoresIniciales) || [];
+  const demo = (typeof window !== "undefined" && window.colaboradoresDemostracion) || [];
+  const todos = [...iniciales, ...demo];
+  const activos = todos.filter(c => c.estado === 'Activo' || !c.estado);
+  return activos.length > 0 ? activos : todos;
+}
 
 function getVisibleIdentifier(person) {
   const firstName = String(person.nombres ?? '').trim().split(/\s+/)[0] ?? '';
@@ -47,32 +311,51 @@ function hashCode(str) {
 }
 
 // Cálculo de métricas de conexión por colaborador
-function calcularMetricasConexion(colaborador) {
+function calcularMetricasConexion(colaborador, dateStr) {
   const code = String(colaborador.codigoColaborador || '1000');
-  const hash = Math.abs(hashCode(colaborador.idColaborador || code));
+  const fechaSeed = dateStr || currentSelectedDate || '2026-11-23';
+  const hash = Math.abs(hashCode((colaborador.idColaborador || code) + '_' + fechaSeed));
+  const dateHash = Math.abs(hashCode(fechaSeed));
 
   // Convenio base: meta de horas y días
   const metaHoras = colaborador.fichaTalento?.periodos?.at(-1)?.meta ?? 420;
   const diasConvenio = Math.ceil(metaHoras / 5); // ej. 84 días para 420h
+  const metaDiaria = 5.00; // Meta base diaria de 5 horas
 
   let tiempoConectadoHoras = 63.24;
   let tiempoMetaMes = 85;
+  let tiempoDiarioHoras = 5.24;
+  let tiempoDiarioFmt = '05:14:10';
   let dentroRangoPct = 100;
   let rachaDias = 13;
   let estado = 'EXCELENTE';
   let estadoLabel = 'Excelente (≥ 5h)';
   let badgeCls = 'green';
 
+  const dateDelta = ((dateHash % 7) - 3) * 0.04;
+
   if (code === '1101') { // Alex Rios
     tiempoConectadoHoras = 74.50;
+    tiempoDiarioHoras = Number(Math.max(4.8, 5.44 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 15;
     dentroRangoPct = 100;
   } else if (code === '1102') { // Sam Vega
     tiempoConectadoHoras = 68.10;
+    tiempoDiarioHoras = Number(Math.max(4.7, 5.26 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 14;
     dentroRangoPct = 99;
   } else if (code === '1104' || code === '1026') { // Dani / Luis
     tiempoConectadoHoras = 46.20;
+    tiempoDiarioHoras = Number(Math.max(3.8, 4.60 + dateDelta).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     rachaDias = 4;
     dentroRangoPct = 88;
     estado = 'NORMAL';
@@ -80,20 +363,29 @@ function calcularMetricasConexion(colaborador) {
     badgeCls = 'yellow';
   } else {
     tiempoConectadoHoras = Number((55 + (hash % 20) + (hash % 100) / 100).toFixed(2));
+    tiempoDiarioHoras = Number((4.90 + ((hash % 15) - 3) / 10).toFixed(2));
+    const mins = Math.floor((tiempoDiarioHoras % 1) * 60);
+    const secs = 10 + (hash % 45);
+    tiempoDiarioFmt = `0${Math.floor(tiempoDiarioHoras)}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
     dentroRangoPct = 92 + (hash % 9);
     rachaDias = 5 + (hash % 10);
-    if (tiempoConectadoHoras >= 55) {
+    if (tiempoDiarioHoras >= 5.00) {
       estado = 'EXCELENTE';
       estadoLabel = 'Excelente (≥ 5h)';
       badgeCls = 'green';
-    } else {
+    } else if (tiempoDiarioHoras >= 4.50) {
       estado = 'NORMAL';
       estadoLabel = 'Normal (4.5h - 5h)';
       badgeCls = 'yellow';
+    } else {
+      estado = 'BAJO';
+      estadoLabel = 'Bajo (< 4.5h)';
+      badgeCls = 'red';
     }
   }
 
   const avancePct = ((tiempoConectadoHoras / tiempoMetaMes) * 100).toFixed(2);
+  const avanceDiarioPct = ((tiempoDiarioHoras / metaDiaria) * 100).toFixed(1);
   const promedioDiario = (tiempoConectadoHoras / 12).toFixed(2);
 
   // Días completados vs pendientes para el convenio
@@ -104,6 +396,10 @@ function calcularMetricasConexion(colaborador) {
     tiempoConectadoHoras,
     tiempoMetaMes,
     avancePct,
+    tiempoDiarioHoras,
+    tiempoDiarioFmt,
+    metaDiaria,
+    avanceDiarioPct,
     dentroRangoPct,
     rachaDias,
     promedioDiario,
@@ -301,16 +597,6 @@ function populateDepartments() {
   $('#department').innerHTML = opts;
 }
 
-function populateDashColabDropdown(selectedId) {
-  const select = $('#dashColabSelect');
-  if (!select) return;
-  const activos = obtenerColaboradoresActivos();
-  select.innerHTML = activos.map(p => {
-    const idVis = getVisibleIdentifier(p);
-    return `<option value="${escape(p.idColaborador)}"${p.idColaborador === selectedId ? ' selected' : ''}>${escape(name(p))} (${escape(idVis)})</option>`;
-  }).join('');
-}
-
 function renderGeneralKPIs(colaboradores) {
   let countExcelente = 0;
   let sumaHoras = 0;
@@ -330,7 +616,7 @@ function renderGeneralKPIs(colaboradores) {
 }
 
 function render() {
-  const colaboradores = obtenerColaboradoresActivos();
+  const colaboradores = obtenerListaColaboradores();
   renderGeneralKPIs(colaboradores);
 
   const query = norm($('#search').value);
@@ -369,20 +655,12 @@ function render() {
         </td>
         <td>
           <div class="conn-progress-container">
-            <strong>${m.tiempoConectadoHoras} h / ${m.tiempoMetaMes}h</strong>
+            <strong>${m.tiempoDiarioHoras} h / ${m.metaDiaria}h</strong>
             <div class="conn-progress-bg">
-              <div class="conn-progress-fill" style="width: ${Math.min(100, m.avancePct)}%"></div>
+              <div class="conn-progress-fill" style="width: ${Math.min(100, m.avanceDiarioPct)}%"></div>
             </div>
-            <small>${m.avancePct}% de meta mensual</small>
+            <small>${m.avanceDiarioPct}% de meta diaria (${m.tiempoDiarioFmt})</small>
           </div>
-        </td>
-        <td>
-          <strong style="color:var(--green);font-size:14px">${m.dentroRangoPct}%</strong>
-          <small>en horario establecido</small>
-        </td>
-        <td>
-          <strong>${m.promedioDiario} h</strong>
-          <small>promedio por jornada</small>
         </td>
         <td>
           <span class="badge ${m.badgeCls}">
@@ -406,11 +684,9 @@ function abrirModalDetalle(idColaborador, page = 1) {
   currentSelectedColabId = idColaborador;
   currentConnPage = page;
 
-  const colabs = obtenerColaboradores();
+  const colabs = obtenerListaColaboradores();
   const person = colabs.find(c => c.idColaborador === idColaborador);
   if (!person) throw new Error('Colaborador no encontrado.');
-
-  populateDashColabDropdown(idColaborador);
 
   const m = calcularMetricasConexion(person);
   const idVis = getVisibleIdentifier(person);
@@ -475,25 +751,25 @@ function abrirModalDetalle(idColaborador, page = 1) {
         </div>
       </div>
 
-      <!-- 2. Tiempo de conexión -->
+      <!-- 2. Tiempo de conexión por día -->
       <div class="conn-kpi-card">
         <div class="conn-kpi-top">
           <div class="conn-kpi-icon-wrap">
             <div class="conn-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="conn-kpi-title">Tiempo de conexión</span>
+            <span class="conn-kpi-title">Tiempo de conexión por día</span>
           </div>
-          <button type="button" class="conn-kpi-info-btn" title="Horas acumuladas conectadas">ⓘ</button>
+          <button type="button" class="conn-kpi-info-btn" title="Horas conectadas registradas por jornada">ⓘ</button>
         </div>
         <div class="conn-kpi-val-row">
           <div class="conn-kpi-main-val">
-            ${m.tiempoConectadoHoras} h <span class="sub-val">/${m.tiempoMetaMes}h</span>
+            ${m.tiempoDiarioHoras} h <span class="sub-val">/${m.metaDiaria}h</span>
           </div>
-          <div class="conn-kpi-pct">${m.avancePct}%</div>
+          <div class="conn-kpi-pct">${m.avanceDiarioPct}%</div>
         </div>
         <div class="conn-compare-pill green">
-          +${m.avancePct}% respecto a ayer
+          +${m.avanceDiarioPct}% de meta diaria (${m.tiempoDiarioFmt})
         </div>
       </div>
 
@@ -518,24 +794,24 @@ function abrirModalDetalle(idColaborador, page = 1) {
         </div>
       </div>
 
-      <!-- 4. Prom. conexión -->
+      <!-- 4. Promedio diario -->
       <div class="conn-kpi-card">
         <div class="conn-kpi-top">
           <div class="conn-kpi-icon-wrap">
             <div class="conn-kpi-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </div>
-            <span class="conn-kpi-title">Prom. conexión</span>
+            <span class="conn-kpi-title">Promedio diario</span>
           </div>
-          <button type="button" class="conn-kpi-info-btn" title="Promedio de conexión">ⓘ</button>
+          <button type="button" class="conn-kpi-info-btn" title="Promedio de conexión por jornada">ⓘ</button>
         </div>
         <div class="conn-kpi-val-row">
           <div class="conn-kpi-main-val">
-            ${m.tiempoConectadoHoras} h
+            ${m.promedioDiario} h / día
           </div>
         </div>
-        <div class="conn-compare-pill red">
-          -0.00% respecto a ayer
+        <div class="conn-compare-pill green">
+          Jornada base: 5h
         </div>
       </div>
     </section>
@@ -664,13 +940,6 @@ document.addEventListener('click', event => {
   }
 });
 
-document.addEventListener('change', event => {
-  if (event.target.id === 'dashColabSelect') {
-    if (event.target.value) abrirModalDetalle(event.target.value, 1);
-    return;
-  }
-});
-
 ['#search', '#department', '#estadoConexionFilter'].forEach(selector => {
   const el = $(selector);
   if (el) {
@@ -686,9 +955,19 @@ window.addEventListener('storage', event => {
   }
 });
 
-try {
-  populateDepartments();
-  render();
-} catch (err) {
-  notice(err.message, true);
+function iniciarModulo() {
+  try {
+    inicializarSelectorFecha();
+    populateDepartments();
+    render();
+  } catch (err) {
+    notice(err.message, true);
+  }
 }
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", iniciarModulo);
+} else {
+  iniciarModulo();
+}
+})();

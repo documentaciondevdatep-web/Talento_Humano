@@ -4,8 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tiempo hablado | Talento Humano</title>
-  <link rel="stylesheet" href="GestionTiempoHablado.css?v=2">
-  <script type="module" src="GestionTiempoHablado.js?v=2"></script>
+  <link rel="stylesheet" href="GestionTiempoHablado.css?v=20261120">
+  <script src="../shared/data/thDataGlobal.js?v=20261120"></script>
+  <script src="GestionTiempoHablado.js?v=20261120" defer></script>
 </head>
 <body>
   <main>
@@ -15,7 +16,45 @@
         <h1>Tiempo hablado</h1>
         <p>Supervisión de participación por voz, horas en canales activos y tiempo con micrófono abierto durante la jornada.</p>
       </div>
-      <span class="source-badge">Monitoreo de voz</span>
+      <div class="header-actions">
+        <div class="header-date-picker-wrap">
+          <button type="button" class="header-date-badge" id="btnToggleDatePicker" title="Haz clic para seleccionar otra fecha" aria-haspopup="dialog" aria-expanded="false">
+            <span class="header-date-icon" aria-hidden="true">📅</span>
+            <div class="header-date-info">
+              <span class="header-date-label">Fecha del día</span>
+              <strong id="fechaMonitoreoActual" class="header-date-text">--</strong>
+            </div>
+            <span class="date-picker-arrow" aria-hidden="true">▾</span>
+          </button>
+
+          <!-- Dropdown calendario interactivo con fines de semana y fechas futuras deshabilitadas -->
+          <div id="datePickerDropdown" class="date-picker-dropdown" hidden role="dialog" aria-label="Selector de fecha">
+            <div class="dp-header">
+              <button type="button" class="dp-nav-btn" id="dpPrevMonth" title="Mes anterior">‹</button>
+              <strong class="dp-month-title" id="dpMonthTitle">Noviembre de 2026</strong>
+              <button type="button" class="dp-nav-btn" id="dpNextMonth" title="Mes siguiente">›</button>
+            </div>
+            <div class="dp-weekdays">
+              <span class="dp-weekday weekend" title="Domingo (No laborable)">DO</span>
+              <span class="dp-weekday">LU</span>
+              <span class="dp-weekday">MA</span>
+              <span class="dp-weekday">MI</span>
+              <span class="dp-weekday">JU</span>
+              <span class="dp-weekday">VI</span>
+              <span class="dp-weekday weekend" title="Sábado (No laborable)">SA</span>
+            </div>
+            <div class="dp-days-grid" id="dpDaysGrid"></div>
+            <div class="dp-footer">
+              <span class="dp-legend-hint"><span class="dp-dot-weekend"></span> Sábados y domingos no laborables</span>
+              <div class="dp-footer-actions">
+                <button type="button" class="dp-btn-today" id="dpBtnToday">Hoy</button>
+                <button type="button" class="dp-btn-close" id="dpBtnClose">Cerrar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <span class="source-badge">Monitoreo de voz</span>
+      </div>
     </header>
 
     <div id="status" role="status" aria-live="polite"></div>
@@ -72,10 +111,8 @@
           <thead>
             <tr>
               <th>Colaborador</th>
-              <th>Ubicación</th>
-              <th>Conexiones a canal</th>
-              <th>Tiempo total hablado</th>
-              <th>Promedio diario</th>
+              <th>Área</th>
+              <th>Tiempo hablado por día</th>
               <th>Nivel de voz</th>
               <th>Canal frecuente</th>
               <th>Acción</th>
@@ -91,7 +128,7 @@
 
     <!-- Regla de negocio al pie -->
     <p class="footnote">
-      <strong>Métricas de tiempo hablado:</strong> Se registran las horas de permanencia en canales de voz de trabajo (meta base: 50 h mensuales) y el tiempo efectivo con micrófono abierto (meta base: 36 h mensuales, 3 h diarias). Un porcentaje acumulado $\ge 70\%$ es considerado óptimo; entre $40\%$ y $70\%$ moderado; y menor al $40\%$ bajo con requerimiento de seguimiento en clima y participación activa.
+      <strong>Métricas de tiempo hablado por día:</strong> Se supervisa la permanencia diaria en canales de voz de trabajo (jornada base: 5 h) y el tiempo efectivo con micrófono abierto por día (meta diaria: 3 h por jornada). Un porcentaje diario $\ge 70\%$ es considerado óptimo; entre $40\%$ y $70\%$ moderado; y menor al $40\%$ bajo con requerimiento de seguimiento en clima y participación activa.
     </p>
   </main>
 
@@ -99,16 +136,7 @@
   <dialog id="modalDetalleHablado" class="dashboard-dialog" aria-labelledby="modalHabladoTitle">
     <div class="dash-modal-topbar">
       <div class="dash-modal-left">
-        <button type="button" data-close="modalDetalleHablado" class="dash-back-btn">
-          ← Volver a la lista general
-        </button>
         <span class="dash-modal-badge">Vista individual del colaborador</span>
-      </div>
-      <div class="dash-modal-center">
-        <label class="dash-colab-picker-label">
-          <span>Consultar otro colaborador:</span>
-          <select id="dashColabSelect" aria-label="Cambiar colaborador a consultar"></select>
-        </label>
       </div>
       <div class="dash-modal-right">
         <button type="button" data-close="modalDetalleHablado" class="dash-close-x" aria-label="Cerrar modal">×</button>
@@ -116,10 +144,6 @@
     </div>
 
     <div id="modalHabladoBody" class="dash-modal-scrollable"></div>
-
-    <footer class="dialog-actions dash-modal-footer">
-      <button type="button" data-close="modalDetalleHablado" class="primary">Volver al control general</button>
-    </footer>
   </dialog>
 </body>
 </html>
