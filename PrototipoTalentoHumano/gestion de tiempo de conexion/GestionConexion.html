@@ -16,7 +16,16 @@
         <h1>Tiempo de conexión</h1>
         <p>Control de tiempo conectado a la plataforma, cumplimiento de jornada diaria y seguimiento de racha de puntualidad.</p>
       </div>
-      <span class="source-badge">Monitoreo de conexión</span>
+      <div class="header-actions">
+        <div class="header-date-badge" aria-label="Fecha de conexión">
+          <span class="header-date-icon" aria-hidden="true">📅</span>
+          <div class="header-date-info">
+            <span class="header-date-label">Fecha del día</span>
+            <strong id="fechaMonitoreoActual" class="header-date-text">--</strong>
+          </div>
+        </div>
+        <span class="source-badge">Monitoreo de conexión</span>
+      </div>
     </header>
 
     <div id="status" role="status" aria-live="polite"></div>
@@ -100,9 +109,6 @@
   <dialog id="modalDetalleConexion" class="dashboard-dialog" aria-labelledby="modalConexionTitle">
     <div class="dash-modal-topbar">
       <div class="dash-modal-left">
-        <button type="button" data-close="modalDetalleConexion" class="dash-back-btn">
-          ← Volver a la lista general
-        </button>
         <span class="dash-modal-badge">Vista individual del colaborador</span>
       </div>
       <div class="dash-modal-right">
@@ -111,10 +117,6 @@
     </div>
 
     <div id="modalConexionBody" class="dash-modal-scrollable"></div>
-
-    <footer class="dialog-actions dash-modal-footer">
-      <button type="button" data-close="modalDetalleConexion" class="primary">Volver al control general</button>
-    </footer>
   </dialog>
 </body>
 </html>

@@ -49,21 +49,24 @@ const COLABORADORES_BASE = [
 ];
 
 function obtenerColaboradores() {
+  const baseOficial = (typeof window !== "undefined" && Array.isArray(window.colaboradores70Oficiales) && window.colaboradores70Oficiales.length >= 65)
+    ? window.colaboradores70Oficiales
+    : COLABORADORES_BASE;
   try {
     const raw = localStorage.getItem("th_colaboradores");
     if (!raw) {
-      localStorage.setItem("th_colaboradores", JSON.stringify(COLABORADORES_BASE));
-      return JSON.parse(JSON.stringify(COLABORADORES_BASE));
+      localStorage.setItem("th_colaboradores", JSON.stringify(baseOficial));
+      return JSON.parse(JSON.stringify(baseOficial));
     }
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) {
-      localStorage.setItem("th_colaboradores", JSON.stringify(COLABORADORES_BASE));
-      return JSON.parse(JSON.stringify(COLABORADORES_BASE));
+    if (!Array.isArray(parsed) || parsed.length < 65) {
+      localStorage.setItem("th_colaboradores", JSON.stringify(baseOficial));
+      return JSON.parse(JSON.stringify(baseOficial));
     }
     return parsed;
   } catch (e) {
     console.warn("Error leyendo th_colaboradores:", e);
-    return JSON.parse(JSON.stringify(COLABORADORES_BASE));
+    return JSON.parse(JSON.stringify(baseOficial));
   }
 }
 
